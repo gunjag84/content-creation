@@ -89,11 +89,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **INFRA-01**: Electron desktop app starts with double-click on .exe (no terminal, no dev server)
 - [x] **INFRA-02**: React + Tailwind CSS frontend with electron-vite build tooling
-- [ ] **INFRA-03**: SQLite database for learning data (posts, stories, performance, balance matrix cache) with WAL mode and integrity checks
-- [ ] **INFRA-04**: JSON file storage for settings with automatic timestamp versioning
-- [ ] **INFRA-05**: Secure Claude API key storage via Electron safeStorage API
-- [ ] **INFRA-06**: Brand-aware data model (brand_id in all database tables) with single-brand UI
-- [ ] **INFRA-07**: Graceful shutdown handler to prevent SQLite corruption
+- [x] **INFRA-03**: SQLite database for learning data (posts, stories, performance, balance matrix cache) with WAL mode and integrity checks
+- [x] **INFRA-04**: JSON file storage for settings with automatic timestamp versioning
+- [x] **INFRA-05**: Secure Claude API key storage via Electron safeStorage API
+- [x] **INFRA-06**: Brand-aware data model (brand_id in all database tables) with single-brand UI
+- [x] **INFRA-07**: Graceful shutdown handler to prevent SQLite corruption
 
 ## v2 Requirements
 
@@ -203,11 +203,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEARN-06 | Phase 3 | Pending |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
-| INFRA-06 | Phase 1 | Pending |
-| INFRA-07 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
+| INFRA-05 | Phase 1 | Complete |
+| INFRA-06 | Phase 1 | Complete |
+| INFRA-07 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 55 total
