@@ -3,6 +3,7 @@ import { AppLayout } from './components/layout/AppLayout'
 import { Sidebar, type NavItem } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { TestRender } from './pages/TestRender'
+import { Settings } from './pages/Settings'
 
 function App() {
   const [activeItem, setActiveItem] = useState<NavItem>('dashboard')
@@ -15,14 +16,7 @@ function App() {
       case 'create':
         return <TestRender />
       case 'settings':
-        return (
-          <div className="max-w-4xl">
-            <h1 className="text-4xl font-bold mb-2 text-slate-100">Settings</h1>
-            <p className="text-slate-400 mb-8">
-              Settings configuration will be implemented in Phase 2
-            </p>
-          </div>
-        )
+        return <Settings />
       default:
         return <Dashboard />
     }
