@@ -1,0 +1,153 @@
+# Requirements: Content Creation System
+
+**Defined:** 2026-03-10
+**Core Value:** The core loop must work end-to-end: pick a topic and mechanic, generate text via Claude, render branded images from HTML/CSS templates, and export upload-ready PNGs - all guided by brand settings and performance insights.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Settings & Configuration
+
+- [ ] **SET-01**: User can configure brand voice (tonality, do's/don'ts, example posts upload, auto-generated voice profile with manual override)
+- [ ] **SET-02**: User can configure target persona (demographics, pain points, goals, language expectations, media consumption, buying behavior)
+- [ ] **SET-03**: User can configure content pillars with coupled percentage sliders (Generate Demand / Convert Demand / Nurture Loyalty, sum = 100%)
+- [ ] **SET-04**: User can manage theme hierarchy via tree editor (add/edit/archive Oberthema -> Unterthema -> Kernaussage, drag & drop reorder)
+- [ ] **SET-05**: User can manage post mechanic catalog (7 pre-filled mechanics with hook rules, slide ranges, structure guidelines, pillar mapping, activate/deactivate)
+- [ ] **SET-06**: User can configure content defaults (carousel slide min/max, caption max chars, hashtag min/max, stories per feed post)
+- [ ] **SET-07**: User can configure brand guidance visuals (primary/secondary/background colors, headline/body/CTA fonts with custom upload, logo upload + placement, last carousel slide rules, standard CTA)
+- [ ] **SET-08**: User can write competitor analysis as free-text differentiation (optional, prompt block skipped when empty)
+- [ ] **SET-09**: User can manage story tools catalog (18 pre-filled Instagram tools with engagement type, pillar mapping, mechanic recommendations, activate/deactivate)
+- [ ] **SET-10**: User can write viral post expertise (hook formulas, viral mechanics, post structures - optional, prompt block skipped when empty)
+- [ ] **SET-11**: User can view and edit master prompt template (code editor, rarely used, pre-filled with working default)
+- [ ] **SET-12**: Every settings change is automatically versioned with timestamp (system can show which version was active for any post)
+
+### Template System
+
+- [ ] **TPL-01**: User can create a template by uploading a background image and being guided through zone definition
+- [ ] **TPL-02**: User can visually drag rectangles on image preview to define text zones (hook, body, CTA) with font role, alignment, and max_lines per zone
+- [ ] **TPL-03**: User can visually define no-text zones (protected areas where text must not appear)
+- [ ] **TPL-04**: User can configure overlay settings per template (color, opacity, gradient with stops, enabled/disabled)
+- [ ] **TPL-05**: User can set background type per template (image, solid color from brand guidance, gradient from brand guidance)
+- [ ] **TPL-06**: User can manage templates in settings (list, edit zones, delete, duplicate)
+- [ ] **TPL-07**: System renders HTML/CSS templates to PNG at Instagram dimensions (1080x1350 feed, 1080x1920 story)
+- [ ] **TPL-08**: User is offered "save as template?" when uploading a custom background image during manual post flow
+- [ ] **TPL-09**: Templates support carousel variants (separate cover slide, content slide, CTA slide HTML with shared config)
+
+### Post Generation Workflow
+
+- [ ] **POST-01**: System recommends a content pillar, theme, and mechanic based on rotation balance (equal rotation until learning data exists)
+- [ ] **POST-02**: User can accept or override the system recommendation (choose pillar, theme/subtopic/key message, content type, mechanic, template)
+- [ ] **POST-03**: User can choose content type: single post or carousel
+- [ ] **POST-04**: User can optionally upload a custom background image that overrides the template background for this post
+- [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
+- [ ] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
+- [ ] **POST-07**: User can enter text manually without AI generation (manual mode - system provides empty zones, user fills them)
+- [ ] **POST-08**: User can edit individual slide texts, hooks, and CTAs inline after generation
+- [ ] **POST-09**: User can request alternative hook suggestions from AI
+- [ ] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
+- [ ] **POST-11**: User can reorder carousel slides via drag and drop
+- [ ] **POST-12**: User can request a completely new AI-generated draft
+- [ ] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
+- [ ] **POST-14**: User sees rendered PNG preview with caption for visual review before export
+- [ ] **POST-15**: User can adjust per-slide overlay opacity for carousels and trigger re-render
+- [ ] **POST-16**: User can approve and export upload-ready PNGs + caption text file
+- [ ] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
+
+### Story Generation
+
+- [ ] **STORY-01**: System generates story proposals linked to the feed post (2-4 stories per post, configurable)
+- [ ] **STORY-02**: Story content inherits from feed post (slide texts, caption, theme, mechanic) - no new content invented
+- [ ] **STORY-03**: System assigns story type per story (teaser before post, reference to post, deepening of aspect, behind-the-scenes)
+- [ ] **STORY-04**: System recommends interactive tool per story based on post mechanic and pillar (from story tools catalog)
+- [ ] **STORY-05**: System generates concrete text for interactive tools (poll question + options, quiz question + answers, etc.)
+- [ ] **STORY-06**: System generates story image - either reformatted feed slide (9:16 with brand color padding) or dedicated story template
+- [ ] **STORY-07**: System recommends timing per story (before or after feed post)
+- [ ] **STORY-08**: User can approve, reject, or edit each story (text, tool choice, source slide, image)
+- [ ] **STORY-09**: System renders story PNGs at 1080x1920 (9:16)
+- [ ] **STORY-10**: User can export story PNGs alongside feed post PNGs
+
+### Performance Tracking
+
+- [ ] **PERF-01**: System auto-captures post metadata on creation (pillar, theme, subtopic, key message, mechanic, template, content type, slide count, ad-hoc flag)
+- [ ] **PERF-02**: System shows manual performance input form 7 days after feed post publication (reach, impressions, likes, comments, shares, saves, revenue, qualitative notes)
+- [ ] **PERF-03**: System shows manual story performance input form within 24 hours of story publication (impressions, reach, replies, taps forward/back, exits, sticker taps)
+- [ ] **PERF-04**: User can add revenue attribution and qualitative notes per post (always manual, never API-replaced)
+- [ ] **PERF-05**: Data model supports API override per metric field (manual value + API value columns, API wins when present, manual shown as override option)
+- [ ] **PERF-06**: Story performance is linked to parent feed post in database
+
+### Learning System
+
+- [ ] **LEARN-01**: System tracks balance matrix across all steerable variables (pillar distribution, theme distribution, mechanic distribution, content type distribution, template distribution, story tool distribution)
+- [ ] **LEARN-02**: System calculates performance-per-variable (avg metrics per theme, per mechanic, per pillar, per template, per story tool)
+- [ ] **LEARN-03**: System generates soft-signal warnings when a variable is overused (e.g., "Mechanic X used 4x in 2 weeks - rotate?")
+- [ ] **LEARN-04**: Recommendations use equal rotation in cold start (no data yet), then shift to data-driven weighting as performance accumulates
+- [ ] **LEARN-05**: Ad-hoc posts are flagged and excluded from theme balance calculation but included in pillar balance
+- [ ] **LEARN-06**: Pillar balance tracks actual vs. target percentage (from content pillar sliders) and warns on deviation
+
+### Infrastructure
+
+- [ ] **INFRA-01**: Electron desktop app starts with double-click on .exe (no terminal, no dev server)
+- [ ] **INFRA-02**: React + Tailwind CSS frontend with electron-vite build tooling
+- [ ] **INFRA-03**: SQLite database for learning data (posts, stories, performance, balance matrix cache) with WAL mode and integrity checks
+- [ ] **INFRA-04**: JSON file storage for settings with automatic timestamp versioning
+- [ ] **INFRA-05**: Secure Claude API key storage via Electron safeStorage API
+- [ ] **INFRA-06**: Brand-aware data model (brand_id in all database tables) with single-brand UI
+- [ ] **INFRA-07**: Graceful shutdown handler to prevent SQLite corruption
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### API Integration
+
+- **API-01**: Instagram Graph API integration for automated feed post metrics (replaces manual input)
+- **API-02**: Instagram Stories API / webhook for automated story metrics within 24h window
+- **API-03**: Automated posting via Instagram Content Publishing API
+
+### Multi-Brand & Web
+
+- **MULTI-01**: Multi-brand UI (brand switcher, per-brand settings and data)
+- **WEB-01**: Web app deployment (React code reuse, PostgreSQL migration, cloud Puppeteer)
+- **WEB-02**: User authentication and multi-tenant architecture
+
+### Content Types
+
+- **CONTENT-01**: Video/Reel generation support
+- **CONTENT-02**: LinkedIn post format support
+
+### UX Enhancements
+
+- **UX-01**: First-run onboarding wizard (guided brand setup, template creation, first post)
+- **UX-02**: Content calendar/scheduling view
+- **UX-03**: Draft auto-save and crash recovery
+- **UX-04**: Comprehensive logging with electron-log for production debugging
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Pre-built template library | Creates generic content, no brand differentiation - users create custom templates |
+| Provider-agnostic LLM layer | Abstraction dilutes prompt optimization - Claude API only |
+| Real-time Instagram preview | Perfect match impossible across devices/OS - high-fidelity preview sufficient |
+| Mobile app | Desktop-first, web migration path exists for later |
+| Real-time chat | Not core to content creation workflow |
+| Direct Instagram posting | Manual export validates core loop without API complexity |
+| Infinite customization | Decision fatigue - opinionated defaults with strategic flexibility |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| (populated during roadmap creation) | | |
+
+**Coverage:**
+- v1 requirements: 55 total
+- Mapped to phases: 0
+- Unmapped: 55
+
+---
+*Requirements defined: 2026-03-10*
+*Last updated: 2026-03-10 after initial definition*
