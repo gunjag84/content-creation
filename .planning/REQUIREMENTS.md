@@ -141,13 +141,79 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| SET-01 | Phase 2 | Pending |
+| SET-02 | Phase 2 | Pending |
+| SET-03 | Phase 2 | Pending |
+| SET-04 | Phase 2 | Pending |
+| SET-05 | Phase 2 | Pending |
+| SET-06 | Phase 2 | Pending |
+| SET-07 | Phase 2 | Pending |
+| SET-08 | Phase 2 | Pending |
+| SET-09 | Phase 2 | Pending |
+| SET-10 | Phase 2 | Pending |
+| SET-11 | Phase 2 | Pending |
+| SET-12 | Phase 2 | Pending |
+| TPL-01 | Phase 2 | Pending |
+| TPL-02 | Phase 2 | Pending |
+| TPL-03 | Phase 2 | Pending |
+| TPL-04 | Phase 2 | Pending |
+| TPL-05 | Phase 2 | Pending |
+| TPL-06 | Phase 2 | Pending |
+| TPL-07 | Phase 1 | Pending |
+| TPL-08 | Phase 2 | Pending |
+| TPL-09 | Phase 2 | Pending |
+| POST-01 | Phase 3 | Pending |
+| POST-02 | Phase 3 | Pending |
+| POST-03 | Phase 3 | Pending |
+| POST-04 | Phase 3 | Pending |
+| POST-05 | Phase 3 | Pending |
+| POST-06 | Phase 3 | Pending |
+| POST-07 | Phase 3 | Pending |
+| POST-08 | Phase 3 | Pending |
+| POST-09 | Phase 3 | Pending |
+| POST-10 | Phase 3 | Pending |
+| POST-11 | Phase 3 | Pending |
+| POST-12 | Phase 3 | Pending |
+| POST-13 | Phase 3 | Pending |
+| POST-14 | Phase 3 | Pending |
+| POST-15 | Phase 3 | Pending |
+| POST-16 | Phase 3 | Pending |
+| POST-17 | Phase 3 | Pending |
+| STORY-01 | Phase 3 | Pending |
+| STORY-02 | Phase 3 | Pending |
+| STORY-03 | Phase 3 | Pending |
+| STORY-04 | Phase 3 | Pending |
+| STORY-05 | Phase 3 | Pending |
+| STORY-06 | Phase 3 | Pending |
+| STORY-07 | Phase 3 | Pending |
+| STORY-08 | Phase 3 | Pending |
+| STORY-09 | Phase 3 | Pending |
+| STORY-10 | Phase 3 | Pending |
+| PERF-01 | Phase 4 | Pending |
+| PERF-02 | Phase 4 | Pending |
+| PERF-03 | Phase 4 | Pending |
+| PERF-04 | Phase 4 | Pending |
+| PERF-05 | Phase 4 | Pending |
+| PERF-06 | Phase 4 | Pending |
+| LEARN-01 | Phase 3 | Pending |
+| LEARN-02 | Phase 3 | Pending |
+| LEARN-03 | Phase 3 | Pending |
+| LEARN-04 | Phase 3 | Pending |
+| LEARN-05 | Phase 3 | Pending |
+| LEARN-06 | Phase 3 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Pending |
+| INFRA-07 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 55 total
-- Mapped to phases: 0
-- Unmapped: 55
+- Mapped to phases: 55
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after initial definition*
+*Last updated: 2026-03-10 after roadmap creation*
