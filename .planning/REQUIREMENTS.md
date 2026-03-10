@@ -24,11 +24,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Template System
 
-- [ ] **TPL-01**: User can create a template by uploading a background image and being guided through zone definition
-- [ ] **TPL-02**: User can visually drag rectangles on image preview to define text zones (hook, body, CTA) with font role, alignment, and max_lines per zone
-- [ ] **TPL-03**: User can visually define no-text zones (protected areas where text must not appear)
-- [ ] **TPL-04**: User can configure overlay settings per template (color, opacity, gradient with stops, enabled/disabled)
-- [ ] **TPL-05**: User can set background type per template (image, solid color from brand guidance, gradient from brand guidance)
+- [x] **TPL-01**: User can create a template by uploading a background image and being guided through zone definition
+- [x] **TPL-02**: User can visually drag rectangles on image preview to define text zones (hook, body, CTA) with font role, alignment, and max_lines per zone
+- [x] **TPL-03**: User can visually define no-text zones (protected areas where text must not appear)
+- [x] **TPL-04**: User can configure overlay settings per template (color, opacity, gradient with stops, enabled/disabled)
+- [x] **TPL-05**: User can set background type per template (image, solid color from brand guidance, gradient from brand guidance)
 - [ ] **TPL-06**: User can manage templates in settings (list, edit zones, delete, duplicate)
 - [x] **TPL-07**: System renders HTML/CSS templates to PNG at Instagram dimensions (1080x1350 feed, 1080x1920 story)
 - [ ] **TPL-08**: User is offered "save as template?" when uploading a custom background image during manual post flow
@@ -153,11 +153,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SET-10 | Phase 2 | Complete |
 | SET-11 | Phase 2 | Complete |
 | SET-12 | Phase 2 | Complete |
-| TPL-01 | Phase 2 | Pending |
-| TPL-02 | Phase 2 | Pending |
-| TPL-03 | Phase 2 | Pending |
-| TPL-04 | Phase 2 | Pending |
-| TPL-05 | Phase 2 | Pending |
+| TPL-01 | Phase 2 | Complete |
+| TPL-02 | Phase 2 | Complete |
+| TPL-03 | Phase 2 | Complete |
+| TPL-04 | Phase 2 | Complete |
+| TPL-05 | Phase 2 | Complete |
 | TPL-06 | Phase 2 | Pending |
 | TPL-07 | Phase 1 | Complete |
 | TPL-08 | Phase 2 | Pending |
