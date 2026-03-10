@@ -3,9 +3,14 @@ import { join } from 'path'
 import { initDatabase, closeDatabase } from './db/index'
 import { SettingsService } from './services/settings-service'
 import { SecurityService } from './services/security-service'
+import { RenderService } from './services/render-service'
 import { registerDatabaseIPC } from './ipc/database'
 import { registerSettingsIPC } from './ipc/settings'
 import { registerSecurityIPC } from './ipc/security'
+import { registerRenderingIPC } from './ipc/rendering'
+
+// Global reference to render service for lifecycle management
+let renderService: RenderService
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -29,7 +34,7 @@ function createWindow() {
 }
 
 // App lifecycle
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Initialize database with WAL mode
   const dbPath = join(app.getPath('userData'), 'content-creation.db')
   initDatabase(dbPath)
@@ -38,10 +43,15 @@ app.whenReady().then(() => {
   const settingsService = new SettingsService()
   const securityService = new SecurityService()
 
+  // Initialize render service BEFORE creating main window
+  renderService = new RenderService()
+  await renderService.initialize()
+
   // Register IPC handlers
   registerDatabaseIPC()
   registerSettingsIPC(settingsService)
   registerSecurityIPC(securityService)
+  registerRenderingIPC(renderService)
 
   // App info handler
   ipcMain.handle('app:info', async () => {
@@ -49,11 +59,6 @@ app.whenReady().then(() => {
       version: app.getVersion(),
       userData: app.getPath('userData')
     }
-  })
-
-  // Rendering handler stub (will be implemented in Plan 03)
-  ipcMain.handle('render:to-png', async (_event, _html, _dimensions) => {
-    return ''
   })
 
   createWindow()
@@ -71,11 +76,14 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Graceful shutdown - checkpoint WAL and close database
-app.on('before-quit', () => {
+// Graceful shutdown - cleanup render service and close database
+app.on('before-quit', async () => {
   try {
+    if (renderService) {
+      await renderService.cleanup()
+    }
     closeDatabase()
   } catch (err) {
-    console.error('Error closing database:', err)
+    console.error('Error during shutdown:', err)
   }
 })
