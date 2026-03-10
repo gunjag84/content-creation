@@ -6,7 +6,7 @@ interface BrandPreviewProps {
 }
 
 export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null)
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null)
   const [isRendering, setIsRendering] = useState(false)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const latestGuidance = useRef(visualGuidance)
@@ -15,6 +15,15 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
   useEffect(() => {
     latestGuidance.current = visualGuidance
   }, [visualGuidance])
+
+  // Clean up blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewBlobUrl) {
+        URL.revokeObjectURL(previewBlobUrl)
+      }
+    }
+  }, [previewBlobUrl])
 
   // Render preview with debounce
   useEffect(() => {
@@ -48,13 +57,34 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
     visualGuidance.instagramHandle
   ])
 
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const parts = dataUrl.split(',')
+    const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png'
+    const raw = atob(parts[1])
+    const arr = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i++) {
+      arr[i] = raw.charCodeAt(i)
+    }
+    return new Blob([arr], { type: mime })
+  }
+
   const renderPreview = async () => {
     setIsRendering(true)
 
     try {
       const html = generatePreviewHTML(latestGuidance.current)
       const dataUrl = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
-      setPreviewDataUrl(dataUrl)
+
+      // Convert data URL to Blob URL to avoid header pollution
+      const blob = dataUrlToBlob(dataUrl)
+
+      // Revoke previous blob URL to prevent memory leaks
+      if (previewBlobUrl) {
+        URL.revokeObjectURL(previewBlobUrl)
+      }
+
+      const blobUrl = URL.createObjectURL(blob)
+      setPreviewBlobUrl(blobUrl)
     } catch (error) {
       console.error('Preview render failed:', error)
     } finally {
@@ -214,19 +244,19 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="text-sm font-medium text-gray-700">Brand Preview</label>
-      <div className="relative bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-center min-h-[400px]">
+      <label className="text-sm font-medium text-slate-200">Brand Preview</label>
+      <div className="relative bg-slate-800 border border-slate-700 rounded-lg p-4 flex items-center justify-center min-h-[400px]">
         {isRendering ? (
-          <div className="text-gray-500">Rendering preview...</div>
-        ) : previewDataUrl ? (
+          <div className="text-slate-400">Rendering preview...</div>
+        ) : previewBlobUrl ? (
           <img
-            src={previewDataUrl}
+            src={previewBlobUrl}
             alt="Brand preview"
             className="max-w-full h-auto rounded-md shadow-lg"
             style={{ maxWidth: '300px' }}
           />
         ) : (
-          <div className="text-gray-500">Preview will appear here</div>
+          <div className="text-slate-400">Preview will appear here</div>
         )}
       </div>
     </div>
