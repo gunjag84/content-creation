@@ -116,4 +116,12 @@ export function registerFontIPC() {
 
     return destPath
   })
+
+  // Read file as base64 data URL for renderer display
+  ipcMain.handle('file:read-as-data-url', async (_event, filePath: string) => {
+    const data = await fs.readFile(filePath)
+    const ext = path.extname(filePath).toLowerCase().replace('.', '')
+    const mimeType = ext === 'jpg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : `image/${ext}`
+    return `data:${mimeType};base64,${data.toString('base64')}`
+  })
 }

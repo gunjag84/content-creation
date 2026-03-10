@@ -46,7 +46,10 @@ const api: IElectronAPI = {
   deleteAPIKey: () => ipcRenderer.invoke('security:delete-key'),
 
   // App
-  getAppInfo: () => ipcRenderer.invoke('app:info')
+  getAppInfo: () => ipcRenderer.invoke('app:info'),
+
+  // File utilities
+  readFileAsDataUrl: (path) => ipcRenderer.invoke('file:read-as-data-url', path)
 }
 
 contextBridge.exposeInMainWorld('api', api)

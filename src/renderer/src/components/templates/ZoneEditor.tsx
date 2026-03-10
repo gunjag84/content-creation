@@ -184,12 +184,38 @@ export function ZoneEditor({
     })
   }
 
-  const handleStageMouseUp = () => {
-    if (isDrawing && tempZone && drawStart) {
+  const handleStageMouseUp = (e: any) => {
+    if (isDrawing && drawStart) {
+      let finalZone = tempZone
+
+      // Fallback: if tempZone is null (mouse moved too fast), calculate zone from current position
+      if (!finalZone) {
+        const stage = e.target.getStage()
+        const pos = stage.getPointerPosition()
+        const x = pos.x / scale
+        const y = pos.y / scale
+
+        const width = Math.abs(x - drawStart.x)
+        const height = Math.abs(y - drawStart.y)
+        const finalX = Math.min(drawStart.x, x)
+        const finalY = Math.min(drawStart.y, y)
+
+        finalZone = {
+          id: 'temp',
+          type: 'body',
+          x: finalX,
+          y: finalY,
+          width,
+          height,
+          fontSize: getFontSizeForType('body'),
+          minFontSize: brandGuidance?.minFontSize || 14
+        }
+      }
+
       // Finalize the zone
-      if (tempZone.width >= MIN_ZONE_SIZE && tempZone.height >= MIN_ZONE_SIZE) {
+      if (finalZone.width >= MIN_ZONE_SIZE && finalZone.height >= MIN_ZONE_SIZE) {
         const newZone: Zone = {
-          ...tempZone,
+          ...finalZone,
           id: generateZoneId()
         }
         onZonesChange([...zones, newZone])
@@ -209,7 +235,7 @@ export function ZoneEditor({
       setIsDrawing(false)
       setDrawStart(null)
       setTempZone(null)
-      setDrawMode(false)
+      // Keep draw mode active so user can draw multiple zones
     }
   }
 
@@ -321,7 +347,7 @@ export function ZoneEditor({
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+      <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg border border-slate-700">
         <div className="flex gap-2">
           <Button
             variant={drawMode ? 'default' : 'outline'}
@@ -331,6 +357,7 @@ export function ZoneEditor({
               setSelectedZoneId(null)
               setPopoverPosition(null)
             }}
+            className={drawMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border-slate-600 text-slate-300 hover:bg-slate-700'}
           >
             {drawMode ? 'Cancel Drawing' : 'Draw Zone'}
           </Button>
@@ -339,17 +366,18 @@ export function ZoneEditor({
             size="sm"
             onClick={handleDeleteSelected}
             disabled={!selectedZoneId}
+            className="border-slate-600 text-slate-300 hover:bg-slate-700 disabled:opacity-50"
           >
             Delete Selected
           </Button>
         </div>
-        <div className="text-sm text-gray-600">{zones.length} zones defined</div>
+        <div className="text-sm text-slate-400">{zones.length} zones defined</div>
       </div>
 
       {/* Canvas */}
       <div
         ref={containerRef}
-        className="border rounded-lg overflow-hidden bg-gray-100"
+        className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 max-w-[700px] mx-auto"
         style={{ cursor: drawMode ? 'crosshair' : 'default' }}
       >
         <Stage

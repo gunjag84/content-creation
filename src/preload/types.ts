@@ -49,6 +49,9 @@ export interface IElectronAPI {
 
   // App
   getAppInfo: () => Promise<{ version: string; userData: string }>
+
+  // File utilities
+  readFileAsDataUrl: (path: string) => Promise<string>
 }
 
 declare global {

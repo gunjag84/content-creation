@@ -101,14 +101,20 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
     }
   }
 
-  const loadBackgroundImage = (imagePath: string) => {
-    const img = new Image()
-    img.onload = () => setBackgroundImage(img)
-    img.onerror = () => {
-      console.error('Failed to load background image:', imagePath)
+  const loadBackgroundImage = async (imagePath: string) => {
+    try {
+      const dataUrl = await window.api.readFileAsDataUrl(imagePath)
+      const img = new Image()
+      img.onload = () => setBackgroundImage(img)
+      img.onerror = () => {
+        console.error('Failed to load background image:', imagePath)
+        setBackgroundImage(null)
+      }
+      img.src = dataUrl
+    } catch (err) {
+      console.error('Failed to load background image:', err)
       setBackgroundImage(null)
     }
-    img.src = `file://${imagePath}`
   }
 
   const handleBackgroundTypeChange = (
