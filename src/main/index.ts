@@ -8,6 +8,8 @@ import { registerDatabaseIPC } from './ipc/database'
 import { registerSettingsIPC } from './ipc/settings'
 import { registerSecurityIPC } from './ipc/security'
 import { registerRenderingIPC } from './ipc/rendering'
+import { registerTemplateIPC } from './ipc/templates'
+import { registerFontIPC } from './ipc/fonts'
 
 // Global reference to render service for lifecycle management
 let renderService: RenderService
@@ -52,6 +54,8 @@ app.whenReady().then(async () => {
   registerDatabaseIPC()
   registerSettingsIPC(settingsService)
   registerSecurityIPC(securityService)
+  registerTemplateIPC()
+  registerFontIPC()
 
   // App info handler
   ipcMain.handle('app:info', async () => {

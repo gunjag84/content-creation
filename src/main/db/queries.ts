@@ -181,3 +181,199 @@ export function insertSettingsVersion(
   const result = stmt.run(brandId, filename, timestamp)
   return result.lastInsertRowid as number
 }
+
+export interface SettingsVersion {
+  id: number
+  brand_id: number
+  filename: string
+  timestamp: number
+}
+
+export function listSettingsVersions(brandId?: number): SettingsVersion[] {
+  const db = getDatabase()
+  if (brandId !== undefined) {
+    const stmt = db.prepare('SELECT * FROM settings_versions WHERE brand_id = ? ORDER BY timestamp DESC')
+    return stmt.all(brandId) as SettingsVersion[]
+  } else {
+    const stmt = db.prepare('SELECT * FROM settings_versions ORDER BY timestamp DESC')
+    return stmt.all() as SettingsVersion[]
+  }
+}
+
+export function getSettingsVersionAtTime(timestamp: number, brandId?: number): SettingsVersion | undefined {
+  const db = getDatabase()
+  if (brandId !== undefined) {
+    const stmt = db.prepare(`
+      SELECT * FROM settings_versions
+      WHERE brand_id = ? AND timestamp <= ?
+      ORDER BY timestamp DESC
+      LIMIT 1
+    `)
+    return stmt.get(brandId, timestamp) as SettingsVersion | undefined
+  } else {
+    const stmt = db.prepare(`
+      SELECT * FROM settings_versions
+      WHERE timestamp <= ?
+      ORDER BY timestamp DESC
+      LIMIT 1
+    `)
+    return stmt.get(timestamp) as SettingsVersion | undefined
+  }
+}
+
+export function getSettingsVersionForPost(postId: number): SettingsVersion | undefined {
+  const db = getDatabase()
+  const stmt = db.prepare(`
+    SELECT sv.* FROM settings_versions sv
+    JOIN posts p ON p.settings_version_id = sv.id
+    WHERE p.id = ?
+  `)
+  return stmt.get(postId) as SettingsVersion | undefined
+}
+
+// Template operations
+export interface TemplateInsert {
+  brand_id?: number
+  name: string
+  background_type: 'image' | 'solid_color' | 'gradient'
+  background_value: string
+  overlay_color?: string
+  overlay_opacity?: number
+  overlay_gradient?: string
+  overlay_enabled?: boolean
+  format: 'feed' | 'story'
+  zones_config: string // JSON string of Zone[]
+}
+
+export interface Template extends TemplateInsert {
+  id: number
+  created_at: number
+  updated_at: number
+}
+
+export function insertTemplate(data: TemplateInsert): number {
+  const db = getDatabase()
+  const stmt = db.prepare(`
+    INSERT INTO templates (
+      brand_id, name, background_type, background_value, overlay_color,
+      overlay_opacity, overlay_gradient, overlay_enabled, format, zones_config
+    ) VALUES (
+      @brand_id, @name, @background_type, @background_value, @overlay_color,
+      @overlay_opacity, @overlay_gradient, @overlay_enabled, @format, @zones_config
+    )
+  `)
+
+  const result = stmt.run({
+    brand_id: data.brand_id ?? 1,
+    name: data.name,
+    background_type: data.background_type,
+    background_value: data.background_value,
+    overlay_color: data.overlay_color ?? null,
+    overlay_opacity: data.overlay_opacity ?? 0.5,
+    overlay_gradient: data.overlay_gradient ?? null,
+    overlay_enabled: data.overlay_enabled !== undefined ? (data.overlay_enabled ? 1 : 0) : 1,
+    format: data.format,
+    zones_config: data.zones_config
+  })
+
+  return result.lastInsertRowid as number
+}
+
+export function getTemplate(id: number): Template | undefined {
+  const db = getDatabase()
+  const stmt = db.prepare('SELECT * FROM templates WHERE id = ?')
+  return stmt.get(id) as Template | undefined
+}
+
+export function listTemplates(brandId?: number): Template[] {
+  const db = getDatabase()
+  if (brandId !== undefined) {
+    const stmt = db.prepare('SELECT * FROM templates WHERE brand_id = ? ORDER BY created_at DESC')
+    return stmt.all(brandId) as Template[]
+  } else {
+    const stmt = db.prepare('SELECT * FROM templates ORDER BY created_at DESC')
+    return stmt.all() as Template[]
+  }
+}
+
+export function updateTemplate(id: number, data: Partial<TemplateInsert>): void {
+  const db = getDatabase()
+  const fields: string[] = []
+  const values: any = { id }
+
+  if (data.name !== undefined) {
+    fields.push('name = @name')
+    values.name = data.name
+  }
+  if (data.background_type !== undefined) {
+    fields.push('background_type = @background_type')
+    values.background_type = data.background_type
+  }
+  if (data.background_value !== undefined) {
+    fields.push('background_value = @background_value')
+    values.background_value = data.background_value
+  }
+  if (data.overlay_color !== undefined) {
+    fields.push('overlay_color = @overlay_color')
+    values.overlay_color = data.overlay_color
+  }
+  if (data.overlay_opacity !== undefined) {
+    fields.push('overlay_opacity = @overlay_opacity')
+    values.overlay_opacity = data.overlay_opacity
+  }
+  if (data.overlay_gradient !== undefined) {
+    fields.push('overlay_gradient = @overlay_gradient')
+    values.overlay_gradient = data.overlay_gradient
+  }
+  if (data.overlay_enabled !== undefined) {
+    fields.push('overlay_enabled = @overlay_enabled')
+    values.overlay_enabled = data.overlay_enabled ? 1 : 0
+  }
+  if (data.format !== undefined) {
+    fields.push('format = @format')
+    values.format = data.format
+  }
+  if (data.zones_config !== undefined) {
+    fields.push('zones_config = @zones_config')
+    values.zones_config = data.zones_config
+  }
+
+  if (fields.length === 0) return
+
+  fields.push("updated_at = strftime('%s', 'now')")
+
+  const stmt = db.prepare(`
+    UPDATE templates
+    SET ${fields.join(', ')}
+    WHERE id = @id
+  `)
+
+  stmt.run(values)
+}
+
+export function deleteTemplate(id: number): void {
+  const db = getDatabase()
+  const stmt = db.prepare('DELETE FROM templates WHERE id = ?')
+  stmt.run(id)
+}
+
+export function duplicateTemplate(id: number, newName: string): number {
+  const db = getDatabase()
+  const source = getTemplate(id)
+  if (!source) {
+    throw new Error(`Template ${id} not found`)
+  }
+
+  return insertTemplate({
+    brand_id: source.brand_id,
+    name: newName,
+    background_type: source.background_type,
+    background_value: source.background_value,
+    overlay_color: source.overlay_color ?? undefined,
+    overlay_opacity: source.overlay_opacity ?? undefined,
+    overlay_gradient: source.overlay_gradient ?? undefined,
+    overlay_enabled: Boolean(source.overlay_enabled),
+    format: source.format,
+    zones_config: source.zones_config
+  })
+}

@@ -6,6 +6,28 @@ const api: IElectronAPI = {
   loadSettings: () => ipcRenderer.invoke('settings:load'),
   saveSettings: (settings) => ipcRenderer.invoke('settings:save', settings),
 
+  // Templates
+  templates: {
+    list: () => ipcRenderer.invoke('templates:list'),
+    create: (template) => ipcRenderer.invoke('templates:create', template),
+    get: (id) => ipcRenderer.invoke('templates:get', id),
+    update: (id, data) => ipcRenderer.invoke('templates:update', id, data),
+    delete: (id) => ipcRenderer.invoke('templates:delete', id),
+    duplicate: (id, newName) => ipcRenderer.invoke('templates:duplicate', id, newName)
+  },
+
+  // Fonts
+  fonts: {
+    upload: () => ipcRenderer.invoke('fonts:upload'),
+    list: () => ipcRenderer.invoke('fonts:list')
+  },
+
+  // Settings Versions
+  settingsVersions: {
+    list: () => ipcRenderer.invoke('settings-versions:list'),
+    forPost: (postId) => ipcRenderer.invoke('settings-versions:for-post', postId)
+  },
+
   // Database
   getDbStatus: () => ipcRenderer.invoke('db:status'),
 
