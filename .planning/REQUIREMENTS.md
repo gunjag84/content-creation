@@ -11,13 +11,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **SET-01**: User can configure brand voice (tonality, do's/don'ts, example posts upload, auto-generated voice profile with manual override)
 - [x] **SET-02**: User can configure target persona (demographics, pain points, goals, language expectations, media consumption, buying behavior)
-- [ ] **SET-03**: User can configure content pillars with coupled percentage sliders (Generate Demand / Convert Demand / Nurture Loyalty, sum = 100%)
-- [ ] **SET-04**: User can manage theme hierarchy via tree editor (add/edit/archive Oberthema -> Unterthema -> Kernaussage, drag & drop reorder)
-- [ ] **SET-05**: User can manage post mechanic catalog (7 pre-filled mechanics with hook rules, slide ranges, structure guidelines, pillar mapping, activate/deactivate)
+- [x] **SET-03**: User can configure content pillars with coupled percentage sliders (Generate Demand / Convert Demand / Nurture Loyalty, sum = 100%)
+- [x] **SET-04**: User can manage theme hierarchy via tree editor (add/edit/archive Oberthema -> Unterthema -> Kernaussage, drag & drop reorder)
+- [x] **SET-05**: User can manage post mechanic catalog (7 pre-filled mechanics with hook rules, slide ranges, structure guidelines, pillar mapping, activate/deactivate)
 - [x] **SET-06**: User can configure content defaults (carousel slide min/max, caption max chars, hashtag min/max, stories per feed post)
 - [x] **SET-07**: User can configure brand guidance visuals (primary/secondary/background colors, headline/body/CTA fonts with custom upload, logo upload + placement, last carousel slide rules, standard CTA)
 - [x] **SET-08**: User can write competitor analysis as free-text differentiation (optional, prompt block skipped when empty)
-- [ ] **SET-09**: User can manage story tools catalog (18 pre-filled Instagram tools with engagement type, pillar mapping, mechanic recommendations, activate/deactivate)
+- [x] **SET-09**: User can manage story tools catalog (18 pre-filled Instagram tools with engagement type, pillar mapping, mechanic recommendations, activate/deactivate)
 - [x] **SET-10**: User can write viral post expertise (hook formulas, viral mechanics, post structures - optional, prompt block skipped when empty)
 - [x] **SET-11**: User can view and edit master prompt template (code editor, rarely used, pre-filled with working default)
 - [x] **SET-12**: Every settings change is automatically versioned with timestamp (system can show which version was active for any post)
@@ -143,13 +143,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | SET-01 | Phase 2 | Complete |
 | SET-02 | Phase 2 | Complete |
-| SET-03 | Phase 2 | Pending |
-| SET-04 | Phase 2 | Pending |
-| SET-05 | Phase 2 | Pending |
+| SET-03 | Phase 2 | Complete |
+| SET-04 | Phase 2 | Complete |
+| SET-05 | Phase 2 | Complete |
 | SET-06 | Phase 2 | Complete |
 | SET-07 | Phase 2 | Complete |
 | SET-08 | Phase 2 | Complete |
-| SET-09 | Phase 2 | Pending |
+| SET-09 | Phase 2 | Complete |
 | SET-10 | Phase 2 | Complete |
 | SET-11 | Phase 2 | Complete |
 | SET-12 | Phase 2 | Complete |
