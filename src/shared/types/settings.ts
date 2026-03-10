@@ -141,7 +141,7 @@ export const ViralExpertiseSchema = z.object({
 // Master Prompt Schema
 export const MasterPromptSchema = z.object({
   template: z.string()
-})
+}).optional()
 
 // Main Settings Schema
 export const SettingsSchema = z.object({

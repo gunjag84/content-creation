@@ -18,7 +18,9 @@ export class SettingsService {
     try {
       const data = await fs.readFile(this.settingsPath, 'utf-8')
       const parsed = JSON.parse(data)
-      const validated = SettingsSchema.parse(parsed)
+      // Merge with defaults to backfill fields added in later phases
+      const merged = { ...DEFAULT_SETTINGS, ...parsed }
+      const validated = SettingsSchema.parse(merged)
       return validated
     } catch (err: any) {
       if (err.code === 'ENOENT') {
