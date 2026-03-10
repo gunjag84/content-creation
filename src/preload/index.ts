@@ -13,7 +13,8 @@ const api: IElectronAPI = {
     get: (id) => ipcRenderer.invoke('templates:get', id),
     update: (id, data) => ipcRenderer.invoke('templates:update', id, data),
     delete: (id) => ipcRenderer.invoke('templates:delete', id),
-    duplicate: (id, newName) => ipcRenderer.invoke('templates:duplicate', id, newName)
+    duplicate: (id, newName) => ipcRenderer.invoke('templates:duplicate', id, newName),
+    uploadBackground: () => ipcRenderer.invoke('templates:upload-background')
   },
 
   // Fonts

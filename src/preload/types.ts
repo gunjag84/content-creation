@@ -16,6 +16,7 @@ export interface IElectronAPI {
     update: (id: number, data: Partial<TemplateInsert>) => Promise<void>
     delete: (id: number) => Promise<void>
     duplicate: (id: number, newName: string) => Promise<number>
+    uploadBackground: () => Promise<string | null>
   }
 
   // Fonts

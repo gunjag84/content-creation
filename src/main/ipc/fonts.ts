@@ -89,4 +89,31 @@ export function registerFontIPC() {
       path: destPath
     }
   })
+
+  ipcMain.handle('templates:upload-background', async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Upload Template Background',
+      filters: [
+        { name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }
+      ],
+      properties: ['openFile']
+    })
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null
+    }
+
+    const sourcePath = result.filePaths[0]
+    const filename = path.basename(sourcePath)
+
+    // Create template images directory in userData if it doesn't exist
+    const templatesDir = path.join(app.getPath('userData'), 'templates', 'images')
+    await fs.mkdir(templatesDir, { recursive: true })
+
+    // Copy image file
+    const destPath = path.join(templatesDir, filename)
+    await fs.copyFile(sourcePath, destPath)
+
+    return destPath
+  })
 }
