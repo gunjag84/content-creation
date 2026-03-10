@@ -3,6 +3,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { ZoneEditor, type Zone } from './ZoneEditor'
+import { CarouselVariantEditor, type CarouselVariants } from './CarouselVariantEditor'
 import { OverlayControls } from './OverlayControls'
 import { BackgroundSelector } from './BackgroundSelector'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -29,6 +30,12 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
   const [overlayColor, setOverlayColor] = useState('#000000')
   const [overlayOpacity, setOverlayOpacity] = useState(50)
   const [zones, setZones] = useState<Zone[]>([])
+  const [isCarousel, setIsCarousel] = useState(false)
+  const [carouselVariants, setCarouselVariants] = useState<CarouselVariants>({
+    cover: [],
+    content: [],
+    cta: []
+  })
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -62,7 +69,22 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
         // Parse zones from JSON
         try {
           const parsedZones = JSON.parse(template.zones_config)
-          setZones(parsedZones)
+
+          // Check if it's carousel format
+          if (parsedZones && typeof parsedZones === 'object' && !Array.isArray(parsedZones)) {
+            if (parsedZones.type === 'carousel' && parsedZones.cover && parsedZones.content && parsedZones.cta) {
+              setIsCarousel(true)
+              setCarouselVariants({
+                cover: parsedZones.cover,
+                content: parsedZones.content,
+                cta: parsedZones.cta
+              })
+            } else {
+              setZones(parsedZones)
+            }
+          } else if (Array.isArray(parsedZones)) {
+            setZones(parsedZones)
+          }
         } catch (err) {
           console.error('Failed to parse zones config:', err)
         }
@@ -135,7 +157,12 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
       return
     }
 
-    if (zones.length === 0) {
+    // Check zones for both single and carousel
+    const hasZones = isCarousel
+      ? carouselVariants.cover.length > 0 || carouselVariants.content.length > 0 || carouselVariants.cta.length > 0
+      : zones.length > 0
+
+    if (!hasZones) {
       const confirmed = window.confirm(
         'This template has no zones defined. Save anyway?'
       )
@@ -144,6 +171,16 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
 
     setSaving(true)
     try {
+      // Serialize zones based on carousel mode
+      const zonesConfig = isCarousel
+        ? JSON.stringify({
+            type: 'carousel',
+            cover: carouselVariants.cover,
+            content: carouselVariants.content,
+            cta: carouselVariants.cta
+          })
+        : JSON.stringify(zones)
+
       const templateData: TemplateInsert = {
         name: name.trim(),
         background_type: backgroundType,
@@ -152,7 +189,7 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
         overlay_opacity: overlayOpacity,
         overlay_enabled: overlayEnabled,
         format,
-        zones_config: JSON.stringify(zones)
+        zones_config: zonesConfig
       }
 
       let resultId: number
@@ -242,6 +279,41 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
         </div>
       </div>
 
+      {/* Carousel Mode Toggle (only for feed format) */}
+      {format === 'feed' && (
+        <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
+          <input
+            type="checkbox"
+            id="carousel-mode"
+            checked={isCarousel}
+            onChange={(e) => {
+              const newCarousel = e.target.checked
+              if (newCarousel && zones.length > 0) {
+                const confirmed = window.confirm(
+                  'Switching to carousel mode will reset your zones. Continue?'
+                )
+                if (!confirmed) return
+                setZones([])
+              } else if (!newCarousel && (carouselVariants.cover.length > 0 || carouselVariants.content.length > 0 || carouselVariants.cta.length > 0)) {
+                const confirmed = window.confirm(
+                  'Switching to single slide mode will reset your carousel zones. Continue?'
+                )
+                if (!confirmed) return
+                setCarouselVariants({ cover: [], content: [], cta: [] })
+              }
+              setIsCarousel(newCarousel)
+            }}
+            className="w-4 h-4"
+          />
+          <Label htmlFor="carousel-mode" className="cursor-pointer">
+            Carousel Template
+            <span className="block text-xs text-slate-400 font-normal mt-1">
+              Create separate zone layouts for cover, content, and CTA slides
+            </span>
+          </Label>
+        </div>
+      )}
+
       {/* Background Selector */}
       <BackgroundSelector
         backgroundType={backgroundType}
@@ -251,21 +323,36 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
         onImageUpload={handleImageUpload}
       />
 
-      {/* Zone Editor */}
+      {/* Zone Editor or Carousel Variant Editor */}
       <div className="space-y-2">
-        <Label>Template Zones</Label>
-        <ZoneEditor
-          backgroundImage={backgroundImage}
-          backgroundType={backgroundType}
-          backgroundColor={backgroundValue}
-          overlayColor={overlayColor}
-          overlayOpacity={overlayOpacity}
-          overlayEnabled={overlayEnabled}
-          zones={zones}
-          onZonesChange={setZones}
-          brandGuidance={brandGuidance}
-          format={format}
-        />
+        <Label>{isCarousel ? 'Carousel Zones' : 'Template Zones'}</Label>
+        {isCarousel ? (
+          <CarouselVariantEditor
+            variants={carouselVariants}
+            onChange={setCarouselVariants}
+            brandGuidance={brandGuidance}
+            backgroundImage={backgroundImage}
+            backgroundType={backgroundType}
+            backgroundColor={backgroundValue}
+            overlayColor={overlayColor}
+            overlayOpacity={overlayOpacity}
+            overlayEnabled={overlayEnabled}
+            format={format}
+          />
+        ) : (
+          <ZoneEditor
+            backgroundImage={backgroundImage}
+            backgroundType={backgroundType}
+            backgroundColor={backgroundValue}
+            overlayColor={overlayColor}
+            overlayOpacity={overlayOpacity}
+            overlayEnabled={overlayEnabled}
+            zones={zones}
+            onZonesChange={setZones}
+            brandGuidance={brandGuidance}
+            format={format}
+          />
+        )}
       </div>
 
       {/* Overlay Controls */}
