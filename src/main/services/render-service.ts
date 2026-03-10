@@ -80,9 +80,12 @@ export class RenderService {
     const filePath = path.join(tempDir, filename)
 
     // Write PNG buffer to file
-    fs.writeFileSync(filePath, image.toPNG())
+    const pngBuffer = image.toPNG()
+    fs.writeFileSync(filePath, pngBuffer)
 
-    return filePath
+    // Return both path and base64 for display in renderer
+    const base64 = pngBuffer.toString('base64')
+    return JSON.stringify({ filePath, dataUrl: `data:image/png;base64,${base64}` })
   }
 
   /**

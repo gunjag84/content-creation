@@ -20,13 +20,14 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: false
     }
   })
 
   // Load the renderer
-  if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
+  if (process.env.ELECTRON_RENDERER_URL) {
+    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
     mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
@@ -37,21 +38,20 @@ function createWindow() {
 app.whenReady().then(async () => {
   // Initialize database with WAL mode
   const dbPath = join(app.getPath('userData'), 'content-creation.db')
-  initDatabase(dbPath)
+  try {
+    initDatabase(dbPath)
+  } catch (err) {
+    console.error('Database init failed:', err)
+  }
 
   // Initialize services
   const settingsService = new SettingsService()
   const securityService = new SecurityService()
 
-  // Initialize render service BEFORE creating main window
-  renderService = new RenderService()
-  await renderService.initialize()
-
-  // Register IPC handlers
+  // Register IPC handlers (before window so they're ready when renderer loads)
   registerDatabaseIPC()
   registerSettingsIPC(settingsService)
   registerSecurityIPC(securityService)
-  registerRenderingIPC(renderService)
 
   // App info handler
   ipcMain.handle('app:info', async () => {
@@ -61,7 +61,17 @@ app.whenReady().then(async () => {
     }
   })
 
+  // Create main window first so it appears immediately
   createWindow()
+
+  // Initialize render service AFTER main window is visible
+  renderService = new RenderService()
+  try {
+    await renderService.initialize()
+  } catch (err) {
+    console.error('RenderService init failed:', err)
+  }
+  registerRenderingIPC(renderService)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

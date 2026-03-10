@@ -3,6 +3,7 @@ import { useState } from 'react'
 interface RenderResult {
   format: string
   path: string
+  dataUrl: string
   duration: number
   dimensions: string
 }
@@ -31,12 +32,14 @@ export function TestRender() {
 
     try {
       const html = createSampleHTML(format, width, height)
-      const filePath = await window.api.renderToPNG(html, { width, height })
+      const rawResult = await window.api.renderToPNG(html, { width, height })
+      const parsed = JSON.parse(rawResult)
       const duration = performance.now() - startTime
 
       const result: RenderResult = {
         format,
-        path: filePath,
+        path: parsed.filePath,
+        dataUrl: parsed.dataUrl,
         duration: Math.round(duration),
         dimensions: `${width}x${height}`
       }
@@ -59,28 +62,35 @@ export function TestRender() {
       const slide2 = createSampleHTML('Carousel Slide 2', 1080, 1350)
       const slide3 = createSampleHTML('Carousel Slide 3', 1080, 1350)
 
-      const path1 = await window.api.renderToPNG(slide1, { width: 1080, height: 1350 })
-      const path2 = await window.api.renderToPNG(slide2, { width: 1080, height: 1350 })
-      const path3 = await window.api.renderToPNG(slide3, { width: 1080, height: 1350 })
+      const raw1 = await window.api.renderToPNG(slide1, { width: 1080, height: 1350 })
+      const raw2 = await window.api.renderToPNG(slide2, { width: 1080, height: 1350 })
+      const raw3 = await window.api.renderToPNG(slide3, { width: 1080, height: 1350 })
+
+      const parsed1 = JSON.parse(raw1)
+      const parsed2 = JSON.parse(raw2)
+      const parsed3 = JSON.parse(raw3)
 
       const duration = performance.now() - startTime
 
       const newResults: RenderResult[] = [
         {
           format: 'Carousel Slide 1',
-          path: path1,
+          path: parsed1.filePath,
+          dataUrl: parsed1.dataUrl,
           duration: Math.round(duration / 3),
           dimensions: '1080x1350'
         },
         {
           format: 'Carousel Slide 2',
-          path: path2,
+          path: parsed2.filePath,
+          dataUrl: parsed2.dataUrl,
           duration: Math.round(duration / 3),
           dimensions: '1080x1350'
         },
         {
           format: 'Carousel Slide 3',
-          path: path3,
+          path: parsed3.filePath,
+          dataUrl: parsed3.dataUrl,
           duration: Math.round(duration / 3),
           dimensions: '1080x1350'
         }
@@ -158,7 +168,7 @@ export function TestRender() {
 
               <div className="bg-slate-950 rounded-lg p-4 mb-3">
                 <img
-                  src={`file:///${result.path}`}
+                  src={result.dataUrl}
                   alt={result.format}
                   className="max-w-full h-auto mx-auto"
                   style={{ maxHeight: '400px' }}
