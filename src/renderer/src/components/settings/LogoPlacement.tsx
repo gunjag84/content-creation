@@ -219,14 +219,17 @@ export function LogoPlacement({ logo, standardCTA, instagramHandle, lastSlideRul
 
       {/* CTA Text */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700">Standard CTA Text</label>
+        <label className="text-sm font-medium text-gray-700">Standard CTA</label>
         <input
           type="text"
           value={ctaValue}
           onChange={(e) => handleCtaChange(e.target.value)}
-          placeholder="e.g., Hol dir dein Dankbarkeitstagebuch"
+          placeholder="e.g., Link in Bio, Jetzt entdecken"
           className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <p className="text-xs text-slate-400 mt-1">
+          Default call-to-action text for carousel end slides (e.g., 'Link in Bio', 'Jetzt entdecken')
+        </p>
       </div>
 
       {/* Instagram Handle */}
@@ -236,14 +239,17 @@ export function LogoPlacement({ logo, standardCTA, instagramHandle, lastSlideRul
           type="text"
           value={handleValue}
           onChange={(e) => handleInstagramChange(e.target.value)}
-          placeholder="e.g., @leben.lieben.official"
+          placeholder="e.g., @yourbrand"
           className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <p className="text-xs text-slate-400 mt-1">
+          Your @handle shown on the last carousel slide (e.g., @yourbrand)
+        </p>
       </div>
 
       {/* Last Slide Rules */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700">Last Slide Rules</label>
+        <label className="text-sm font-medium text-gray-700">Last Slide Layout Rules</label>
         <textarea
           value={rulesValue}
           onChange={(e) => handleRulesChange(e.target.value)}
@@ -251,6 +257,9 @@ export function LogoPlacement({ logo, standardCTA, instagramHandle, lastSlideRul
           rows={4}
           className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
+        <p className="text-xs text-slate-400 mt-1">
+          Define what appears on the final carousel slide: logo placement, CTA text, handle position. This guides the AI when generating the last slide.
+        </p>
       </div>
     </div>
   )
