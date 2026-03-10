@@ -1,13 +1,22 @@
 import { useState } from 'react'
 import { AppLayout } from './components/layout/AppLayout'
-import { Sidebar, type NavItem } from './components/layout/Sidebar'
+import { Sidebar, type NavItem, type SettingsTab } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { TestRender } from './pages/TestRender'
 import { Settings } from './pages/Settings'
 
 function App() {
   const [activeItem, setActiveItem] = useState<NavItem>('dashboard')
+  const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTab>('brand-voice')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const handleNavigate = (item: NavItem) => {
+    setActiveItem(item)
+    // Auto-expand sidebar when navigating to settings
+    if (item === 'settings') {
+      setSidebarCollapsed(false)
+    }
+  }
 
   const renderPage = () => {
     switch (activeItem) {
@@ -16,7 +25,7 @@ function App() {
       case 'create':
         return <TestRender />
       case 'settings':
-        return <Settings />
+        return <Settings activeTab={activeSettingsTab} />
       default:
         return <Dashboard />
     }
@@ -27,7 +36,9 @@ function App() {
       sidebar={
         <Sidebar
           activeItem={activeItem}
-          onNavigate={setActiveItem}
+          activeSettingsTab={activeSettingsTab}
+          onNavigate={handleNavigate}
+          onSettingsTabChange={setActiveSettingsTab}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
