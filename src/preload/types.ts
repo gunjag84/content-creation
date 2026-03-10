@@ -24,6 +24,11 @@ export interface IElectronAPI {
     list: () => Promise<{ filename: string; path: string }[]>
   }
 
+  // Logo
+  logo: {
+    upload: () => Promise<{ filename: string; path: string } | null>
+  }
+
   // Settings Versions
   settingsVersions: {
     list: () => Promise<SettingsVersion[]>

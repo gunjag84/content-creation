@@ -59,4 +59,34 @@ export function registerFontIPC() {
       throw err
     }
   })
+
+  ipcMain.handle('logo:upload', async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Upload Logo',
+      filters: [
+        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'svg'] }
+      ],
+      properties: ['openFile']
+    })
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null
+    }
+
+    const sourcePath = result.filePaths[0]
+    const filename = path.basename(sourcePath)
+
+    // Create logo directory in userData if it doesn't exist
+    const logoDir = path.join(app.getPath('userData'), 'logo')
+    await fs.mkdir(logoDir, { recursive: true })
+
+    // Copy logo file
+    const destPath = path.join(logoDir, filename)
+    await fs.copyFile(sourcePath, destPath)
+
+    return {
+      filename,
+      path: destPath
+    }
+  })
 }

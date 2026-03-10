@@ -22,6 +22,11 @@ const api: IElectronAPI = {
     list: () => ipcRenderer.invoke('fonts:list')
   },
 
+  // Logo
+  logo: {
+    upload: () => ipcRenderer.invoke('logo:upload')
+  },
+
   // Settings Versions
   settingsVersions: {
     list: () => ipcRenderer.invoke('settings-versions:list'),
