@@ -2,7 +2,7 @@
 phase: 2
 slug: settings-templates
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-10
 ---
@@ -38,19 +38,21 @@ created: 2026-03-10
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 02-01-01 | 01 | 1 | SET-01 | unit | `npm test -- tests/components/BrandVoiceSection.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-01-02 | 01 | 1 | SET-02 | unit | `npm test -- tests/components/TargetPersonaSection.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-01-03 | 01 | 1 | SET-03 | unit | `npm test -- tests/components/PillarSliders.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-01-04 | 01 | 1 | SET-07 | unit | `npm test -- tests/components/BrandColorPicker.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-01-05 | 01 | 1 | SET-11 | unit | `npm test -- tests/components/MasterPromptSection.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-01-06 | 01 | 1 | SET-12 | unit | `npm test -- tests/main/services/settings-service.test.ts -x` | ✅ | ⬜ pending |
-| 02-02-01 | 02 | 2 | TPL-01 | unit | `npm test -- tests/components/TemplateEditor.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-02-02 | 02 | 2 | TPL-02 | unit | `npm test -- tests/components/ZoneEditor.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 02-02-03 | 02 | 2 | TPL-06 | integration | `npm test -- tests/main/ipc/templates.test.ts -x` | ❌ W0 | ⬜ pending |
-| 02-02-04 | 02 | 2 | SET-07 | unit | `npm test -- tests/main/ipc/fonts.test.ts -x` | ❌ W0 | ⬜ pending |
-| 02-XX-XX | XX | X | Multiple | unit | `npm test -- tests/hooks/useAutoSave.test.tsx -x` | ❌ W0 | ⬜ pending |
+| 02-01-T1 | 01 | 1 | Foundation | unit | `npx vitest run` | ✅ (existing) | pending |
+| 02-01-T2 | 01 | 1 | Foundation | integration | `npx vitest run tests/main/ipc/templates.test.ts tests/main/ipc/fonts.test.ts` | W0 | pending |
+| 02-02-T1 | 02 | 2 | SET-01,SET-02 | unit | `npm test -- tests/hooks/useAutoSave.test.tsx -x` | W0 | pending |
+| 02-02-T2 | 02 | 2 | SET-06,SET-08,SET-10,SET-11 | unit | `npm test -- tests/components/BrandVoiceSection.test.tsx tests/components/MasterPromptSection.test.tsx -x` | W0 | pending |
+| 02-02-T3 | 02 | 2 | SET-12 | unit | `npm test -- tests/main/services/settings-service.test.ts -x` | ✅ (existing) | pending |
+| 02-03-T1 | 03 | 2 | SET-03,SET-04 | unit | `npm test -- tests/renderer/components/PillarSliders.test.tsx tests/components/PillarSliders.test.tsx -x` | W0 (task creates) | pending |
+| 02-03-T2 | 03 | 2 | SET-05,SET-09 | unit | `npm test -- tests/components/PillarSliders.test.tsx -x` | W0 | pending |
+| 02-04-T1 | 04 | 2 | SET-07 | unit | `npm test -- tests/components/BrandColorPicker.test.tsx tests/main/ipc/fonts.test.ts -x` | W0 | pending |
+| 02-04-T2 | 04 | 2 | SET-07 | unit | `npm test -- tests/components/BrandColorPicker.test.tsx -x` | W0 | pending |
+| 02-05-T1 | 05 | 3 | TPL-01,TPL-02,TPL-03 | unit | `npm test -- tests/components/ZoneEditor.test.tsx tests/components/TemplateEditor.test.tsx -x` | W0 | pending |
+| 02-05-T2 | 05 | 3 | TPL-04,TPL-05 | unit | `npm test -- tests/components/TemplateEditor.test.tsx tests/components/ZoneEditor.test.tsx -x` | W0 | pending |
+| 02-06-T1 | 06 | 3 | TPL-06 | integration | `npm test -- tests/main/ipc/templates.test.ts -x` | W0 | pending |
+| 02-06-T2 | 06 | 3 | TPL-08,TPL-09 | integration | `npm test -- tests/main/ipc/templates.test.ts -x` | W0 | pending |
 
-*Status: ⬜ pending - ✅ green - ❌ red - ⚠️ flaky*
+*Status: pending - green - red - flaky*
 
 ---
 
@@ -96,11 +98,11 @@ Framework setup:
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify pointing to actual test files
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved
