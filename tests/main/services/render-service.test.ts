@@ -136,11 +136,12 @@ describe('RenderService', () => {
       expect(lastBrowserWindowInstance.webContents.capturePage).toHaveBeenCalled()
     })
 
-    it('should return file path to saved PNG', async () => {
+    it('should return JSON with file path and data URL', async () => {
       const result = await service.renderToPNG('<div>test</div>', { width: 1080, height: 1350 })
+      const parsed = JSON.parse(result)
 
-      // Use platform-agnostic path matching (backslash on Windows, forward slash on Unix)
-      expect(result).toMatch(/[\\\/]tmp[\\\/]render_.*_1080x1350\.png/)
+      expect(parsed.filePath).toMatch(/[\\\/]tmp[\\\/]render_.*_1080x1350\.png/)
+      expect(parsed.dataUrl).toMatch(/^data:image\/png;base64,/)
     })
 
     it('should handle sequential renders (carousel simulation)', async () => {
@@ -148,15 +149,15 @@ describe('RenderService', () => {
       const html2 = '<div>Slide 2</div>'
       const html3 = '<div>Slide 3</div>'
 
-      const path1 = await service.renderToPNG(html1, { width: 1080, height: 1350 })
-      const path2 = await service.renderToPNG(html2, { width: 1080, height: 1350 })
-      const path3 = await service.renderToPNG(html3, { width: 1080, height: 1350 })
+      const result1 = JSON.parse(await service.renderToPNG(html1, { width: 1080, height: 1350 }))
+      const result2 = JSON.parse(await service.renderToPNG(html2, { width: 1080, height: 1350 }))
+      const result3 = JSON.parse(await service.renderToPNG(html3, { width: 1080, height: 1350 }))
 
-      expect(path1).toBeTruthy()
-      expect(path2).toBeTruthy()
-      expect(path3).toBeTruthy()
-      expect(path1).not.toBe(path2)
-      expect(path2).not.toBe(path3)
+      expect(result1.filePath).toBeTruthy()
+      expect(result2.filePath).toBeTruthy()
+      expect(result3.filePath).toBeTruthy()
+      expect(result1.filePath).not.toBe(result2.filePath)
+      expect(result2.filePath).not.toBe(result3.filePath)
     })
   })
 
@@ -167,19 +168,19 @@ describe('RenderService', () => {
 
     it('should render multiple slides sequentially', async () => {
       const slides = ['<div>Slide 1</div>', '<div>Slide 2</div>', '<div>Slide 3</div>']
-      const paths = await service.renderCarousel(slides, { width: 1080, height: 1350 })
+      const results = await service.renderCarousel(slides, { width: 1080, height: 1350 })
 
-      expect(paths).toHaveLength(3)
-      expect(paths[0]).toBeTruthy()
-      expect(paths[1]).toBeTruthy()
-      expect(paths[2]).toBeTruthy()
+      expect(results).toHaveLength(3)
+      expect(JSON.parse(results[0]).filePath).toBeTruthy()
+      expect(JSON.parse(results[1]).filePath).toBeTruthy()
+      expect(JSON.parse(results[2]).filePath).toBeTruthy()
     })
 
     it('should return unique paths for each slide', async () => {
       const slides = ['<div>A</div>', '<div>B</div>']
-      const paths = await service.renderCarousel(slides, { width: 1080, height: 1350 })
+      const results = await service.renderCarousel(slides, { width: 1080, height: 1350 })
 
-      expect(paths[0]).not.toBe(paths[1])
+      expect(JSON.parse(results[0]).filePath).not.toBe(JSON.parse(results[1]).filePath)
     })
   })
 
