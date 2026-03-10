@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. SQLite database persists learning data with WAL mode enabled and integrity checks on startup
   4. JSON settings files are stored in app.getPath('userData') with automatic timestamp versioning on every write
   5. App shuts down gracefully without corrupting SQLite database
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md - Scaffold electron-vite project, app shell with sidebar nav, dark mode, IPC type contracts
+- [ ] 01-02-PLAN.md - SQLite data layer with full schema, JSON settings with Zod validation and versioning, secure API key storage, graceful shutdown
+- [ ] 01-03-PLAN.md - HTML-to-PNG rendering pipeline with hidden BrowserWindow, test render page, build verification
 
 ### Phase 2: Settings & Templates
 **Goal**: Complete brand configuration system and visual template creation tools
@@ -90,11 +90,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Rendering | 0/3 | Not started | - |
+| 1. Foundation & Rendering | 0/3 | Planning complete | - |
 | 2. Settings & Templates | 0/2 | Not started | - |
 | 3. Content Generation | 0/3 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
