@@ -87,8 +87,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Electron desktop app starts with double-click on .exe (no terminal, no dev server)
-- [ ] **INFRA-02**: React + Tailwind CSS frontend with electron-vite build tooling
+- [x] **INFRA-01**: Electron desktop app starts with double-click on .exe (no terminal, no dev server)
+- [x] **INFRA-02**: React + Tailwind CSS frontend with electron-vite build tooling
 - [ ] **INFRA-03**: SQLite database for learning data (posts, stories, performance, balance matrix cache) with WAL mode and integrity checks
 - [ ] **INFRA-04**: JSON file storage for settings with automatic timestamp versioning
 - [ ] **INFRA-05**: Secure Claude API key storage via Electron safeStorage API
@@ -201,8 +201,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEARN-04 | Phase 3 | Pending |
 | LEARN-05 | Phase 3 | Pending |
 | LEARN-06 | Phase 3 | Pending |
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Pending |
 | INFRA-04 | Phase 1 | Pending |
 | INFRA-05 | Phase 1 | Pending |
