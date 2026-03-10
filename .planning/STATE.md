@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 3 of 3 in current phase
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-10T11:21:41Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-03-10T12:22:50.587Z"
 last_activity: 2026-03-10 - Completed plan 01-02 (Data Layer with SQLite, Settings, Security)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 67
 ---
 
@@ -52,6 +52,7 @@ Progress: [███████░░░] 67%
 |------------|----------|-------|-------|
 | 01-01      | 25 min   | 2     | 28    |
 | 01-02      | 12 min   | 3     | 18    |
+| Phase 01-foundation-rendering P03 | 25 min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,10 @@ Recent decisions affecting current work:
 - TDD for data layer: Write tests first (RED), then implement (GREEN) - caught 3 issues early
 - Schema.sql as separate file: Easier to review/edit than embedded strings, copied via build plugin
 - Zod validation on read AND write: Fail-fast on corrupted settings rather than silent errors
+- [Phase 01]: Base64 data URLs for renderer display: Return rendered PNGs as data:image/png;base64,... instead of file paths — Renderer process has restrictions accessing file:// protocol in production builds. Data URLs work universally and eliminate file cleanup concerns
+- [Phase 01]: Initialize RenderService after createWindow() to prevent black screen/startup blocking — Creating BrowserWindow before main window caused black screen and blocking behavior. Post-window initialization works reliably
+- [Phase 01]: Use sandbox: false in BrowserWindow preload config for Electron 40+ compatibility — Electron 40+ requires sandbox: false for contextBridge to work with preload scripts
+- [Phase 01]: Use ELECTRON_RENDERER_URL instead of deprecated VITE_DEV_SERVER_URL for electron-vite 5.x — electron-vite 5.x changed environment variable naming. Old variable caused undefined URL errors
 
 ### Pending Todos
 
@@ -82,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T11:06:16.946Z
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-foundation-rendering/01-02-PLAN.md
+Last session: 2026-03-10T12:22:50.581Z
+Stopped at: Completed 01-03-PLAN.md
+Resume file: None

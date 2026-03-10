@@ -30,7 +30,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **TPL-04**: User can configure overlay settings per template (color, opacity, gradient with stops, enabled/disabled)
 - [ ] **TPL-05**: User can set background type per template (image, solid color from brand guidance, gradient from brand guidance)
 - [ ] **TPL-06**: User can manage templates in settings (list, edit zones, delete, duplicate)
-- [ ] **TPL-07**: System renders HTML/CSS templates to PNG at Instagram dimensions (1080x1350 feed, 1080x1920 story)
+- [x] **TPL-07**: System renders HTML/CSS templates to PNG at Instagram dimensions (1080x1350 feed, 1080x1920 story)
 - [ ] **TPL-08**: User is offered "save as template?" when uploading a custom background image during manual post flow
 - [ ] **TPL-09**: Templates support carousel variants (separate cover slide, content slide, CTA slide HTML with shared config)
 
@@ -159,7 +159,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TPL-04 | Phase 2 | Pending |
 | TPL-05 | Phase 2 | Pending |
 | TPL-06 | Phase 2 | Pending |
-| TPL-07 | Phase 1 | Pending |
+| TPL-07 | Phase 1 | Complete |
 | TPL-08 | Phase 2 | Pending |
 | TPL-09 | Phase 2 | Pending |
 | POST-01 | Phase 3 | Pending |
