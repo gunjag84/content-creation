@@ -37,7 +37,7 @@ Plans:
 - [ ] 01-03-PLAN.md - HTML-to-PNG rendering pipeline with hidden BrowserWindow, test render page, build verification
 
 ### Phase 2: Settings & Templates
-**Goal**: Complete brand configuration system and visual template creation tools
+**Goal**: Complete brand configuration system with all 11 settings areas and visual template creation tools with canvas-based zone editor
 **Depends on**: Phase 1
 **Requirements**: SET-01, SET-02, SET-03, SET-04, SET-05, SET-06, SET-07, SET-08, SET-09, SET-10, SET-11, SET-12, TPL-01, TPL-02, TPL-03, TPL-04, TPL-05, TPL-06, TPL-08, TPL-09
 **Success Criteria** (what must be TRUE):
@@ -46,11 +46,15 @@ Plans:
   3. User can manage templates in settings (list, edit zones, delete, duplicate) and templates persist across sessions
   4. Claude API key is stored securely via Electron safeStorage API and never appears in plain text in settings.json
   5. Settings changes are automatically versioned with timestamps and system can show which settings version was active for any post
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md - Extend Zod schemas for all 11 settings areas, extract blueprint data to JSON, install dependencies, template/font IPC handlers
+- [ ] 02-02-PLAN.md - Settings page shell with vertical tabs, Zustand store, auto-save hook, 6 simple form sections (voice, persona, defaults, competitor, viral, master prompt)
+- [ ] 02-03-PLAN.md - Interactive settings sections: coupled pillar sliders, theme hierarchy display, mechanics catalog, story tools catalog
+- [ ] 02-04-PLAN.md - Brand guidance section with color pickers, font upload/preview, logo placement, live brand preview card
+- [ ] 02-05-PLAN.md - Template builder with react-konva zone editor, overlay controls, background selector
+- [ ] 02-06-PLAN.md - Template management UI (list, edit, delete, duplicate), carousel variant editor, save-as-template dialog
 
 ### Phase 3: Content Generation
 **Goal**: End-to-end content workflow from recommendation to export with AI generation and performance-based learning
@@ -95,6 +99,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
-| 2. Settings & Templates | 0/2 | Not started | - |
+| 2. Settings & Templates | 0/6 | Not started | - |
 | 3. Content Generation | 0/3 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
