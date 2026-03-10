@@ -1,7 +1,6 @@
-export interface Settings {
-  // Placeholder type - will be replaced with Zod-inferred type in Plan 02
-  [key: string]: any
-}
+import type { Settings } from '../shared/types/settings'
+
+export type { Settings }
 
 export interface IElectronAPI {
   // Settings

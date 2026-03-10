@@ -1,5 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import { initDatabase, closeDatabase } from './db/index'
+import { SettingsService } from './services/settings-service'
+import { SecurityService } from './services/security-service'
+import { registerDatabaseIPC } from './ipc/database'
+import { registerSettingsIPC } from './ipc/settings'
+import { registerSecurityIPC } from './ipc/security'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -24,6 +30,32 @@ function createWindow() {
 
 // App lifecycle
 app.whenReady().then(() => {
+  // Initialize database with WAL mode
+  const dbPath = join(app.getPath('userData'), 'content-creation.db')
+  initDatabase(dbPath)
+
+  // Initialize services
+  const settingsService = new SettingsService()
+  const securityService = new SecurityService()
+
+  // Register IPC handlers
+  registerDatabaseIPC()
+  registerSettingsIPC(settingsService)
+  registerSecurityIPC(securityService)
+
+  // App info handler
+  ipcMain.handle('app:info', async () => {
+    return {
+      version: app.getVersion(),
+      userData: app.getPath('userData')
+    }
+  })
+
+  // Rendering handler stub (will be implemented in Plan 03)
+  ipcMain.handle('render:to-png', async (_event, _html, _dimensions) => {
+    return ''
+  })
+
   createWindow()
 
   app.on('activate', () => {
@@ -39,44 +71,11 @@ app.on('window-all-closed', () => {
   }
 })
 
-// IPC Handlers - Stubs that will be replaced in Plans 02 and 03
-
-// App info handler (implemented)
-ipcMain.handle('app:info', async () => {
-  return {
-    version: app.getVersion(),
-    userData: app.getPath('userData')
+// Graceful shutdown - checkpoint WAL and close database
+app.on('before-quit', () => {
+  try {
+    closeDatabase()
+  } catch (err) {
+    console.error('Error closing database:', err)
   }
-})
-
-// Settings handlers (stubs)
-ipcMain.handle('settings:load', async () => {
-  return {}
-})
-
-ipcMain.handle('settings:save', async (_event, _settings) => {
-  // Stub implementation
-})
-
-// Database handlers (stubs)
-ipcMain.handle('db:status', async () => {
-  return { ok: false, tables: 0 }
-})
-
-// Rendering handlers (stubs)
-ipcMain.handle('render:to-png', async (_event, _html, _dimensions) => {
-  return ''
-})
-
-// Security handlers (stubs)
-ipcMain.handle('security:save-key', async (_event, _key) => {
-  // Stub implementation
-})
-
-ipcMain.handle('security:load-key', async () => {
-  return null
-})
-
-ipcMain.handle('security:delete-key', async () => {
-  // Stub implementation
 })
