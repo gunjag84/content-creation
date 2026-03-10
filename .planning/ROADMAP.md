@@ -46,7 +46,7 @@ Plans:
   3. User can manage templates in settings (list, edit zones, delete, duplicate) and templates persist across sessions
   4. Claude API key is stored securely via Electron safeStorage API and never appears in plain text in settings.json
   5. Settings changes are automatically versioned with timestamps and system can show which settings version was active for any post
-**Plans**: 6 plans
+**Plans**: 10 plans
 
 Plans:
 - [ ] 02-01-PLAN.md - Extend Zod schemas for all 11 settings areas, extract blueprint data to JSON, install dependencies, template/font IPC handlers
@@ -55,6 +55,10 @@ Plans:
 - [ ] 02-04-PLAN.md - Brand guidance section with color pickers, font upload/preview, logo placement, live brand preview card
 - [ ] 02-05-PLAN.md - Template builder with react-konva zone editor, overlay controls, background selector
 - [ ] 02-06-PLAN.md - Template management UI (list, edit, delete, duplicate), carousel variant editor, save-as-template dialog
+- [ ] 02-07-PLAN.md - [GAP CLOSURE] Fix startup errors (better-sqlite3 rebuild, Zod validation), wire settings versioning to SQLite
+- [ ] 02-08-PLAN.md - [GAP CLOSURE] Integrate settings sub-navigation into main sidebar
+- [ ] 02-09-PLAN.md - [GAP CLOSURE] Fix toggle switches for dark theme, add standard fonts, improve Brand Guidance labels
+- [ ] 02-10-PLAN.md - [GAP CLOSURE] Fix template builder (image loading, zone persistence, canvas sizing, button contrast) and brand preview 431 error
 
 ### Phase 3: Content Generation
 **Goal**: End-to-end content workflow from recommendation to export with AI generation and performance-based learning
@@ -99,6 +103,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
-| 2. Settings & Templates | 4/6 | In Progress|  |
+| 2. Settings & Templates | 6/10 | In Progress (gap closure) |  |
 | 3. Content Generation | 0/3 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
