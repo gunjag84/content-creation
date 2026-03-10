@@ -1,0 +1,164 @@
+[
+  {
+    "id": "poll",
+    "name": "Poll",
+    "description": "2-4 Antwortoptionen, User stimmt ab",
+    "engagementType": "Tap (Abstimmung)",
+    "pillarMapping": ["Generate Demand", "Convert Demand"],
+    "mechanicRecommendations": ["provokative-frage", "myth-busting"],
+    "active": true
+  },
+  {
+    "id": "quiz",
+    "name": "Quiz",
+    "description": "Multiple-Choice mit richtiger Antwort",
+    "engagementType": "Tap (Antwort)",
+    "pillarMapping": ["Generate Demand"],
+    "mechanicRecommendations": ["myth-busting", "listicle"],
+    "active": true
+  },
+  {
+    "id": "question",
+    "name": "Question",
+    "description": "Offenes Textfeld, User antwortet oder fragt",
+    "engagementType": "DM / Text-Reply",
+    "pillarMapping": ["Nurture Loyalty"],
+    "mechanicRecommendations": ["storytelling", "behind-the-scenes"],
+    "active": true
+  },
+  {
+    "id": "emoji-slider",
+    "name": "Emoji Slider",
+    "description": "User schiebt Emoji auf Skala",
+    "engagementType": "Slide-Interaktion",
+    "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+    "mechanicRecommendations": ["provokative-frage", "polarisierende-aussage"],
+    "active": true
+  },
+  {
+    "id": "add-yours",
+    "name": "Add Yours",
+    "description": "Prompt, den andere User in ihrer Story beantworten",
+    "engagementType": "Story-Chain (viral)",
+    "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+    "mechanicRecommendations": ["provokative-frage", "storytelling"],
+    "active": true
+  },
+  {
+    "id": "add-yours-music",
+    "name": "Add Yours Music",
+    "description": "User teilen Songs zu einem Prompt",
+    "engagementType": "Story-Chain (viral)",
+    "pillarMapping": ["Nurture Loyalty"],
+    "mechanicRecommendations": ["storytelling", "behind-the-scenes"],
+    "active": true
+  },
+  {
+    "id": "reveal",
+    "name": "Reveal",
+    "description": "Bild blurred, nur sichtbar nach DM",
+    "engagementType": "DM",
+    "pillarMapping": ["Convert Demand"],
+    "mechanicRecommendations": ["social-proof"],
+    "active": true
+  },
+  {
+    "id": "countdown",
+    "name": "Countdown",
+    "description": "Timer zu Event, User setzt Reminder",
+    "engagementType": "Reminder-Subscription",
+    "pillarMapping": ["Convert Demand"],
+    "mechanicRecommendations": ["social-proof"],
+    "active": true
+  },
+  {
+    "id": "challenge",
+    "name": "Challenge",
+    "description": "User nominieren und herausfordern",
+    "engagementType": "Story-Weitergabe",
+    "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+    "mechanicRecommendations": ["provokative-frage", "storytelling"],
+    "active": true
+  },
+  {
+    "id": "link",
+    "name": "Link",
+    "description": "Klickbarer Link zu externer URL",
+    "engagementType": "Link-Tap",
+    "pillarMapping": ["Convert Demand"],
+    "mechanicRecommendations": ["listicle", "social-proof"],
+    "active": true
+  },
+  {
+    "id": "product",
+    "name": "Product",
+    "description": "Klickbar zum Instagram Shop",
+    "engagementType": "Product-Tap → Purchase",
+    "pillarMapping": ["Convert Demand"],
+    "mechanicRecommendations": ["social-proof", "listicle"],
+    "active": true
+  },
+  {
+    "id": "mention",
+    "name": "Mention",
+    "description": "Andere Accounts taggen",
+    "engagementType": "Profil-Visit",
+    "pillarMapping": ["Nurture Loyalty"],
+    "mechanicRecommendations": ["behind-the-scenes", "storytelling"],
+    "active": true
+  },
+  {
+    "id": "location",
+    "name": "Location",
+    "description": "Ort taggen, erscheint in Location-Feed",
+    "engagementType": "Location-Page-Visit",
+    "pillarMapping": ["Generate Demand"],
+    "mechanicRecommendations": ["behind-the-scenes"],
+    "active": true
+  },
+  {
+    "id": "hashtag",
+    "name": "Hashtag",
+    "description": "Hashtag klickbar, führt zur Hashtag-Seite",
+    "engagementType": "Hashtag-Page-Visit",
+    "pillarMapping": ["Generate Demand"],
+    "mechanicRecommendations": ["listicle", "myth-busting"],
+    "active": true
+  },
+  {
+    "id": "music",
+    "name": "Music",
+    "description": "Song mit Lyrics-Anzeige",
+    "engagementType": "passiv",
+    "pillarMapping": ["Nurture Loyalty"],
+    "mechanicRecommendations": ["storytelling", "behind-the-scenes"],
+    "active": true
+  },
+  {
+    "id": "cutout",
+    "name": "Cutout",
+    "description": "Eigene Sticker aus Fotos",
+    "engagementType": "passiv",
+    "pillarMapping": ["Nurture Loyalty"],
+    "mechanicRecommendations": ["behind-the-scenes"],
+    "active": true
+  },
+  {
+    "id": "frames",
+    "name": "Frames",
+    "description": "Polaroid-Look, Handy schütteln zum Aufdecken",
+    "engagementType": "Shake-Interaktion",
+    "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+    "mechanicRecommendations": ["storytelling"],
+    "active": true
+  },
+  {
+    "id": "gifs",
+    "name": "GIFs",
+    "description": "Animierte GIF-Sticker für Dynamik",
+    "engagementType": "passiv",
+    "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+    "mechanicRecommendations": ["provokative-frage", "listicle"],
+    "active": true
+  }
+]
