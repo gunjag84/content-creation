@@ -1,9 +1,9 @@
 ---
 status: complete
 phase: 02-settings-templates
-source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md]
-started: 2026-03-10T19:10:00Z
-updated: 2026-03-10T19:35:00Z
+source: [02-07-SUMMARY.md, 02-08-SUMMARY.md, 02-09-SUMMARY.md, 02-10-SUMMARY.md]
+started: 2026-03-11T00:00:00Z
+updated: 2026-03-11T08:00:00Z
 ---
 
 ## Current Test
@@ -14,159 +14,109 @@ updated: 2026-03-10T19:35:00Z
 ## Tests
 
 ### 1. Cold Start Smoke Test
-expected: Kill any running instance. Start the app from scratch with `npm run dev`. App boots without errors, main window opens, and the Settings page is accessible from navigation.
+expected: Kill any running instance. Start the app from scratch with `npm run dev`. App boots without errors (no "better-sqlite3 compiled against wrong NODE_MODULE_VERSION" error, no Zod validation error for masterPrompt). Main window opens and Settings is accessible.
+result: pass
+
+### 2. Settings Navigation in Sidebar
+expected: Settings sub-navigation is integrated into the main app sidebar (not a separate tab panel). Clicking "Settings" in the sidebar expands it inline to reveal 13 sub-items (Brand Voice, Target Persona, Content Pillars, etc.). Nav stays pinned to top - no vertical re-centering when switching items.
+result: pass
+
+### 3. Mechanics Toggles - Now Interactive
+expected: Mechanics tab shows 7 cards each with an active/inactive toggle. Clicking a toggle actually switches it (not just a read-only display). The toggle state saves and persists when you navigate away and return.
+result: pass
+notes: "User requests full CRUD for Mechanics (also Story Tools and Themes) - logged as gap"
+
+### 4. Story Tools Toggles - Now Interactive
+expected: Story Tools tab shows 18 cards each with an active/inactive toggle. Clicking a toggle actually switches it. Toggle state saves and persists.
+result: pass
+
+### 5. Brand Guidance - Standard Fonts Dropdown
+expected: Alongside the font upload slots, there is now a dropdown to select from ~20 standard system fonts (e.g., Arial, Georgia, Roboto, etc.). Selecting a font applies it as the active font choice without requiring a file upload.
 result: issue
-reported: "Database init failed: better-sqlite3 compiled against NODE_MODULE_VERSION 127, Electron requires 143. Also settings:load handler fails with Zod validation error - masterPrompt expected object, received undefined."
+reported: "a) The entire card for brand colors is WHITE --> text not readable. b) Selector for standard font only available for CTA. Make it also available for Headline and body fonts. Remove the huge preview for the uploaded fonts. We have the preview window on the right which is sufficient for preview. This preview DOES NOT show a preview --> always: Preview will appear here"
+severity: major
+
+### 6. Brand Guidance - Field Labels Clarity
+expected: The IG handle field and last slide rules field have clearer labels with helper text explaining what they're for. All px fields have default/placeholder values shown.
+result: pass
+
+### 7. Brand Preview - No More 431 Errors
+expected: Brand Guidance tab shows a live preview card on the right. The preview renders without any HTTP 431 "Request Header Fields Too Large" errors. Changing colors or fonts updates the preview within ~1 second.
+result: issue
+reported: "No error, but no preview. It remains at Preview will appear here"
+severity: major
+
+### 8. Settings Version History - Records Changes
+expected: Settings History tab now shows version entries after making settings changes. After saving changes in any settings tab, navigate to Settings History and see at least one version entry with a timestamp. (Requires changes to have been made this session.)
+result: pass
+
+### 9. Template Builder - Image Loads
+expected: In the Template Builder, when a background image is set, it displays on the canvas without errors. No 431 errors, no broken image. Image loading uses data URLs to bypass file:// restrictions.
+result: issue
+reported: "a) white buttons still have white text. b) cards are white not dark themed. c) Image loads, but cannot select any zone - mousedown does not trigger zone selection. Also not possible on color or gradient background."
 severity: blocker
 
-### 2. Settings Page Navigation
-expected: Opening Settings shows a vertical tab list on the left with 13 tabs (Brand Voice, Target Persona, Content Pillars, Themes, Mechanics, Story Tools, Brand Guidance, Content Defaults, Competitor Analysis, Viral Expertise, Master Prompt, Templates, Settings History). Clicking any tab switches the right panel content.
+### 10. Template Builder - Zone Drawing Persists
+expected: In Template Builder, click and drag on the canvas to draw a zone rectangle. The zone appears and stays on canvas (does not disappear). Fast mouse movements do not lose the zone. Zones are visible after drawing.
 result: issue
-reported: "it shows correctly. BUT: Do not add an extra nav bar, but integrate it in the overall application nav bar on the very left, just by uncollapsing the settings."
-severity: major
-
-### 3. Auto-Save on Text Fields
-expected: Type into a text field (e.g., Brand Voice tonality). After ~500ms, a "Saved" indicator appears. No manual save button needed. Changes persist after navigating away and back to the tab.
-result: pass
-
-### 4. Content Pillar Sliders
-expected: Three sliders (Generate Demand / Convert Demand / Nurture Loyalty) always sum to 100%. Dragging one slider redistributes the others proportionally. Values update live and save automatically.
-result: pass
-
-### 5. Theme Hierarchy Display
-expected: Themes tab shows 5 Oberthemen. Clicking an Oberthema expands to show Unterthemen. Clicking an Unterthema shows Kernaussagen as bullet points. Pillar mapping badges (blue/green/purple) shown on each Oberthema. Read-only display.
-result: pass
-
-### 6. Mechanics Catalog
-expected: Mechanics tab shows 7 expandable cards. Each has an active/inactive toggle. Expanding a card shows hook rules, slide range, structure guidelines, and pillar badges. Header shows count like "5 of 7 active". Toggling saves immediately.
-result: issue
-reported: "Shows correct, but toggle not working. it is just a read only display"
-severity: major
-
-### 7. Story Tools Catalog
-expected: Story Tools tab shows 18 expandable cards with same pattern as mechanics. Each has toggle, expand for details (engagement type, pillar mapping, mechanic recommendations). Active count displayed in header.
-result: issue
-reported: "toggle not working either"
-severity: major
-
-### 8. Brand Guidance - Color Pickers
-expected: Brand Guidance tab shows 3 color pickers side-by-side (primary, secondary, background). Clicking a swatch opens a visual color picker. Hex values can be typed directly. Changes apply immediately.
-result: pass
-notes: "User requests: (1) Add standard set of ~20 fonts alongside upload, (2) Add default values for all px fields, (3) IG handle and last slide rules fields are confusing - need better labels/context"
-
-### 9. Brand Guidance - Font Upload
-expected: Three font upload slots (headline, body, CTA). Clicking upload opens file dialog for .ttf/.otf/.woff2 files. After upload, a preview text renders in the selected font.
-result: pass
-
-### 10. Brand Guidance - Live Preview
-expected: Right column shows a live brand preview card. When changing colors, fonts, or logo settings, the preview re-renders within ~1 second to reflect the new brand identity.
-result: issue
-reported: "Image not showing: Server responded with status code 431 - Request Header Fields Too Large (repeated x7/x8)"
+reported: "Cannot select any zone - mousedown does not trigger zone selection on any background mode (image, color, gradient)"
 severity: blocker
 
-### 11. Master Prompt Reset
-expected: Master Prompt tab shows a monospace textarea. Clicking "Reset to Default" shows a confirmation dialog. Confirming resets the prompt to the default template.
-result: pass
-
-### 12. Settings Version History
-expected: Settings History tab shows a list of version timestamps, newest first. Recent versions show relative time ("2 minutes ago"). Hovering shows full timestamp. Current version marked with a badge.
+### 11. Template Builder - Canvas Sized Properly
+expected: The template builder canvas fits within the UI without requiring scroll or being cut off. Canvas is constrained to max ~700px width and displays proportionally within the layout.
 result: issue
-reported: "Shows 0 versions and 'No settings changes recorded yet' despite having made multiple settings changes during this session"
+reported: "still much scrolling required vertically; preview zone is HUGE"
 severity: major
 
-### 13. Template Builder - Zone Drawing
-expected: In Templates tab, click "New Template". On the canvas, click and drag to draw a rectangle zone. Zone appears with a colored border (blue for hook, green for body, etc.). Zone can be dragged to reposition and resized via handles.
+### 12. Template Builder - Button Text Readable
+expected: All buttons in the template builder are readable - no white text on white background. Dark theme is applied consistently throughout the template builder UI.
 result: issue
-reported: "All off. a) image does not load. b) drawing zones do not persist or log. c) huge areas - not fitting in the system. Redesign fully. d) white buttons have white text"
+reported: "Buttons still white with white text (Cancel, Story amongst others), dark theme NOT applied consistently, still white cards: Background, Overlay Settings"
 severity: blocker
-
-### 14. Template Builder - Zone Configuration
-expected: Click on a drawn zone to select it. A popover appears near the zone with type selector (hook/body/cta/no-text), font size display, and character count. Changing type updates the zone color. Delete button removes the zone.
-result: skipped
-reason: Template builder fundamentally broken (test 13) - zones don't persist
-
-### 15. Template Builder - Background Options
-expected: Background selector offers three modes: image upload, solid color (with brand color swatches), and gradient (with direction options). Selecting each mode updates the canvas background live.
-result: skipped
-reason: Template builder fundamentally broken (test 13) - image doesn't load
-
-### 16. Template Builder - Overlay Controls
-expected: Overlay toggle enables a semi-transparent color layer between background and zones. Color picker and opacity slider adjust the overlay. Changes visible in real-time on canvas.
-result: skipped
-reason: Template builder fundamentally broken (test 13) - canvas unusable
-
-### 17. Template CRUD Operations
-expected: Template list shows saved templates as cards in a grid. Each card has edit, duplicate, and delete buttons. Delete shows confirmation. Duplicate prompts for name. Edit opens the template builder with all settings pre-populated.
-result: pass
-
-### 18. Carousel Variant Editor
-expected: In template builder (feed format only), a carousel toggle appears. Enabling it switches to a 3-tab interface (Cover/Content/CTA) where each tab has its own zone editor. Switching modes warns if zones exist.
-result: pass
-notes: "Carousel UI works (toggle, tabs, mode switching) but zone drawing broken here too - same root cause as test 13"
 
 ## Summary
 
-total: 18
-passed: 8
-issues: 7
+total: 12
+passed: 6
+issues: 6
 pending: 0
-skipped: 3
+skipped: 0
 
 ## Gaps
 
-- truth: "App boots without errors and Settings page is accessible"
+- truth: "Brand colors card uses dark theme (readable text), standard font selector available for Headline/Body/CTA, per-slot upload preview removed, right-side preview renders live"
   status: failed
-  reason: "User reported: Database init failed: better-sqlite3 compiled against NODE_MODULE_VERSION 127, Electron requires 143. Also settings:load handler fails with Zod validation error - masterPrompt expected object, received undefined."
+  reason: "User reported: a) The entire card for brand colors is WHITE --> text not readable. b) Selector for standard font only available for CTA. Make it also available for Headline and body fonts. Remove the huge preview for the uploaded fonts. We have the preview window on the right which is sufficient for preview. This preview DOES NOT show a preview --> always: Preview will appear here"
+  severity: major
+  test: 5
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Template builder canvas fits viewport without vertical scrolling; preview zone is proportionally sized"
+  status: failed
+  reason: "User reported: still much scrolling required vertically; preview zone is HUGE"
+  severity: major
+  test: 11
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Template builder has dark theme throughout - no white cards, no white-on-white buttons"
+  status: failed
+  reason: "User reported: Buttons still white with white text (Cancel, Story amongst others), dark theme NOT applied consistently, still white cards: Background, Overlay Settings"
   severity: blocker
-  test: 1
+  test: 9
   root_cause: ""
   artifacts: []
   missing: []
   debug_session: ""
 
-- truth: "Settings tabs integrated in the overall application nav bar by uncollapsing settings"
+- truth: "Template builder zone drawing works - mousedown triggers zone creation on all background modes"
   status: failed
-  reason: "User reported: Settings has its own separate vertical tab nav bar instead of being integrated into the existing app sidebar by expanding the settings section. Additional: when switching tabs, the tab nav vertically re-centers with the content area - fix this when integrating into navbar."
-  severity: major
-  test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Mechanics catalog toggle switches are interactive and save active/inactive state"
-  status: failed
-  reason: "User reported: Shows correct, but toggle not working. it is just a read only display"
-  severity: major
-  test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Story tools catalog toggle switches are interactive and save active/inactive state"
-  status: failed
-  reason: "User reported: toggle not working either (same issue as mechanics)"
-  severity: major
-  test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Brand Guidance offers standard font selection and has clear field labels"
-  status: failed
-  reason: "User reported: Need ~20 standard fonts alongside upload, default values for all px fields, and IG handle / last slide rules fields are confusing - need better labels or context"
-  severity: minor
-  test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Brand preview renders live and updates when settings change"
-  status: failed
-  reason: "User reported: Image not showing - Vite dev server responds with 431 Request Header Fields Too Large (repeated x7/x8). Likely base64 preview data exceeding header size limits."
+  reason: "User reported: cannot select any zone - mousedown does not trigger zone selection on any background mode (image, color, gradient)"
   severity: blocker
   test: 10
   root_cause: ""
@@ -174,21 +124,21 @@ skipped: 3
   missing: []
   debug_session: ""
 
-- truth: "Settings version history shows timestamps for each settings change"
+- truth: "Brand preview renders live when settings change (colors, fonts)"
   status: failed
-  reason: "User reported: Shows 0 versions and 'No settings changes recorded yet' despite having made multiple settings changes during this session"
+  reason: "User reported: No error, but no preview. It remains at Preview will appear here"
   severity: major
-  test: 12
+  test: 7
   root_cause: ""
   artifacts: []
   missing: []
   debug_session: ""
 
-- truth: "Template builder loads images, zones persist, canvas fits properly, buttons are readable"
+- truth: "Mechanics, Story Tools, and Themes catalogs support full CRUD (create, edit, delete items)"
   status: failed
-  reason: "User reported: All off. (a) image does not load, (b) drawing zones do not persist or log, (c) huge areas not fitting in the system - needs full redesign, (d) white buttons have white text (unreadable)"
-  severity: blocker
-  test: 13
+  reason: "User reported: Include option to CRUD the Mechanics. This also goes for Story Tools, Themes."
+  severity: major
+  test: 3
   root_cause: ""
   artifacts: []
   missing: []
