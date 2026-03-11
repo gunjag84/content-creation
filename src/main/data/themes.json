@@ -4,7 +4,7 @@
       "id": "ot-1",
       "name": "Alltag berufstätiger Mütter",
       "description": "Die gelebte Realität der Zielgruppe. Wiedererkennung, Validierung, emotionale Resonanz.",
-      "pillarMapping": ["Generate Demand", "Nurture Loyalty"],
+      "pillarMapping": ["generate-demand", "nurture-loyalty"],
       "unterthemen": [
         {
           "id": "ut-1-1",
@@ -56,7 +56,7 @@
       "id": "ot-2",
       "name": "Wissenschaft des Glücks und der Dankbarkeit",
       "description": "Faktenbasierte Erkenntnisse. Bildung, Inspiration, Glaubwürdigkeit.",
-      "pillarMapping": ["Generate Demand", "Convert Demand"],
+      "pillarMapping": ["generate-demand", "convert-demand"],
       "unterthemen": [
         {
           "id": "ut-2-1",
@@ -98,7 +98,7 @@
       "id": "ot-3",
       "name": "Analoge Rituale als Gegenbewegung",
       "description": "Die Lösung, die LEBEN.LIEBEN. anbietet. Aspiration, Sehnsucht wecken.",
-      "pillarMapping": ["Generate Demand", "Convert Demand"],
+      "pillarMapping": ["generate-demand", "convert-demand"],
       "unterthemen": [
         {
           "id": "ut-3-1",
@@ -149,7 +149,7 @@
       "id": "ot-4",
       "name": "Produkt und Erlebnis",
       "description": "Konversion. Produkt zeigen, Nutzen erklären, Vertrauen aufbauen.",
-      "pillarMapping": ["Convert Demand", "Generate Demand"],
+      "pillarMapping": ["convert-demand", "generate-demand"],
       "unterthemen": [
         {
           "id": "ut-4-1",
@@ -201,7 +201,7 @@
       "id": "ot-5",
       "name": "Marke und Community",
       "description": "Loyalität, Zugehörigkeit, Vertrauen. Die Welt hinter dem Produkt.",
-      "pillarMapping": ["Nurture Loyalty", "Generate Demand"],
+      "pillarMapping": ["nurture-loyalty", "generate-demand"],
       "unterthemen": [
         {
           "id": "ut-5-1",

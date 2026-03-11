@@ -2,13 +2,6 @@ import React, { useEffect, useRef } from 'react'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '../ui/select'
 import type { Zone } from './ZoneEditor'
 import type { Settings } from '../../../../shared/types/settings'
 
@@ -21,6 +14,13 @@ interface ZonePopoverProps {
   onClose: () => void
 }
 
+const ZONE_TYPES: { value: Zone['type']; label: string }[] = [
+  { value: 'hook', label: 'Title' },
+  { value: 'body', label: 'Body' },
+  { value: 'cta', label: 'CTA' },
+  { value: 'no-text', label: 'No Text' },
+]
+
 export function ZonePopover({
   zone,
   position,
@@ -31,7 +31,6 @@ export function ZonePopover({
 }: ZonePopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null)
 
-  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
@@ -39,7 +38,6 @@ export function ZonePopover({
       }
     }
 
-    // Delay adding listener to prevent immediate closure
     const timeout = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside)
     }, 100)
@@ -50,22 +48,16 @@ export function ZonePopover({
     }
   }, [onClose])
 
-  // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
+      if (e.key === 'Escape') onClose()
     }
-
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [onClose])
 
-  // Calculate approximate character count based on zone dimensions
   const approximateCharCount = Math.floor((zone.width * zone.height) / (zone.fontSize * 10))
 
-  // Position popover to stay within viewport
   const popoverStyle: React.CSSProperties = {
     position: 'fixed',
     left: position.x,
@@ -73,8 +65,8 @@ export function ZonePopover({
     zIndex: 1000
   }
 
-  const handleTypeChange = (newType: Zone['type']) => {
-    onUpdate({ type: newType })
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ label: e.target.value || undefined })
   }
 
   const handleMinFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,95 +76,110 @@ export function ZonePopover({
     }
   }
 
-  // Stop propagation on all interactions to prevent canvas events
-  const stopPropagation = (e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation()
-  }
-
   return (
     <div
       ref={popoverRef}
       style={popoverStyle}
-      className="bg-white border rounded-lg shadow-lg p-4 w-80"
-      onClick={stopPropagation}
-      onMouseDown={stopPropagation}
-      onMouseUp={stopPropagation}
-      onKeyDown={stopPropagation}
+      className="bg-slate-800 border border-slate-600 rounded-lg shadow-lg p-4 w-72 text-slate-100"
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Zone Configuration</h3>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <h3 className="font-semibold text-sm">Zone Configuration</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-200 text-lg leading-none px-1"
+          >
             ×
-          </Button>
+          </button>
         </div>
 
-        {/* Zone Type */}
+        {/* Zone Type Buttons */}
         <div className="space-y-2">
-          <Label>Zone Type</Label>
-          <Select value={zone.type} onValueChange={handleTypeChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hook">Hook</SelectItem>
-              <SelectItem value="body">Body</SelectItem>
-              <SelectItem value="cta">CTA</SelectItem>
-              <SelectItem value="no-text">No Text</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Font Size (auto-determined) */}
-        <div className="space-y-2">
-          <Label>Font Size (auto-determined)</Label>
-          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-            {zone.fontSize}px
-            {zone.type === 'hook' && ' (Headline Font)'}
-            {zone.type === 'body' && ' (Body Font)'}
-            {zone.type === 'cta' && ' (CTA Font)'}
+          <Label className="text-xs text-slate-400">Zone Type</Label>
+          <div className="grid grid-cols-4 gap-1">
+            {ZONE_TYPES.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => onUpdate({ type: value })}
+                className={`py-1.5 px-2 text-xs rounded font-medium transition-colors ${
+                  zone.type === value
+                    ? value === 'hook'
+                      ? 'bg-blue-600 text-white'
+                      : value === 'body'
+                      ? 'bg-green-600 text-white'
+                      : value === 'cta'
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-red-700 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Content Label */}
+        {zone.type !== 'no-text' && (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400">Content Label</Label>
+            <Input
+              type="text"
+              placeholder={
+                zone.type === 'hook' ? 'e.g. Attention hook...' :
+                zone.type === 'body' ? 'e.g. Main benefit...' :
+                'e.g. Buy now...'
+              }
+              value={zone.label || ''}
+              onChange={handleLabelChange}
+              className="h-8 text-sm bg-slate-700 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+          </div>
+        )}
+
+        {/* Font Size + Char Count row */}
+        {zone.type !== 'no-text' && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-400">Font Size</Label>
+              <div className="text-xs text-slate-300 bg-slate-700 px-2 py-1.5 rounded">
+                {zone.fontSize}px
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-400">~Chars</Label>
+              <div className="text-xs text-slate-300 bg-slate-700 px-2 py-1.5 rounded">
+                ~{approximateCharCount}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Min Font Size */}
         {zone.type !== 'no-text' && (
-          <div className="space-y-2">
-            <Label htmlFor="minFontSize">Min Font Size (fallback)</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-400">Min Font Size</Label>
             <Input
-              id="minFontSize"
               type="number"
               min="8"
               max={zone.fontSize}
               value={zone.minFontSize}
               onChange={handleMinFontSizeChange}
-              onClick={stopPropagation}
+              className="h-8 text-sm bg-slate-700 border-slate-600 text-slate-100"
             />
           </div>
         )}
 
-        {/* Approximate Character Count */}
-        {zone.type !== 'no-text' && (
-          <div className="space-y-2">
-            <Label>Approximate Character Count</Label>
-            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-              ~{approximateCharCount} characters
-            </div>
-          </div>
-        )}
-
-        {/* Zone Dimensions */}
-        <div className="space-y-2">
-          <Label>Dimensions</Label>
-          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-            {Math.round(zone.width)} × {Math.round(zone.height)} px
-            <br />
-            Position: ({Math.round(zone.x)}, {Math.round(zone.y)})
-          </div>
-        </div>
-
-        {/* Delete Button */}
-        <Button variant="destructive" size="sm" onClick={onDelete} className="w-full">
+        {/* Delete */}
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onDelete}
+          className="w-full h-8 text-xs"
+        >
           Delete Zone
         </Button>
       </div>

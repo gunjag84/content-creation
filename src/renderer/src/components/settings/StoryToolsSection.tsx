@@ -57,12 +57,14 @@ export function StoryToolsSection({ settings, onUpdate }: StoryToolsSectionProps
     setIsCreating(true)
   }
 
+  const normalizePillar = (p: string): string => p.toLowerCase().replace(/\s+/g, '-')
+
   const handleEdit = (tool: typeof tools[0]) => {
     setFormData({
       name: tool.name,
       description: tool.description,
       engagementType: tool.engagementType || '',
-      pillarMapping: tool.pillarMapping || [],
+      pillarMapping: (tool.pillarMapping || []).map(normalizePillar),
       mechanicRecommendations: tool.mechanicRecommendations?.join('\n') || '',
     })
     setEditingTool(tool)

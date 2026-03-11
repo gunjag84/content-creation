@@ -64,11 +64,13 @@ export function ThemeSection({ settings, onUpdate }: ThemeSectionProps) {
     setIsCreating(true)
   }
 
+  const normalizePillar = (p: string): string => p.toLowerCase().replace(/\s+/g, '-')
+
   const handleEdit = (oberthema: typeof themes.oberthemen[0]) => {
     setFormData({
       name: oberthema.name,
       description: oberthema.description || '',
-      pillarMapping: oberthema.pillarMapping || [],
+      pillarMapping: (oberthema.pillarMapping || []).map(normalizePillar),
     })
     setEditingTheme(oberthema)
     setIsCreating(true)

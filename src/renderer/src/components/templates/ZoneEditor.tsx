@@ -7,6 +7,7 @@ import type { Settings } from '../../../../shared/types/settings'
 export interface Zone {
   id: string
   type: 'hook' | 'body' | 'cta' | 'no-text'
+  label?: string // custom content label/placeholder shown on canvas
   x: number // pixels from left (at 1080 scale)
   y: number // pixels from top (at 1080 scale)
   width: number // pixels
@@ -64,7 +65,7 @@ export function ZoneEditor({
   const [drawMode, setDrawMode] = useState(false)
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
   const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null)
-  const [containerSize, setContainerSize] = useState({ width: 700, height: MAX_DISPLAY_HEIGHT })
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null)
   const [tempZone, setTempZone] = useState<Zone | null>(null)
@@ -74,7 +75,7 @@ export function ZoneEditor({
   const stageRef = useRef<any>(null)
 
   const canvasHeight = format === 'feed' ? CANVAS_HEIGHT_FEED : CANVAS_HEIGHT_STORY
-  const scale = containerSize.width / CANVAS_WIDTH
+  const scale = containerSize ? containerSize.width / CANVAS_WIDTH : 1
 
   // Responsive canvas sizing
   useEffect(() => {
@@ -128,6 +129,12 @@ export function ZoneEditor({
     }
   }
 
+  // Convert Stage-relative coords to viewport coords for position:fixed popover
+  const toViewportPos = (stageX: number, stageY: number) => {
+    const rect = stageRef.current?.container()?.getBoundingClientRect()
+    return { x: (rect?.left ?? 0) + stageX, y: (rect?.top ?? 0) + stageY }
+  }
+
   const handleStageMouseDown = (e: any) => {
     const clickedOnEmpty = e.target === e.target.getStage()
 
@@ -138,13 +145,11 @@ export function ZoneEditor({
         setSelectedZoneId(clickedId)
         setDrawMode(false)
 
-        // Position popover near the zone
+        // Position popover near the zone (convert to viewport coords for position:fixed)
         const stage = e.target.getStage()
         const pointerPos = stage.getPointerPosition()
-        setPopoverPosition({
-          x: pointerPos.x,
-          y: pointerPos.y - 20
-        })
+        const vp = toViewportPos(pointerPos.x, pointerPos.y)
+        setPopoverPosition({ x: vp.x, y: vp.y - 20 })
       }
       return
     }
@@ -231,10 +236,8 @@ export function ZoneEditor({
         const stage = stageRef.current
         if (stage) {
           const pos = stage.getPointerPosition()
-          setPopoverPosition({
-            x: pos.x,
-            y: Math.max(20, pos.y - 100)
-          })
+          const vp = toViewportPos(pos.x, pos.y)
+          setPopoverPosition({ x: vp.x, y: Math.max(20, vp.y - 100) })
         }
       }
 
@@ -313,7 +316,7 @@ export function ZoneEditor({
 
   const renderZone = (zone: Zone, isTemp = false) => {
     const style = ZONE_STYLES[zone.type]
-    const text = SAMPLE_TEXT[zone.type]
+    const text = zone.label || SAMPLE_TEXT[zone.type]
 
     return (
       <React.Fragment key={zone.id}>
@@ -386,16 +389,17 @@ export function ZoneEditor({
         </p>
       )}
 
-      {/* Canvas */}
-      <div
-        ref={containerRef}
-        className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 mx-auto"
-        style={{
-          width: containerSize.width,
-          height: containerSize.height,
-          cursor: drawMode ? 'crosshair' : 'default'
-        }}
-      >
+      {/* Canvas — outer wrapper fills available width and is observed for sizing */}
+      <div ref={containerRef} className="w-full">
+        {containerSize && (
+        <div
+          className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 mx-auto"
+          style={{
+            width: containerSize.width,
+            height: containerSize.height,
+            cursor: drawMode ? 'crosshair' : 'default'
+          }}
+        >
         <Stage
           ref={stageRef}
           width={containerSize.width}
@@ -405,12 +409,13 @@ export function ZoneEditor({
           onMouseUp={handleStageMouseUp}
         >
           <Layer>
-            {/* Background */}
+            {/* Background — listening={false} so clicks fall through to Stage */}
             {backgroundType === 'image' && backgroundImage && (
               <KonvaImage
                 image={backgroundImage}
                 width={CANVAS_WIDTH * scale}
                 height={canvasHeight * scale}
+                listening={false}
               />
             )}
             {backgroundType === 'solid_color' && (
@@ -418,6 +423,7 @@ export function ZoneEditor({
                 width={CANVAS_WIDTH * scale}
                 height={canvasHeight * scale}
                 fill={backgroundColor}
+                listening={false}
               />
             )}
             {backgroundType === 'gradient' && backgroundColor && (
@@ -432,16 +438,18 @@ export function ZoneEditor({
                   1,
                   backgroundColor.split(',')[1] || '#ffffff'
                 ]}
+                listening={false}
               />
             )}
 
-            {/* Overlay */}
+            {/* Overlay — listening={false} so clicks fall through to zones/Stage */}
             {overlayEnabled && (
               <Rect
                 width={CANVAS_WIDTH * scale}
                 height={canvasHeight * scale}
                 fill={overlayColor}
                 opacity={overlayOpacity / 100}
+                listening={false}
               />
             )}
 
@@ -456,6 +464,7 @@ export function ZoneEditor({
                   width={containerSize.width}
                   height={containerSize.height}
                   fill="rgba(0,0,0,0.4)"
+                  listening={false}
                 />
                 <KonvaText
                   x={0}
@@ -465,6 +474,7 @@ export function ZoneEditor({
                   fontSize={14}
                   fill="#94a3b8"
                   align="center"
+                  listening={false}
                 />
               </>
             )}
@@ -484,6 +494,8 @@ export function ZoneEditor({
             )}
           </Layer>
         </Stage>
+        </div>
+        )}
       </div>
 
       {/* Zone Popover */}

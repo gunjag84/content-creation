@@ -2,13 +2,6 @@ import React, { useState } from 'react'
 import { Label } from '../ui/label'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '../ui/select'
 
 interface BackgroundSelectorProps {
   backgroundType: 'image' | 'solid_color' | 'gradient'
@@ -210,16 +203,22 @@ export function BackgroundSelector({
       {backgroundType === 'gradient' && (
         <div className="space-y-2">
           <Label className="text-slate-300">Gradient Direction</Label>
-          <Select value={currentGradientDirection} onValueChange={handleGradientDirectionChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="vertical">Top to Bottom</SelectItem>
-              <SelectItem value="horizontal">Left to Right</SelectItem>
-              <SelectItem value="diagonal">Diagonal</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            {(['vertical', 'horizontal', 'diagonal'] as const).map((dir) => (
+              <button
+                key={dir}
+                type="button"
+                onClick={() => handleGradientDirectionChange(dir)}
+                className={`px-3 py-1.5 text-xs rounded border transition-colors ${
+                  currentGradientDirection === dir
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600'
+                }`}
+              >
+                {dir === 'vertical' ? 'Top to Bottom' : dir === 'horizontal' ? 'Left to Right' : 'Diagonal'}
+              </button>
+            ))}
+          </div>
 
           {/* Gradient Preview */}
           <div className="space-y-2">

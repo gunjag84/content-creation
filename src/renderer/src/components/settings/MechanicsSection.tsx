@@ -59,6 +59,8 @@ export function MechanicsSection({ settings, onUpdate }: MechanicsSectionProps) 
     setIsCreating(true)
   }
 
+  const normalizePillar = (p: string): string => p.toLowerCase().replace(/\s+/g, '-')
+
   const handleEdit = (mechanic: typeof mechanics[0]) => {
     setFormData({
       name: mechanic.name,
@@ -67,7 +69,7 @@ export function MechanicsSection({ settings, onUpdate }: MechanicsSectionProps) 
       slideRangeMin: mechanic.slideRange?.min || 3,
       slideRangeMax: mechanic.slideRange?.max || 7,
       structureGuidelines: mechanic.structureGuidelines || '',
-      pillarMapping: mechanic.pillarMapping || [],
+      pillarMapping: (mechanic.pillarMapping || []).map(normalizePillar),
     })
     setEditingMechanic(mechanic)
     setIsCreating(true)
