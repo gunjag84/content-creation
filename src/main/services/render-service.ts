@@ -54,9 +54,13 @@ export class RenderService {
     // Set window size to target dimensions
     this.renderWindow.setSize(dimensions.width, dimensions.height)
 
-    // Encode HTML for data URI
-    const encodedHTML = encodeURIComponent(html)
-    const dataURI = `data:text/html,${encodedHTML}`
+    const tempDir = app.getPath('temp')
+
+    // Write HTML to temp file to avoid data: URI length limits (~2MB cap in Chromium)
+    const timestamp = Date.now()
+    const htmlFilename = `render_${timestamp}.html`
+    const htmlFilePath = path.join(tempDir, htmlFilename)
+    fs.writeFileSync(htmlFilePath, html, 'utf-8')
 
     // Load HTML and wait for completion
     await new Promise<void>((resolve, reject) => {
@@ -64,19 +68,24 @@ export class RenderService {
         resolve()
       })
 
-      this.renderWindow!.loadURL(dataURI).catch(reject)
+      this.renderWindow!.loadFile(htmlFilePath).catch(reject)
     })
 
-    // Add 150ms delay for CSS rendering (per research recommendation)
-    await new Promise((resolve) => setTimeout(resolve, 150))
+    // Add 300ms delay for CSS rendering and fonts from file:// references
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
     // Capture the page as PNG
     const image = await this.renderWindow.webContents.capturePage()
 
+    // Cleanup temp HTML file
+    try {
+      fs.unlinkSync(htmlFilePath)
+    } catch (_) {
+      /* ignore */
+    }
+
     // Save to temp directory
-    const timestamp = Date.now()
     const filename = `render_${timestamp}_${dimensions.width}x${dimensions.height}.png`
-    const tempDir = app.getPath('temp')
     const filePath = path.join(tempDir, filename)
 
     // Write PNG buffer to file
