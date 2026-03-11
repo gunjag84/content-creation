@@ -13,7 +13,7 @@ This roadmap transforms an AI-powered Instagram content creation concept into a 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation & Rendering** - Electron scaffolding, HTML-to-PNG rendering pipeline, data layer with SQLite and JSON config
-- [x] **Phase 2: Settings & Templates** - Brand configuration (11 settings areas), visual template builder with drag-and-drop zone editor (completed 2026-03-10)
+- [ ] **Phase 2: Settings & Templates** - Brand configuration (11 settings areas), visual template builder with drag-and-drop zone editor (UAT gap closure in progress)
 - [ ] **Phase 3: Content Generation** - AI integration, full post workflow, story generation, performance-based learning system
 - [ ] **Phase 4: Production Readiness** - Performance tracking UI, logging and error handling, testing and polish
 
@@ -46,7 +46,7 @@ Plans:
   3. User can manage templates in settings (list, edit zones, delete, duplicate) and templates persist across sessions
   4. Claude API key is stored securely via Electron safeStorage API and never appears in plain text in settings.json
   5. Settings changes are automatically versioned with timestamps and system can show which settings version was active for any post
-**Plans**: 10 plans
+**Plans**: 15 plans
 
 Plans:
 - [ ] 02-01-PLAN.md - Extend Zod schemas for all 11 settings areas, extract blueprint data to JSON, install dependencies, template/font IPC handlers
@@ -59,6 +59,11 @@ Plans:
 - [ ] 02-08-PLAN.md - [GAP CLOSURE] Integrate settings sub-navigation into main sidebar
 - [ ] 02-09-PLAN.md - [GAP CLOSURE] Fix toggle switches for dark theme, add standard fonts, improve Brand Guidance labels
 - [ ] 02-10-PLAN.md - [GAP CLOSURE] Fix template builder (image loading, zone persistence, canvas sizing, button contrast) and brand preview 431 error
+- [ ] 02-11-PLAN.md - [GAP CLOSURE] Brand Guidance dark theme fix (left column bg-white, font dropdown in all slots, remove oversized preview)
+- [ ] 02-12-PLAN.md - [GAP CLOSURE] Brand preview render fix (temp file HTML loading, JSON parse fix, error state display)
+- [ ] 02-13-PLAN.md - [GAP CLOSURE] Template builder dark theme (BackgroundSelector, OverlayControls, Button outline variant)
+- [ ] 02-14-PLAN.md - [GAP CLOSURE] Zone editor canvas height cap and draw mode discoverability
+- [ ] 02-15-PLAN.md - [GAP CLOSURE] Full CRUD for Mechanics, Story Tools, and Themes catalogs
 
 ### Phase 3: Content Generation
 **Goal**: End-to-end content workflow from recommendation to export with AI generation and performance-based learning
@@ -103,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
-| 2. Settings & Templates | 10/10 | Complete   | 2026-03-10 |
+| 2. Settings & Templates | 10/15 | Gap closure in progress | - |
 | 3. Content Generation | 0/3 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
