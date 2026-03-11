@@ -8,6 +8,7 @@ interface BrandPreviewProps {
 export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null)
   const [isRendering, setIsRendering] = useState(false)
+  const [renderError, setRenderError] = useState<string | null>(null)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const latestGuidance = useRef(visualGuidance)
 
@@ -70,13 +71,15 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
 
   const renderPreview = async () => {
     setIsRendering(true)
+    setRenderError(null)
 
     try {
       const html = generatePreviewHTML(latestGuidance.current)
-      const dataUrl = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+      const result = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+      const parsed = JSON.parse(result)
 
       // Convert data URL to Blob URL to avoid header pollution
-      const blob = dataUrlToBlob(dataUrl)
+      const blob = dataUrlToBlob(parsed.dataUrl)
 
       // Revoke previous blob URL to prevent memory leaks
       if (previewBlobUrl) {
@@ -86,7 +89,9 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
       const blobUrl = URL.createObjectURL(blob)
       setPreviewBlobUrl(blobUrl)
     } catch (error) {
-      console.error('Preview render failed:', error)
+      const message = error instanceof Error ? error.message : String(error)
+      console.error('Preview render failed:', message)
+      setRenderError(message)
     } finally {
       setIsRendering(false)
     }
@@ -248,6 +253,11 @@ export function BrandPreview({ visualGuidance }: BrandPreviewProps) {
       <div className="relative bg-slate-800 border border-slate-700 rounded-lg p-4 flex items-center justify-center min-h-[400px]">
         {isRendering ? (
           <div className="text-slate-400">Rendering preview...</div>
+        ) : renderError ? (
+          <div className="flex flex-col gap-2 items-center text-center px-4">
+            <div className="text-red-400 text-sm font-medium">Preview failed to render</div>
+            <div className="text-slate-500 text-xs">{renderError}</div>
+          </div>
         ) : previewBlobUrl ? (
           <img
             src={previewBlobUrl}
