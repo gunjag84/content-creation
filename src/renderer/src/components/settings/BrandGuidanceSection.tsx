@@ -57,10 +57,10 @@ export function BrandGuidanceSection({ settings, onUpdate }: BrandGuidanceSectio
 
       <div className="grid grid-cols-[1fr_400px] gap-8">
         {/* Left column: Controls */}
-        <div className="space-y-8 bg-white rounded-lg p-6 border border-gray-200">
+        <div className="space-y-8 bg-slate-800 rounded-lg p-6 border border-slate-700">
           {/* Colors Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Colors</h3>
+            <h3 className="text-lg font-semibold text-slate-100 mb-4">Colors</h3>
             <div className="flex gap-6">
               <BrandColorPicker
                 label="Primary Color"
@@ -81,11 +81,11 @@ export function BrandGuidanceSection({ settings, onUpdate }: BrandGuidanceSectio
           </div>
 
           {/* Separator */}
-          <div className="border-t border-gray-200" />
+          <div className="border-t border-slate-700" />
 
           {/* Typography Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Typography</h3>
+            <h3 className="text-lg font-semibold text-slate-100 mb-4">Typography</h3>
             <div className="space-y-6">
               <FontUpload
                 label="Headline Font"
@@ -112,47 +112,47 @@ export function BrandGuidanceSection({ settings, onUpdate }: BrandGuidanceSectio
               {/* Font Sizes */}
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">Headline Size (px)</label>
+                  <label className="text-sm font-medium text-slate-300">Headline Size (px)</label>
                   <input
                     type="number"
                     value={visualGuidance.headlineFontSize}
                     onChange={(e) => handleFontSizeChange('headlineFontSize', parseInt(e.target.value) || 48)}
                     min={14}
                     max={120}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">Body Size (px)</label>
+                  <label className="text-sm font-medium text-slate-300">Body Size (px)</label>
                   <input
                     type="number"
                     value={visualGuidance.bodyFontSize}
                     onChange={(e) => handleFontSizeChange('bodyFontSize', parseInt(e.target.value) || 24)}
                     min={14}
                     max={80}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">CTA Size (px)</label>
+                  <label className="text-sm font-medium text-slate-300">CTA Size (px)</label>
                   <input
                     type="number"
                     value={visualGuidance.ctaFontSize}
                     onChange={(e) => handleFontSizeChange('ctaFontSize', parseInt(e.target.value) || 32)}
                     min={14}
                     max={80}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">Min Size (px)</label>
+                  <label className="text-sm font-medium text-slate-300">Min Size (px)</label>
                   <input
                     type="number"
                     value={visualGuidance.minFontSize}
                     onChange={(e) => handleFontSizeChange('minFontSize', parseInt(e.target.value) || 14)}
                     min={10}
                     max={24}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -160,11 +160,11 @@ export function BrandGuidanceSection({ settings, onUpdate }: BrandGuidanceSectio
           </div>
 
           {/* Separator */}
-          <div className="border-t border-gray-200" />
+          <div className="border-t border-slate-700" />
 
           {/* Logo & CTA Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Logo & CTA</h3>
+            <h3 className="text-lg font-semibold text-slate-100 mb-4">Logo & CTA</h3>
             <LogoPlacement
               logo={visualGuidance.logo}
               standardCTA={visualGuidance.standardCTA}
@@ -176,7 +176,7 @@ export function BrandGuidanceSection({ settings, onUpdate }: BrandGuidanceSectio
         </div>
 
         {/* Right column: Live Preview */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200 sticky top-6">
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 sticky top-6">
           <BrandPreview visualGuidance={visualGuidance} />
         </div>
       </div>
