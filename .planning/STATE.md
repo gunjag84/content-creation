@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 13 of 15 in current phase
+current_plan: 14 of 15 in current phase
 status: executing
-stopped_at: Completed 02-13-PLAN.md
-last_updated: "2026-03-11T07:06:38.326Z"
-last_activity: 2026-03-11 - Completed plan 02-13 (Fix Template Builder Dark Theme)
+stopped_at: Completed 02-14-PLAN.md
+last_updated: "2026-03-11T07:13:33.277Z"
+last_activity: 2026-03-11 - Completed plan 02-14 (Fix ZoneEditor Canvas Height and Draw Mode Discoverability)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -27,11 +27,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 2 of 4 (Settings & Templates)
-Current Plan: 13 of 15 in current phase
+Current Plan: 14 of 15 in current phase
 Status: In Progress
-Last activity: 2026-03-11 - Completed plan 02-13 (Fix Template Builder Dark Theme)
+Last activity: 2026-03-11 - Completed plan 02-14 (Fix ZoneEditor Canvas Height and Draw Mode Discoverability)
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [█████████░] 89%
 | Phase 02-settings-templates P11 | 3.9 | 2 tasks | 2 files |
 | Phase 02 P12 | 2.9 | 2 tasks | 2 files |
 | Phase 02-settings-templates PP13 | 4.1 | 2 tasks | 3 files |
+| Phase 02-settings-templates P14 | 3.3 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 02-12]: Use temp file with loadFile() instead of data: URI to avoid Chromium 2MB limit
 - [Phase 02-12]: Parse JSON response from renderToPNG to extract dataUrl field for blob conversion
 - [Phase 02-13]: Apply Button outline variant fix globally - transparent background with visible text ensures consistency across dark-themed app
+- [Phase 02-settings-templates]: Canvas height capped at 500px using Math.min(scaleByWidth, scaleByHeight)
+- [Phase 02-settings-templates]: Instructional overlay shown when canvas empty and draw mode off
+- [Phase 02-settings-templates]: Hint text displayed below toolbar for discoverability
 
 ### Pending Todos
 
@@ -126,7 +130,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T07:06:38.320Z
-Stopped at: Completed 02-13-PLAN.md
+Last session: 2026-03-11T07:13:33.273Z
+Stopped at: Completed 02-14-PLAN.md
 Resume file: None
 
