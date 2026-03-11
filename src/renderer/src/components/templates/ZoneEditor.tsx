@@ -380,6 +380,12 @@ export function ZoneEditor({
         <div className="text-sm text-slate-400">{zones.length} zones defined</div>
       </div>
 
+      {zones.length === 0 && (
+        <p className="text-xs text-slate-500 text-center">
+          Click "Draw Zone" then drag on the canvas to define text areas
+        </p>
+      )}
+
       {/* Canvas */}
       <div
         ref={containerRef}
@@ -442,6 +448,26 @@ export function ZoneEditor({
             {/* Zones */}
             {zones.map((zone) => renderZone(zone))}
             {tempZone && renderZone(tempZone, true)}
+
+            {/* Instructional overlay when canvas is empty and not in draw mode */}
+            {zones.length === 0 && !drawMode && (
+              <>
+                <Rect
+                  width={containerSize.width}
+                  height={containerSize.height}
+                  fill="rgba(0,0,0,0.4)"
+                />
+                <KonvaText
+                  x={0}
+                  y={containerSize.height / 2 - 30}
+                  width={containerSize.width}
+                  text={'Click "Draw Zone" above, then\ndrag to define text zones on the canvas'}
+                  fontSize={14}
+                  fill="#94a3b8"
+                  align="center"
+                />
+              </>
+            )}
 
             {/* Transformer for selected zone */}
             {selectedZoneId && !drawMode && (
