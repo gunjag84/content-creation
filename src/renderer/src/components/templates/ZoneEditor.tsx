@@ -32,6 +32,7 @@ const CANVAS_WIDTH = 1080
 const CANVAS_HEIGHT_FEED = 1350
 const CANVAS_HEIGHT_STORY = 1920
 const MIN_ZONE_SIZE = 50
+const MAX_DISPLAY_HEIGHT = 500 // px - cap canvas height to avoid excessive scrolling
 
 // Zone visual styling by type
 const ZONE_STYLES = {
@@ -63,7 +64,7 @@ export function ZoneEditor({
   const [drawMode, setDrawMode] = useState(false)
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
   const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null)
-  const [containerSize, setContainerSize] = useState({ width: 700, height: 875 })
+  const [containerSize, setContainerSize] = useState({ width: 700, height: MAX_DISPLAY_HEIGHT })
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null)
   const [tempZone, setTempZone] = useState<Zone | null>(null)
@@ -83,8 +84,13 @@ export function ZoneEditor({
       const entry = entries[0]
       if (entry) {
         const width = entry.contentRect.width
-        const height = (width / CANVAS_WIDTH) * canvasHeight
-        setContainerSize({ width, height })
+        // Compute scale limited by BOTH width and height constraints
+        const scaleByWidth = width / CANVAS_WIDTH
+        const scaleByHeight = MAX_DISPLAY_HEIGHT / canvasHeight
+        const constrainedScale = Math.min(scaleByWidth, scaleByHeight)
+        const constrainedWidth = CANVAS_WIDTH * constrainedScale
+        const constrainedHeight = canvasHeight * constrainedScale
+        setContainerSize({ width: constrainedWidth, height: constrainedHeight })
       }
     })
 
@@ -377,8 +383,12 @@ export function ZoneEditor({
       {/* Canvas */}
       <div
         ref={containerRef}
-        className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 max-w-[700px] mx-auto"
-        style={{ cursor: drawMode ? 'crosshair' : 'default' }}
+        className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 mx-auto"
+        style={{
+          width: containerSize.width,
+          height: containerSize.height,
+          cursor: drawMode ? 'crosshair' : 'default'
+        }}
       >
         <Stage
           ref={stageRef}
