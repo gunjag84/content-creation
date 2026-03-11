@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 14 of 15 in current phase
-status: executing
-stopped_at: Completed 02-14-PLAN.md
-last_updated: "2026-03-11T07:13:33.277Z"
-last_activity: 2026-03-11 - Completed plan 02-14 (Fix ZoneEditor Canvas Height and Draw Mode Discoverability)
+current_plan: 15 of 15 in current phase
+status: completed-phase
+stopped_at: Completed 02-15-PLAN.md
+last_updated: "2026-03-11T07:22:44.503Z"
+last_activity: 2026-03-11 - Completed plan 02-15 (Add CRUD to Mechanics/StoryTools/Themes)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 18
-  completed_plans: 17
-  percent: 94
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -27,11 +27,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 2 of 4 (Settings & Templates)
-Current Plan: 14 of 15 in current phase
-Status: In Progress
-Last activity: 2026-03-11 - Completed plan 02-14 (Fix ZoneEditor Canvas Height and Draw Mode Discoverability)
+Current Plan: 15 of 15 in current phase
+Status: Phase Complete
+Last activity: 2026-03-11 - Completed plan 02-15 (Add CRUD to Mechanics/StoryTools/Themes)
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 94%
 | Phase 02 P12 | 2.9 | 2 tasks | 2 files |
 | Phase 02-settings-templates PP13 | 4.1 | 2 tasks | 3 files |
 | Phase 02-settings-templates P14 | 3.3 | 2 tasks | 1 files |
+| Phase 02-settings-templates PP15 | 6.2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 02-settings-templates]: Canvas height capped at 500px using Math.min(scaleByWidth, scaleByHeight)
 - [Phase 02-settings-templates]: Instructional overlay shown when canvas empty and draw mode off
 - [Phase 02-settings-templates]: Hint text displayed below toolbar for discoverability
+- [Phase 02-settings-templates]: Use inline dialog overlays for CRUD forms instead of external dialog library
+- [Phase 02-settings-templates]: ThemeSection header refactored to div wrapper with nested expand button for separate action buttons
 
 ### Pending Todos
 
@@ -130,7 +133,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T07:13:33.273Z
-Stopped at: Completed 02-14-PLAN.md
+Last session: 2026-03-11T07:22:44.498Z
+Stopped at: Completed 02-15-PLAN.md
 Resume file: None
 
