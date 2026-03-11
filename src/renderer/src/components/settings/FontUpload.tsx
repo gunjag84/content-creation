@@ -41,6 +41,15 @@ const STANDARD_FONTS = [
 export function FontUpload({ label, fontConfig, defaultFontSize, onUpload, onRemove }: FontUploadProps) {
   const [selectedStandardFont, setSelectedStandardFont] = useState<string>('')
 
+  // Keep dropdown in sync when switching between slots
+  useEffect(() => {
+    if (fontConfig && !fontConfig.path) {
+      setSelectedStandardFont(fontConfig.family)
+    } else {
+      setSelectedStandardFont('')
+    }
+  }, [fontConfig?.family, fontConfig?.path])
+
   // Register font on component mount and whenever fontConfig changes
   useEffect(() => {
     if (!fontConfig) return
@@ -97,52 +106,17 @@ export function FontUpload({ label, fontConfig, defaultFontSize, onUpload, onRem
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-slate-300">{label}</label>
 
       {fontConfig ? (
         <div className="flex flex-col gap-3">
-          {/* Font info and actions */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 text-sm text-gray-600">
-              {fontConfig.filename}
-            </div>
-            <button
-              type="button"
-              onClick={handleUpload}
-              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-            >
-              Change
-            </button>
-            <button
-              type="button"
-              onClick={onRemove}
-              className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-            >
-              Remove
-            </button>
-          </div>
-
-          {/* Font preview */}
-          <div
-            className="p-4 bg-gray-50 rounded-md border border-gray-200"
-            style={{
-              fontFamily: `'${fontConfig.family}', sans-serif`,
-              fontSize: `${defaultFontSize}px`,
-              lineHeight: '1.2'
-            }}
-          >
-            The quick brown fox jumps over the lazy dog
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {/* Standard font selection */}
+          {/* Standard font selector */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-gray-600">Choose a standard font</label>
+            <label className="text-xs font-medium text-slate-400">Switch font:</label>
             <select
               value={selectedStandardFont}
               onChange={(e) => handleStandardFontSelect(e.target.value)}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a font...</option>
               {STANDARD_FONTS.map((fontName) => (
@@ -155,9 +129,56 @@ export function FontUpload({ label, fontConfig, defaultFontSize, onUpload, onRem
 
           {/* Divider */}
           <div className="flex items-center gap-2">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="text-xs text-gray-500">or</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+            <div className="flex-1 border-t border-slate-600"></div>
+            <span className="text-xs text-slate-500">or</span>
+            <div className="flex-1 border-t border-slate-600"></div>
+          </div>
+
+          {/* Font info and actions */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 text-sm text-slate-400">
+              {fontConfig.filename}
+            </div>
+            <button
+              type="button"
+              onClick={handleUpload}
+              className="px-3 py-1 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-md transition-colors"
+            >
+              Change
+            </button>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="px-3 py-1 text-sm text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {/* Standard font selection */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-slate-400">Choose a standard font</label>
+            <select
+              value={selectedStandardFont}
+              onChange={(e) => handleStandardFontSelect(e.target.value)}
+              className="px-3 py-2 text-sm bg-slate-700 border border-slate-600 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select a font...</option>
+              {STANDARD_FONTS.map((fontName) => (
+                <option key={fontName} value={fontName}>
+                  {fontName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 border-t border-slate-600"></div>
+            <span className="text-xs text-slate-500">or</span>
+            <div className="flex-1 border-t border-slate-600"></div>
           </div>
 
           {/* Custom font upload */}
@@ -169,7 +190,7 @@ export function FontUpload({ label, fontConfig, defaultFontSize, onUpload, onRem
             >
               Upload Custom Font
             </button>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-slate-500">
               Supports .ttf, .otf, .woff2
             </div>
           </div>
