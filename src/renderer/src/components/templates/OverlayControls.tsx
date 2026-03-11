@@ -36,12 +36,12 @@ export function OverlayControls({ enabled, color, opacity, onChange }: OverlayCo
   }, [isColorPickerOpen])
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-      <h3 className="font-semibold text-sm">Overlay Settings</h3>
+    <div className="space-y-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
+      <h3 className="font-semibold text-sm text-slate-200">Overlay Settings</h3>
 
       {/* Enable/Disable Toggle */}
       <div className="flex items-center justify-between">
-        <Label htmlFor="overlay-enabled">Enable Overlay</Label>
+        <Label htmlFor="overlay-enabled" className="text-slate-300">Enable Overlay</Label>
         <Switch
           id="overlay-enabled"
           checked={enabled}
@@ -53,26 +53,26 @@ export function OverlayControls({ enabled, color, opacity, onChange }: OverlayCo
       {enabled && (
         <>
           <div className="space-y-2">
-            <Label>Overlay Color</Label>
+            <Label className="text-slate-300">Overlay Color</Label>
             <div className="flex items-center gap-3 relative">
               {/* Color swatch button */}
               <button
                 ref={buttonRef}
                 type="button"
                 onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
-                className="w-12 h-12 rounded-md border-2 border-gray-300 cursor-pointer hover:border-gray-400 transition-colors shadow-sm"
+                className="w-12 h-12 rounded-md border-2 border-slate-600 cursor-pointer hover:border-gray-400 transition-colors shadow-sm"
                 style={{ backgroundColor: color }}
                 title="Pick overlay color"
               />
 
               {/* Hex input */}
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">#</span>
+                <span className="text-sm text-slate-400">#</span>
                 <HexColorInput
                   color={color}
                   onChange={(newColor) => onChange({ color: newColor })}
                   prefixed={false}
-                  className="w-24 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-24 px-2 py-1 text-sm border border-slate-600 bg-slate-700 text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -80,7 +80,7 @@ export function OverlayControls({ enabled, color, opacity, onChange }: OverlayCo
               {isColorPickerOpen && (
                 <div
                   ref={popoverRef}
-                  className="absolute top-14 left-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-3"
+                  className="absolute top-14 left-0 z-50 bg-slate-800 rounded-lg shadow-xl border border-slate-600 p-3"
                 >
                   <HexColorPicker
                     color={color}
@@ -94,8 +94,8 @@ export function OverlayControls({ enabled, color, opacity, onChange }: OverlayCo
           {/* Opacity Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Opacity</Label>
-              <span className="text-sm text-gray-600">{opacity}%</span>
+              <Label className="text-slate-300">Opacity</Label>
+              <span className="text-sm text-slate-300">{opacity}%</span>
             </div>
             <Slider
               value={[opacity]}

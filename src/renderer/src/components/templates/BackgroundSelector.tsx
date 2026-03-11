@@ -58,12 +58,12 @@ export function BackgroundSelector({
     backgroundType === 'gradient' ? backgroundValue.split(',')[2] || 'vertical' : 'vertical'
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-      <h3 className="font-semibold text-sm">Background</h3>
+    <div className="space-y-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
+      <h3 className="font-semibold text-sm text-slate-200">Background</h3>
 
       {/* Background Type Radio Group */}
       <div className="space-y-2">
-        <Label>Background Type</Label>
+        <Label className="text-slate-300">Background Type</Label>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -107,7 +107,7 @@ export function BackgroundSelector({
         <div className="space-y-2">
           {backgroundValue ? (
             <div className="space-y-2">
-              <div className="aspect-[4/5] w-full max-w-[200px] rounded-lg border overflow-hidden bg-gray-100">
+              <div className="aspect-[4/5] w-full max-w-[200px] rounded-lg border overflow-hidden bg-slate-700">
                 <img
                   src={`file://${backgroundValue}`}
                   alt="Background preview"
@@ -144,7 +144,7 @@ export function BackgroundSelector({
       {/* Solid Color Swatches */}
       {backgroundType === 'solid_color' && (
         <div className="space-y-2">
-          <Label>Select Color</Label>
+          <Label className="text-slate-300">Select Color</Label>
           <div className="flex gap-2">
             {/* Brand color swatches */}
             <button
@@ -153,7 +153,7 @@ export function BackgroundSelector({
               className={`w-12 h-12 rounded-md border-2 ${
                 backgroundValue === brandColors.primaryColor
                   ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-300'
+                  : 'border-slate-600'
               } cursor-pointer hover:border-gray-400 transition-colors shadow-sm`}
               style={{ backgroundColor: brandColors.primaryColor }}
               title="Primary Color"
@@ -164,7 +164,7 @@ export function BackgroundSelector({
               className={`w-12 h-12 rounded-md border-2 ${
                 backgroundValue === brandColors.secondaryColor
                   ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-300'
+                  : 'border-slate-600'
               } cursor-pointer hover:border-gray-400 transition-colors shadow-sm`}
               style={{ backgroundColor: brandColors.secondaryColor }}
               title="Secondary Color"
@@ -175,7 +175,7 @@ export function BackgroundSelector({
               className={`w-12 h-12 rounded-md border-2 ${
                 backgroundValue === brandColors.backgroundColor
                   ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-300'
+                  : 'border-slate-600'
               } cursor-pointer hover:border-gray-400 transition-colors shadow-sm`}
               style={{ backgroundColor: brandColors.backgroundColor }}
               title="Background Color"
@@ -184,9 +184,9 @@ export function BackgroundSelector({
 
           {/* Custom hex input */}
           <div className="space-y-2">
-            <Label htmlFor="custom-color">Custom Color</Label>
+            <Label htmlFor="custom-color" className="text-slate-300">Custom Color</Label>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">#</span>
+              <span className="text-sm text-slate-400">#</span>
               <Input
                 id="custom-color"
                 type="text"
@@ -198,7 +198,7 @@ export function BackgroundSelector({
                   }
                 }}
                 maxLength={6}
-                className="w-28"
+                className="w-28 bg-slate-700 border-slate-600 text-slate-100"
                 placeholder="000000"
               />
             </div>
@@ -209,7 +209,7 @@ export function BackgroundSelector({
       {/* Gradient Options */}
       {backgroundType === 'gradient' && (
         <div className="space-y-2">
-          <Label>Gradient Direction</Label>
+          <Label className="text-slate-300">Gradient Direction</Label>
           <Select value={currentGradientDirection} onValueChange={handleGradientDirectionChange}>
             <SelectTrigger>
               <SelectValue />
@@ -223,7 +223,7 @@ export function BackgroundSelector({
 
           {/* Gradient Preview */}
           <div className="space-y-2">
-            <Label>Preview</Label>
+            <Label className="text-slate-300">Preview</Label>
             <div
               className="w-full h-20 rounded-md border"
               style={{
@@ -236,7 +236,7 @@ export function BackgroundSelector({
               }}
             />
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             Uses brand primary and secondary colors
           </p>
         </div>
