@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { Settings } from '@shared/types/settings'
+import type { NavItem } from '../components/layout/Sidebar'
+import { BalanceWidget } from '../components/BalanceWidget'
 
-export function Dashboard() {
+interface DashboardProps {
+  onNavigate: (item: NavItem) => void
+}
+
+export function Dashboard({ onNavigate }: DashboardProps) {
   const [appInfo, setAppInfo] = useState<{ version: string; userData: string } | null>(null)
   const [dbStatus, setDbStatus] = useState<{ ok: boolean; tables: number } | null>(null)
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -73,6 +79,11 @@ export function Dashboard() {
           Foundation is ready: Database, settings, security, and rendering pipeline are all operational.
           Navigate to Test Render to see the HTML-to-PNG rendering in action.
         </p>
+      </div>
+
+      {/* Balance Widget */}
+      <div className="mt-8">
+        <BalanceWidget onNavigate={onNavigate} />
       </div>
     </div>
   )

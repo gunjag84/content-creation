@@ -21,13 +21,13 @@ function App() {
   const renderPage = () => {
     switch (activeItem) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard onNavigate={handleNavigate} />
       case 'create':
         return <CreatePost onNavigate={handleNavigate} />
       case 'settings':
         return <Settings activeTab={activeSettingsTab} />
       default:
-        return <Dashboard />
+        return <Dashboard onNavigate={handleNavigate} />
     }
   }
 
