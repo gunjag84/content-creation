@@ -185,8 +185,8 @@ describe('assembleMasterPrompt', () => {
     })
 
     it('should truncate optional sections when exceeding 8000 tokens', () => {
-      // Create a massive competitor analysis to trigger truncation
-      const largeText = 'A'.repeat(30000)
+      // Create a massive competitor analysis to trigger truncation (32000 chars = 8000 tokens alone)
+      const largeText = 'A'.repeat(32000)
       const settingsWithLargeContent: Settings = {
         ...minimalSettings,
         competitorAnalysis: {
@@ -202,8 +202,10 @@ describe('assembleMasterPrompt', () => {
 
       // Should truncate to stay under or near 8000 tokens
       expect(estimatedTokens).toBeLessThan(9000)
-      // Competitor should be dropped first
+      // Competitor should be dropped first since it's too large
       expect(prompt).not.toContain(largeText)
+      // But viral should still be included
+      expect(prompt).toContain('Some viral expertise')
     })
   })
 })

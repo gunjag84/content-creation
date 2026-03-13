@@ -27,7 +27,9 @@ describe('recommendContent', () => {
       const entries: BalanceEntry[] = [
         { id: 1, brand_id: 1, variable_type: 'pillar', variable_value: 'Zebra', usage_count: 3, last_used: null, avg_performance: null },
         { id: 2, brand_id: 1, variable_type: 'pillar', variable_value: 'Apple', usage_count: 3, last_used: null, avg_performance: null },
-        { id: 3, brand_id: 1, variable_type: 'pillar', variable_value: 'Banana', usage_count: 3, last_used: null, avg_performance: null }
+        { id: 3, brand_id: 1, variable_type: 'pillar', variable_value: 'Banana', usage_count: 3, last_used: null, avg_performance: null },
+        { id: 4, brand_id: 1, variable_type: 'theme', variable_value: 'Coaching', usage_count: 5, last_used: null, avg_performance: null },
+        { id: 5, brand_id: 1, variable_type: 'mechanic', variable_value: 'Hook', usage_count: 2, last_used: null, avg_performance: null }
       ]
 
       const result = recommendContent(1, entries)
