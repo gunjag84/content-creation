@@ -78,12 +78,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Learning System
 
-- [ ] **LEARN-01**: System tracks balance matrix across all steerable variables (pillar distribution, theme distribution, mechanic distribution, content type distribution, template distribution, story tool distribution)
-- [ ] **LEARN-02**: System calculates performance-per-variable (avg metrics per theme, per mechanic, per pillar, per template, per story tool)
-- [ ] **LEARN-03**: System generates soft-signal warnings when a variable is overused (e.g., "Mechanic X used 4x in 2 weeks - rotate?")
+- [x] **LEARN-01**: System tracks balance matrix across all steerable variables (pillar distribution, theme distribution, mechanic distribution, content type distribution, template distribution, story tool distribution)
+- [x] **LEARN-02**: System calculates performance-per-variable (avg metrics per theme, per mechanic, per pillar, per template, per story tool)
+- [x] **LEARN-03**: System generates soft-signal warnings when a variable is overused (e.g., "Mechanic X used 4x in 2 weeks - rotate?")
 - [x] **LEARN-04**: Recommendations use equal rotation in cold start (no data yet), then shift to data-driven weighting as performance accumulates
-- [ ] **LEARN-05**: Ad-hoc posts are flagged and excluded from theme balance calculation but included in pillar balance
-- [ ] **LEARN-06**: Pillar balance tracks actual vs. target percentage (from content pillar sliders) and warns on deviation
+- [x] **LEARN-05**: Ad-hoc posts are flagged and excluded from theme balance calculation but included in pillar balance
+- [x] **LEARN-06**: Pillar balance tracks actual vs. target percentage (from content pillar sliders) and warns on deviation
 
 ### Infrastructure
 
@@ -195,12 +195,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-04 | Phase 4 | Pending |
 | PERF-05 | Phase 4 | Pending |
 | PERF-06 | Phase 4 | Pending |
-| LEARN-01 | Phase 3 | Pending |
-| LEARN-02 | Phase 3 | Pending |
-| LEARN-03 | Phase 3 | Pending |
+| LEARN-01 | Phase 3 | Complete |
+| LEARN-02 | Phase 3 | Complete |
+| LEARN-03 | Phase 3 | Complete |
 | LEARN-04 | Phase 3 | Complete |
-| LEARN-05 | Phase 3 | Pending |
-| LEARN-06 | Phase 3 | Pending |
+| LEARN-05 | Phase 3 | Complete |
+| LEARN-06 | Phase 3 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
