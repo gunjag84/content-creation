@@ -17,6 +17,8 @@ export function Step2Generation() {
     generationError,
     setStep,
     setGenerationComplete,
+    setIsGenerating,
+    setGenerationError,
     reset
   } = useCreatePostStore()
 
@@ -75,47 +77,47 @@ export function Step2Generation() {
   }, [displayText])
 
   const startGeneration = async () => {
+    textRef.current = ''
+    setDisplayText('')
+    setIsGenerating(true)
+    setGenerationError(null)
+
+    // Set up event listeners - collect cleanup functions for deferred call
+    const cleanups: (() => void)[] = []
+    const doCleanup = () => cleanups.forEach((fn) => fn())
+
+    cleanups.push(window.api.generation.onToken((token: string) => {
+      textRef.current += token
+    }))
+
+    cleanups.push(window.api.generation.onComplete((result) => {
+      setGenerationComplete(result)
+      doCleanup()
+    }))
+
+    cleanups.push(window.api.generation.onError((error) => {
+      setGenerationError(error.message)
+      doCleanup()
+    }))
+
     try {
-      textRef.current = ''
-      setDisplayText('')
-
-      // Set up event listeners
-      const cleanupToken = window.api.generation.onToken((token: string) => {
-        textRef.current += token
-      })
-
-      const cleanupComplete = window.api.generation.onComplete((result) => {
-        setGenerationComplete(result)
-      })
-
-      const cleanupError = window.api.generation.onError((error) => {
-        console.error('Generation error:', error)
-      })
-
-      // Start streaming
       const response = await window.api.generation.streamContent({
         pillar: selectedPillar,
         theme: selectedTheme,
         mechanic: selectedMechanic,
         contentType,
-        impulse: impulse || '',
-        customBackgroundPath: customBackgroundPath || ''
+        impulse: impulse || ''
       })
 
-      if (response.started) {
-        // Note: The prompt assembly happens in the IPC handler
-        // For now, we'll show a placeholder
-        setAssembledPrompt('[Prompt assembled in backend - not exposed to UI yet]')
-      }
-
-      // Cleanup on unmount
-      return () => {
-        cleanupToken()
-        cleanupComplete()
-        cleanupError()
+      if (response.started && response.prompt) {
+        setAssembledPrompt(response.prompt)
+      } else if (!response.started) {
+        setGenerationError('Failed to start generation. Check your API key in Settings.')
+        doCleanup()
       }
     } catch (error) {
-      console.error('Failed to start generation:', error)
+      setGenerationError((error as Error).message)
+      doCleanup()
     }
   }
 

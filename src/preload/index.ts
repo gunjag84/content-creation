@@ -53,7 +53,7 @@ const api: IElectronAPI = {
 
   // Generation
   generation: {
-    streamContent: (prompt) => ipcRenderer.invoke('generate:content', { prompt }),
+    streamContent: (args) => ipcRenderer.invoke('generate:content', args),
     streamHooks: (args) => ipcRenderer.invoke('generate:hooks', args),
     streamStories: (prompt) => ipcRenderer.invoke('generate:stories', { prompt }),
     onToken: (callback) => {

@@ -56,7 +56,7 @@ export interface IElectronAPI {
 
   // Generation
   generation: {
-    streamContent: (prompt: string) => Promise<{ started: boolean }>
+    streamContent: (args: { pillar: string; theme: string; mechanic: string; contentType: 'single' | 'carousel'; impulse: string }) => Promise<{ started: boolean; prompt?: string }>
     streamHooks: (args: { currentHook: string; slideContext: string; prompt: string }) => Promise<{ started: boolean }>
     streamStories: (prompt: string) => Promise<{ started: boolean }>
     onToken: (callback: (token: string) => void) => () => void

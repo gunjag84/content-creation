@@ -1,13 +1,22 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import Anthropic from '@anthropic-ai/sdk'
 import { SecurityService } from '../services/security-service'
+import { SettingsService } from '../services/settings-service'
+import { assembleMasterPrompt } from '../services/prompt-assembler'
 import type { GenerationResult, StoryProposal } from '../../shared/types/generation'
 
 const securityService = new SecurityService()
+const settingsService = new SettingsService()
 
 export function registerGenerationIPC() {
   // Generate content (feed post slides)
-  ipcMain.handle('generate:content', async (_event, args: { prompt: string }) => {
+  ipcMain.handle('generate:content', async (_event, args: {
+    pillar: string
+    theme: string
+    mechanic: string
+    contentType: 'single' | 'carousel'
+    impulse: string
+  }) => {
     const win = BrowserWindow.getFocusedWindow()
     if (!win) {
       throw new Error('No focused window')
@@ -20,12 +29,22 @@ export function registerGenerationIPC() {
       return { started: false }
     }
 
+    // Load settings and assemble prompt
+    const settings = await settingsService.load()
+    const prompt = assembleMasterPrompt(
+      args.pillar,
+      args.theme,
+      args.mechanic,
+      args.impulse || '',
+      settings
+    )
+
     // Start streaming (async - don't await)
-    streamContent(win, apiKey, args.prompt).catch(err => {
+    streamContent(win, apiKey, prompt).catch(err => {
       win.webContents.send('generate:error', { message: err.message })
     })
 
-    return { started: true }
+    return { started: true, prompt }
   })
 
   // Generate hook alternatives

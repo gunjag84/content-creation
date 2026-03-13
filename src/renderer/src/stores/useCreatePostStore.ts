@@ -52,6 +52,8 @@ interface CreatePostState {
   setStoryProposals: (proposals: StoryProposal[]) => void
   toggleStoryApproval: (index: number) => void
   setExportFolder: (path: string) => void
+  setIsGenerating: (value: boolean) => void
+  setGenerationError: (error: string | null) => void
   reset: () => void
 }
 
@@ -168,6 +170,10 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
   }),
 
   setExportFolder: (path) => set({ exportFolder: path }),
+
+  setIsGenerating: (value) => set({ isGenerating: value }),
+
+  setGenerationError: (error) => set({ generationError: error, isGenerating: false }),
 
   reset: () => set({
     ...initialState,
