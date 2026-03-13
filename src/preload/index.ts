@@ -87,6 +87,16 @@ const api: IElectronAPI = {
   export: {
     selectFolder: () => ipcRenderer.invoke('export:select-folder'),
     saveFiles: (folderPath, files) => ipcRenderer.invoke('export:save-files', { folderPath, files })
+  },
+
+  // Posts
+  posts: {
+    create: (data) => ipcRenderer.invoke('posts:create', data),
+    saveSlides: (slides) => ipcRenderer.invoke('posts:save-slides', slides),
+    updateStatus: (postId, status) => ipcRenderer.invoke('posts:update-status', postId, status),
+    getWithSlides: (postId) => ipcRenderer.invoke('posts:get-with-slides', postId),
+    getRecommendationData: (brandId, targetPercentages) => ipcRenderer.invoke('posts:get-recommendation-data', brandId, targetPercentages),
+    updateBalance: (brandId, variables) => ipcRenderer.invoke('posts:update-balance', brandId, variables)
   }
 }
 

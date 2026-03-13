@@ -12,6 +12,7 @@ import { registerTemplateIPC } from './ipc/templates'
 import { registerFontIPC } from './ipc/fonts'
 import { registerGenerationIPC } from './ipc/generation'
 import { registerExportIPC } from './ipc/export'
+import './ipc/posts'  // Post CRUD and balance IPC handlers
 
 // Global reference to render service for lifecycle management
 let renderService: RenderService

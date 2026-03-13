@@ -1,8 +1,8 @@
 import type { Settings } from '../shared/types/settings'
-import type { Template, TemplateInsert, SettingsVersion } from '../main/db/queries'
-import type { GenerationResult, StoryProposal, ExportFile } from '../shared/types/generation'
+import type { Template, TemplateInsert, SettingsVersion, PostInsert, SlideInsert, Post, Slide, BalanceEntry } from '../main/db/queries'
+import type { GenerationResult, StoryProposal, ExportFile, BalanceWarning, BalanceDashboardData } from '../shared/types/generation'
 
-export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile }
+export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile, PostInsert, SlideInsert, Post, Slide, BalanceEntry, BalanceWarning, BalanceDashboardData }
 
 export interface IElectronAPI {
   // Settings
@@ -70,6 +70,24 @@ export interface IElectronAPI {
   export: {
     selectFolder: () => Promise<{ canceled: boolean; path?: string }>
     saveFiles: (folderPath: string, files: ExportFile[]) => Promise<{ success: boolean; error?: string }>
+  }
+
+  // Posts
+  posts: {
+    create: (data: PostInsert) => Promise<{ success: boolean; postId?: number; error?: string }>
+    saveSlides: (slides: SlideInsert[]) => Promise<{ success: boolean; slideIds?: number[]; error?: string }>
+    updateStatus: (postId: number, status: 'draft' | 'approved' | 'exported') => Promise<{ success: boolean; error?: string }>
+    getWithSlides: (postId: number) => Promise<{ success: boolean; data?: { post: Post; slides: Slide[] }; error?: string }>
+    getRecommendationData: (brandId: number, targetPercentages: Record<string, number>) => Promise<{
+      success: boolean
+      data?: {
+        balanceEntries: BalanceEntry[]
+        warnings: BalanceWarning[]
+        dashboardData: BalanceDashboardData
+      }
+      error?: string
+    }>
+    updateBalance: (brandId: number, variables: Array<{ type: string; value: string }>) => Promise<{ success: boolean; error?: string }>
   }
 }
 
