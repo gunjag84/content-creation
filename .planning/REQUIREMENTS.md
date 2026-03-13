@@ -43,10 +43,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
 - [x] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
 - [x] **POST-07**: User can enter text manually without AI generation (manual mode - system provides empty zones, user fills them)
-- [ ] **POST-08**: User can edit individual slide texts, hooks, and CTAs inline after generation
+- [x] **POST-08**: User can edit individual slide texts, hooks, and CTAs inline after generation
 - [x] **POST-09**: User can request alternative hook suggestions from AI
-- [ ] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
-- [ ] **POST-11**: User can reorder carousel slides via drag and drop
+- [x] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
+- [x] **POST-11**: User can reorder carousel slides via drag and drop
 - [x] **POST-12**: User can request a completely new AI-generated draft
 - [x] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
 - [x] **POST-14**: User sees rendered PNG preview with caption for visual review before export
@@ -169,10 +169,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-05 | Phase 3 | Pending |
 | POST-06 | Phase 3 | Complete |
 | POST-07 | Phase 3 | Complete |
-| POST-08 | Phase 3 | Pending |
+| POST-08 | Phase 3 | Complete |
 | POST-09 | Phase 3 | Complete |
-| POST-10 | Phase 3 | Pending |
-| POST-11 | Phase 3 | Pending |
+| POST-10 | Phase 3 | Complete |
+| POST-11 | Phase 3 | Complete |
 | POST-12 | Phase 3 | Complete |
 | POST-13 | Phase 3 | Complete |
 | POST-14 | Phase 3 | Complete |
