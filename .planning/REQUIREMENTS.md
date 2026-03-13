@@ -36,8 +36,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Post Generation Workflow
 
-- [ ] **POST-01**: System recommends a content pillar, theme, and mechanic based on rotation balance (equal rotation until learning data exists)
-- [ ] **POST-02**: User can accept or override the system recommendation (choose pillar, theme/subtopic/key message, content type, mechanic, template)
+- [x] **POST-01**: System recommends a content pillar, theme, and mechanic based on rotation balance (equal rotation until learning data exists)
+- [x] **POST-02**: User can accept or override the system recommendation (choose pillar, theme/subtopic/key message, content type, mechanic, template)
 - [ ] **POST-03**: User can choose content type: single post or carousel
 - [ ] **POST-04**: User can optionally upload a custom background image that overrides the template background for this post
 - [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
@@ -81,7 +81,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **LEARN-01**: System tracks balance matrix across all steerable variables (pillar distribution, theme distribution, mechanic distribution, content type distribution, template distribution, story tool distribution)
 - [ ] **LEARN-02**: System calculates performance-per-variable (avg metrics per theme, per mechanic, per pillar, per template, per story tool)
 - [ ] **LEARN-03**: System generates soft-signal warnings when a variable is overused (e.g., "Mechanic X used 4x in 2 weeks - rotate?")
-- [ ] **LEARN-04**: Recommendations use equal rotation in cold start (no data yet), then shift to data-driven weighting as performance accumulates
+- [x] **LEARN-04**: Recommendations use equal rotation in cold start (no data yet), then shift to data-driven weighting as performance accumulates
 - [ ] **LEARN-05**: Ad-hoc posts are flagged and excluded from theme balance calculation but included in pillar balance
 - [ ] **LEARN-06**: Pillar balance tracks actual vs. target percentage (from content pillar sliders) and warns on deviation
 
@@ -162,8 +162,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TPL-07 | Phase 1 | Complete |
 | TPL-08 | Phase 2 | Complete |
 | TPL-09 | Phase 2 | Complete |
-| POST-01 | Phase 3 | Pending |
-| POST-02 | Phase 3 | Pending |
+| POST-01 | Phase 3 | Complete |
+| POST-02 | Phase 3 | Complete |
 | POST-03 | Phase 3 | Pending |
 | POST-04 | Phase 3 | Pending |
 | POST-05 | Phase 3 | Pending |
@@ -198,7 +198,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEARN-01 | Phase 3 | Pending |
 | LEARN-02 | Phase 3 | Pending |
 | LEARN-03 | Phase 3 | Pending |
-| LEARN-04 | Phase 3 | Pending |
+| LEARN-04 | Phase 3 | Complete |
 | LEARN-05 | Phase 3 | Pending |
 | LEARN-06 | Phase 3 | Pending |
 | INFRA-01 | Phase 1 | Complete |
