@@ -77,12 +77,17 @@ Plans:
   5. System generates 2-4 story proposals linked to feed post with interactive tool recommendations and dedicated story templates
   6. User can approve and export upload-ready feed PNGs and story PNGs with caption text file
   7. Learning system tracks balance matrix across steerable variables and generates soft-signal warnings when variables are overused
-**Plans**: TBD
+**Plans**: 8 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md - Install deps (@anthropic-ai/sdk, @dnd-kit, react-hook-form), shared generation types, Wave 0 test scaffolds
+- [ ] 03-02-PLAN.md - [TDD] Recommendation engine (round-robin cold start + performance-weighted) + prompt assembler
+- [ ] 03-03-PLAN.md - [TDD] Learning system (balance matrix queries, warning thresholds, pillar balance) + post/slide CRUD IPC
+- [ ] 03-04-PLAN.md - [TDD] Claude API generation IPC handlers (streaming) + file export IPC handlers
+- [ ] 03-05-PLAN.md - [TDD] Zustand wizard store + CreatePost shell + Step 1 (Recommendation & Selection UI)
+- [ ] 03-06-PLAN.md - Step 2 (streaming generation display) + Step 3 (two-panel text editor, thumbnails, caption, drag reorder)
+- [ ] 03-07-PLAN.md - Step 4 (render & review, export) + Step 5 (story proposals, story render, story export)
+- [ ] 03-08-PLAN.md - Dashboard BalanceWidget + final end-to-end UAT checkpoint
 
 ### Phase 4: Production Readiness
 **Goal**: Production-ready app with performance tracking, logging, error handling, and polished UX
@@ -108,6 +113,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
-| 2. Settings & Templates | 11/15 | In Progress|  |
-| 3. Content Generation | 0/3 | Not started | - |
+| 2. Settings & Templates | 15/15 | Complete | 2026-03-11 |
+| 3. Content Generation | 0/8 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
