@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AppLayout } from './components/layout/AppLayout'
 import { Sidebar, type NavItem, type SettingsTab } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
-import { TestRender } from './pages/TestRender'
+import { CreatePost } from './pages/CreatePost'
 import { Settings } from './pages/Settings'
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
       case 'dashboard':
         return <Dashboard />
       case 'create':
-        return <TestRender />
+        return <CreatePost onNavigate={handleNavigate} />
       case 'settings':
         return <Settings activeTab={activeSettingsTab} />
       default:
