@@ -28,6 +28,7 @@ export function Step2Generation() {
   const [retrying, setRetrying] = useState(false)
   const textRef = useRef('')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const hasStartedRef = useRef(false)
 
   // Manual mode: skip generation entirely
   useEffect(() => {
@@ -53,9 +54,10 @@ export function Step2Generation() {
     }
   }, [mode, contentType, setGenerationComplete, setStep])
 
-  // AI mode: start generation on mount
+  // AI mode: start generation on mount (ref guard prevents double-fire in React StrictMode)
   useEffect(() => {
-    if (mode === 'ai' && !retrying) {
+    if (mode === 'ai' && !retrying && !hasStartedRef.current) {
+      hasStartedRef.current = true
       startGeneration()
     }
   }, [mode])
@@ -122,6 +124,7 @@ export function Step2Generation() {
   }
 
   const handleRetry = () => {
+    hasStartedRef.current = false
     setRetrying(true)
     textRef.current = ''
     setDisplayText('')
@@ -129,6 +132,7 @@ export function Step2Generation() {
   }
 
   const handleNewDraft = () => {
+    hasStartedRef.current = false
     reset()
     setRetrying(true)
     textRef.current = ''

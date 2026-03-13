@@ -29,7 +29,8 @@ export function assembleMasterPrompt(
   theme: string,
   mechanic: string,
   impulse: string,
-  settings: Settings
+  settings: Settings,
+  contentType: 'single' | 'carousel' = 'carousel'
 ): string {
   const sections: string[] = []
 
@@ -180,9 +181,40 @@ export function assembleMasterPrompt(
   }
 
   // 9. Master Prompt Template (required - always at the end)
+  // Replace known template variables before appending
   if (masterTemplate) {
-    prompt = prompt + '\n\n' + masterTemplate
+    // Derive mechanic guidelines for {{mechanic_guidelines}} variable
+    const mechanicConfig = settings.mechanics?.mechanics?.find(
+      m => m.name === mechanic && m.active
+    )
+    const mechanicGuidelines = [
+      mechanicConfig?.hookRules,
+      mechanicConfig?.structureGuidelines
+    ].filter(Boolean).join('. ')
+
+    let processedTemplate = masterTemplate
+      // Content variables - replace with actual values
+      .replace(/\{\{pillar\}\}/g, pillar)
+      .replace(/\{\{oberthema\}\}/g, theme)
+      .replace(/\{\{content_type\}\}/g, contentType)
+      .replace(/\{\{mechanic_name\}\}/g, mechanic)
+      .replace(/\{\{mechanic_guidelines\}\}/g, mechanicGuidelines)
+      // Sections already assembled above - remove placeholders to avoid duplication
+      .replace(/\{\{brand_voice\}\}/g, '')
+      .replace(/\{\{target_persona\}\}/g, '')
+      .replace(/\{\{competitor_analysis\}\}/g, '')
+      .replace(/\{\{viral_expertise\}\}/g, '')
+      .replace(/\{\{learning_context\}\}/g, '')
+      // Remove any remaining unknown placeholders
+      .replace(/\{\{[^}]+\}\}/g, '')
+
+    prompt = prompt + '\n\n' + processedTemplate
   }
+
+  // 10. JSON output instruction (always last - overrides any markdown format in template)
+  prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No text before or after the JSON. No markdown code blocks.\n' +
+    '{"slides":[{"slide_number":1,"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":""},{"slide_number":2,"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_number":3,"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
+    'Rules: slide_type must be "cover" for slide 1, "cta" for the last slide, "content" for all others. overlay_opacity defaults to 0.5.'
 
   return prompt
 }
