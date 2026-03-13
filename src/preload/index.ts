@@ -49,7 +49,45 @@ const api: IElectronAPI = {
   getAppInfo: () => ipcRenderer.invoke('app:info'),
 
   // File utilities
-  readFileAsDataUrl: (path) => ipcRenderer.invoke('file:read-as-data-url', path)
+  readFileAsDataUrl: (path) => ipcRenderer.invoke('file:read-as-data-url', path),
+
+  // Generation
+  generation: {
+    streamContent: (prompt) => ipcRenderer.invoke('generate:content', { prompt }),
+    streamHooks: (args) => ipcRenderer.invoke('generate:hooks', args),
+    streamStories: (prompt) => ipcRenderer.invoke('generate:stories', { prompt }),
+    onToken: (callback) => {
+      const listener = (_event: any, token: string) => callback(token)
+      ipcRenderer.on('generate:token', listener)
+      return () => ipcRenderer.removeListener('generate:token', listener)
+    },
+    onComplete: (callback) => {
+      const listener = (_event: any, result: any) => callback(result)
+      ipcRenderer.on('generate:complete', listener)
+      return () => ipcRenderer.removeListener('generate:complete', listener)
+    },
+    onHooksComplete: (callback) => {
+      const listener = (_event: any, result: any) => callback(result)
+      ipcRenderer.on('generate:hooks-complete', listener)
+      return () => ipcRenderer.removeListener('generate:hooks-complete', listener)
+    },
+    onStoriesComplete: (callback) => {
+      const listener = (_event: any, result: any) => callback(result)
+      ipcRenderer.on('generate:stories-complete', listener)
+      return () => ipcRenderer.removeListener('generate:stories-complete', listener)
+    },
+    onError: (callback) => {
+      const listener = (_event: any, error: any) => callback(error)
+      ipcRenderer.on('generate:error', listener)
+      return () => ipcRenderer.removeListener('generate:error', listener)
+    }
+  },
+
+  // Export
+  export: {
+    selectFolder: () => ipcRenderer.invoke('export:select-folder'),
+    saveFiles: (folderPath, files) => ipcRenderer.invoke('export:save-files', { folderPath, files })
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

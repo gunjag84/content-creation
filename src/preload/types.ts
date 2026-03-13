@@ -1,7 +1,8 @@
 import type { Settings } from '../shared/types/settings'
 import type { Template, TemplateInsert, SettingsVersion } from '../main/db/queries'
+import type { GenerationResult, StoryProposal, ExportFile } from '../shared/types/generation'
 
-export type { Settings, Template, TemplateInsert, SettingsVersion }
+export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile }
 
 export interface IElectronAPI {
   // Settings
@@ -52,6 +53,24 @@ export interface IElectronAPI {
 
   // File utilities
   readFileAsDataUrl: (path: string) => Promise<string>
+
+  // Generation
+  generation: {
+    streamContent: (prompt: string) => Promise<{ started: boolean }>
+    streamHooks: (args: { currentHook: string; slideContext: string; prompt: string }) => Promise<{ started: boolean }>
+    streamStories: (prompt: string) => Promise<{ started: boolean }>
+    onToken: (callback: (token: string) => void) => () => void
+    onComplete: (callback: (result: GenerationResult) => void) => () => void
+    onHooksComplete: (callback: (result: { hooks: string[] }) => void) => () => void
+    onStoriesComplete: (callback: (result: { proposals: StoryProposal[] }) => void) => () => void
+    onError: (callback: (error: { message: string; partial?: string }) => void) => () => void
+  }
+
+  // Export
+  export: {
+    selectFolder: () => Promise<{ canceled: boolean; path?: string }>
+    saveFiles: (folderPath: string, files: ExportFile[]) => Promise<{ success: boolean; error?: string }>
+  }
 }
 
 declare global {
