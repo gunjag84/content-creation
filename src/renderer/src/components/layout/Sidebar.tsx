@@ -2,7 +2,7 @@ import { LayoutDashboard, PenSquare, Settings, ChevronLeft, ChevronRight, Chevro
 import { cn } from '@/lib/utils'
 
 export type NavItem = 'dashboard' | 'create' | 'settings'
-export type SettingsTab = 'brand-voice' | 'target-persona' | 'content-pillars' | 'themes' | 'mechanics' | 'content-defaults' | 'brand-guidance' | 'competitor-analysis' | 'story-tools' | 'viral-expertise' | 'master-prompt' | 'templates' | 'settings-history'
+export type SettingsTab = 'brand-voice' | 'target-persona' | 'content-pillars' | 'themes' | 'mechanics' | 'content-defaults' | 'brand-guidance' | 'competitor-analysis' | 'story-tools' | 'viral-expertise' | 'master-prompt' | 'templates' | 'settings-history' | 'api-keys'
 
 interface SidebarProps {
   activeItem: NavItem
@@ -21,6 +21,7 @@ export function Sidebar({ activeItem, activeSettingsTab, onNavigate, onSettingsT
   ]
 
   const settingsItems = [
+    { id: 'api-keys' as SettingsTab, label: 'API Keys' },
     { id: 'brand-voice' as SettingsTab, label: 'Brand Voice' },
     { id: 'target-persona' as SettingsTab, label: 'Target Persona' },
     { id: 'content-pillars' as SettingsTab, label: 'Content Pillars' },

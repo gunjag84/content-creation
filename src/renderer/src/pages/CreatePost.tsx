@@ -1,6 +1,10 @@
 import { useCreatePostStore } from '../stores/useCreatePostStore'
 import { StepIndicator } from '../components/wizard/StepIndicator'
 import { Step1Recommendation } from '../components/wizard/Step1Recommendation'
+import { Step2Generation } from '../components/wizard/Step2Generation'
+import { Step3EditText } from '../components/wizard/Step3EditText'
+import { Step4RenderReview } from '../components/wizard/Step4RenderReview'
+import { Step5Stories } from '../components/wizard/Step5Stories'
 import { Button } from '../components/ui/button'
 import { X } from 'lucide-react'
 import type { NavItem } from '../components/layout/Sidebar'
@@ -24,33 +28,13 @@ export function CreatePost({ onNavigate }: CreatePostProps) {
       case 1:
         return <Step1Recommendation />
       case 2:
-        return (
-          <div className="flex flex-col items-center justify-center p-12">
-            <p className="text-slate-400">Step 2: Generate - Coming Soon</p>
-            <p className="mt-2 text-sm text-slate-500">AI content generation will be implemented here</p>
-          </div>
-        )
+        return <Step2Generation />
       case 3:
-        return (
-          <div className="flex flex-col items-center justify-center p-12">
-            <p className="text-slate-400">Step 3: Edit - Coming Soon</p>
-            <p className="mt-2 text-sm text-slate-500">Slide editor will be implemented here</p>
-          </div>
-        )
+        return <Step3EditText />
       case 4:
-        return (
-          <div className="flex flex-col items-center justify-center p-12">
-            <p className="text-slate-400">Step 4: Render - Coming Soon</p>
-            <p className="mt-2 text-sm text-slate-500">Image rendering will be implemented here</p>
-          </div>
-        )
+        return <Step4RenderReview />
       case 5:
-        return (
-          <div className="flex flex-col items-center justify-center p-12">
-            <p className="text-slate-400">Step 5: Stories - Coming Soon</p>
-            <p className="mt-2 text-sm text-slate-500">Story proposals will be implemented here</p>
-          </div>
-        )
+        return <Step5Stories />
       default:
         return null
     }

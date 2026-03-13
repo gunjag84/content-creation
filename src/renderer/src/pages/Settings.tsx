@@ -13,6 +13,7 @@ import { StoryToolsSection } from '../components/settings/StoryToolsSection'
 import { BrandGuidanceSection } from '../components/settings/BrandGuidanceSection'
 import { TemplateSection } from '../components/settings/TemplateSection'
 import { SettingsHistorySection } from '../components/settings/SettingsHistorySection'
+import { APIKeySection } from '../components/settings/APIKeySection'
 
 interface SettingsProps {
   activeTab: string
@@ -52,6 +53,8 @@ export function Settings({ activeTab }: SettingsProps) {
 
   const renderSection = () => {
     switch (activeTab) {
+      case 'api-keys':
+        return <APIKeySection />
       case 'brand-voice':
         return <BrandVoiceSection settings={settings} onUpdate={updateSection} />
       case 'target-persona':
