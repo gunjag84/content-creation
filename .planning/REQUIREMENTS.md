@@ -41,31 +41,31 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **POST-03**: User can choose content type: single post or carousel
 - [ ] **POST-04**: User can optionally upload a custom background image that overrides the template background for this post
 - [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
-- [ ] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
-- [ ] **POST-07**: User can enter text manually without AI generation (manual mode - system provides empty zones, user fills them)
+- [x] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
+- [x] **POST-07**: User can enter text manually without AI generation (manual mode - system provides empty zones, user fills them)
 - [ ] **POST-08**: User can edit individual slide texts, hooks, and CTAs inline after generation
-- [ ] **POST-09**: User can request alternative hook suggestions from AI
+- [x] **POST-09**: User can request alternative hook suggestions from AI
 - [ ] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
 - [ ] **POST-11**: User can reorder carousel slides via drag and drop
-- [ ] **POST-12**: User can request a completely new AI-generated draft
+- [x] **POST-12**: User can request a completely new AI-generated draft
 - [ ] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
 - [ ] **POST-14**: User sees rendered PNG preview with caption for visual review before export
 - [ ] **POST-15**: User can adjust per-slide overlay opacity for carousels and trigger re-render
-- [ ] **POST-16**: User can approve and export upload-ready PNGs + caption text file
-- [ ] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
+- [x] **POST-16**: User can approve and export upload-ready PNGs + caption text file
+- [x] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
 
 ### Story Generation
 
-- [ ] **STORY-01**: System generates story proposals linked to the feed post (2-4 stories per post, configurable)
-- [ ] **STORY-02**: Story content inherits from feed post (slide texts, caption, theme, mechanic) - no new content invented
-- [ ] **STORY-03**: System assigns story type per story (teaser before post, reference to post, deepening of aspect, behind-the-scenes)
-- [ ] **STORY-04**: System recommends interactive tool per story based on post mechanic and pillar (from story tools catalog)
-- [ ] **STORY-05**: System generates concrete text for interactive tools (poll question + options, quiz question + answers, etc.)
-- [ ] **STORY-06**: System generates story image - either reformatted feed slide (9:16 with brand color padding) or dedicated story template
-- [ ] **STORY-07**: System recommends timing per story (before or after feed post)
-- [ ] **STORY-08**: User can approve, reject, or edit each story (text, tool choice, source slide, image)
-- [ ] **STORY-09**: System renders story PNGs at 1080x1920 (9:16)
-- [ ] **STORY-10**: User can export story PNGs alongside feed post PNGs
+- [x] **STORY-01**: System generates story proposals linked to the feed post (2-4 stories per post, configurable)
+- [x] **STORY-02**: Story content inherits from feed post (slide texts, caption, theme, mechanic) - no new content invented
+- [x] **STORY-03**: System assigns story type per story (teaser before post, reference to post, deepening of aspect, behind-the-scenes)
+- [x] **STORY-04**: System recommends interactive tool per story based on post mechanic and pillar (from story tools catalog)
+- [x] **STORY-05**: System generates concrete text for interactive tools (poll question + options, quiz question + answers, etc.)
+- [x] **STORY-06**: System generates story image - either reformatted feed slide (9:16 with brand color padding) or dedicated story template
+- [x] **STORY-07**: System recommends timing per story (before or after feed post)
+- [x] **STORY-08**: User can approve, reject, or edit each story (text, tool choice, source slide, image)
+- [x] **STORY-09**: System renders story PNGs at 1080x1920 (9:16)
+- [x] **STORY-10**: User can export story PNGs alongside feed post PNGs
 
 ### Performance Tracking
 
@@ -167,28 +167,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-03 | Phase 3 | Pending |
 | POST-04 | Phase 3 | Pending |
 | POST-05 | Phase 3 | Pending |
-| POST-06 | Phase 3 | Pending |
-| POST-07 | Phase 3 | Pending |
+| POST-06 | Phase 3 | Complete |
+| POST-07 | Phase 3 | Complete |
 | POST-08 | Phase 3 | Pending |
-| POST-09 | Phase 3 | Pending |
+| POST-09 | Phase 3 | Complete |
 | POST-10 | Phase 3 | Pending |
 | POST-11 | Phase 3 | Pending |
-| POST-12 | Phase 3 | Pending |
+| POST-12 | Phase 3 | Complete |
 | POST-13 | Phase 3 | Pending |
 | POST-14 | Phase 3 | Pending |
 | POST-15 | Phase 3 | Pending |
-| POST-16 | Phase 3 | Pending |
-| POST-17 | Phase 3 | Pending |
-| STORY-01 | Phase 3 | Pending |
-| STORY-02 | Phase 3 | Pending |
-| STORY-03 | Phase 3 | Pending |
-| STORY-04 | Phase 3 | Pending |
-| STORY-05 | Phase 3 | Pending |
-| STORY-06 | Phase 3 | Pending |
-| STORY-07 | Phase 3 | Pending |
-| STORY-08 | Phase 3 | Pending |
-| STORY-09 | Phase 3 | Pending |
-| STORY-10 | Phase 3 | Pending |
+| POST-16 | Phase 3 | Complete |
+| POST-17 | Phase 3 | Complete |
+| STORY-01 | Phase 3 | Complete |
+| STORY-02 | Phase 3 | Complete |
+| STORY-03 | Phase 3 | Complete |
+| STORY-04 | Phase 3 | Complete |
+| STORY-05 | Phase 3 | Complete |
+| STORY-06 | Phase 3 | Complete |
+| STORY-07 | Phase 3 | Complete |
+| STORY-08 | Phase 3 | Complete |
+| STORY-09 | Phase 3 | Complete |
+| STORY-10 | Phase 3 | Complete |
 | PERF-01 | Phase 4 | Pending |
 | PERF-02 | Phase 4 | Pending |
 | PERF-03 | Phase 4 | Pending |
