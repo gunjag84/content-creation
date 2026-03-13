@@ -137,6 +137,84 @@ export function getStoriesByPost(postId: number): Story[] {
   return stmt.all(postId) as Story[]
 }
 
+// Slide operations
+export interface SlideInsert {
+  post_id: number
+  slide_number: number
+  slide_type: 'cover' | 'content' | 'cta'
+  hook_text: string
+  body_text: string
+  cta_text: string
+  overlay_opacity: number
+  custom_background_path?: string
+}
+
+export interface Slide extends SlideInsert {
+  id: number
+  created_at: number
+}
+
+export function insertSlide(data: SlideInsert): number {
+  const db = getDatabase()
+  const stmt = db.prepare(`
+    INSERT INTO slides (
+      post_id, slide_number, slide_type, hook_text, body_text, cta_text,
+      overlay_opacity, custom_background_path
+    ) VALUES (
+      @post_id, @slide_number, @slide_type, @hook_text, @body_text, @cta_text,
+      @overlay_opacity, @custom_background_path
+    )
+  `)
+
+  const result = stmt.run({
+    post_id: data.post_id,
+    slide_number: data.slide_number,
+    slide_type: data.slide_type,
+    hook_text: data.hook_text,
+    body_text: data.body_text,
+    cta_text: data.cta_text,
+    overlay_opacity: data.overlay_opacity,
+    custom_background_path: data.custom_background_path ?? null
+  })
+
+  return result.lastInsertRowid as number
+}
+
+export function getSlidesByPost(postId: number): Slide[] {
+  const db = getDatabase()
+  const stmt = db.prepare('SELECT * FROM slides WHERE post_id = ? ORDER BY slide_number ASC')
+  return stmt.all(postId) as Slide[]
+}
+
+export function updatePostStatus(postId: number, status: 'draft' | 'approved' | 'exported'): void {
+  const db = getDatabase()
+  const stmt = db.prepare(`
+    UPDATE posts
+    SET status = ?, updated_at = strftime('%s', 'now')
+    WHERE id = ?
+  `)
+  stmt.run(status, postId)
+}
+
+export interface PostWithSlides {
+  post: Post
+  slides: Slide[]
+}
+
+export function getPostWithSlides(postId: number): PostWithSlides {
+  const post = getPost(postId)
+  if (!post) {
+    throw new Error(`Post ${postId} not found`)
+  }
+
+  const slides = getSlidesByPost(postId)
+
+  return {
+    post,
+    slides
+  }
+}
+
 // Balance matrix operations
 export function updateBalanceMatrix(
   brandId: number,
