@@ -48,9 +48,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
 - [ ] **POST-11**: User can reorder carousel slides via drag and drop
 - [x] **POST-12**: User can request a completely new AI-generated draft
-- [ ] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
-- [ ] **POST-14**: User sees rendered PNG preview with caption for visual review before export
-- [ ] **POST-15**: User can adjust per-slide overlay opacity for carousels and trigger re-render
+- [x] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
+- [x] **POST-14**: User sees rendered PNG preview with caption for visual review before export
+- [x] **POST-15**: User can adjust per-slide overlay opacity for carousels and trigger re-render
 - [x] **POST-16**: User can approve and export upload-ready PNGs + caption text file
 - [x] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
 
@@ -174,9 +174,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-10 | Phase 3 | Pending |
 | POST-11 | Phase 3 | Pending |
 | POST-12 | Phase 3 | Complete |
-| POST-13 | Phase 3 | Pending |
-| POST-14 | Phase 3 | Pending |
-| POST-15 | Phase 3 | Pending |
+| POST-13 | Phase 3 | Complete |
+| POST-14 | Phase 3 | Complete |
+| POST-15 | Phase 3 | Complete |
 | POST-16 | Phase 3 | Complete |
 | POST-17 | Phase 3 | Complete |
 | STORY-01 | Phase 3 | Complete |

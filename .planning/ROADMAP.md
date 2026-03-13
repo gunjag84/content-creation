@@ -85,7 +85,7 @@ Plans:
 - [ ] 03-03-PLAN.md - [TDD] Learning system (balance matrix queries, warning thresholds, pillar balance) + post/slide CRUD IPC
 - [ ] 03-04-PLAN.md - [TDD] Claude API generation IPC handlers (streaming) + file export IPC handlers
 - [ ] 03-05-PLAN.md - [TDD] Zustand wizard store + CreatePost shell + Step 1 (Recommendation & Selection UI)
-- [ ] 03-06-PLAN.md - Step 2 (streaming generation display) + Step 3 (two-panel text editor, thumbnails, caption, drag reorder)
+- [x] 03-06-PLAN.md - Step 2 (streaming generation display) + Step 3 (two-panel text editor, thumbnails, caption, drag reorder)
 - [ ] 03-07-PLAN.md - Step 4 (render & review, export) + Step 5 (story proposals, story render, story export)
 - [ ] 03-08-PLAN.md - Dashboard BalanceWidget + final end-to-end UAT checkpoint
 

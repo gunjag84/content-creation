@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 3 of 8 in current phase
+current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-03-PLAN.md (Learning System Backend)
-last_updated: "2026-03-13T07:51:29.564Z"
-last_activity: 2026-03-13 - Completed plan 03-05 (Wizard Store + Step 1 UI)
+stopped_at: Completed 03-07-PLAN.md (Render, Export, and Stories)
+last_updated: "2026-03-13T08:04:25.122Z"
+last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 23
-  percent: 85
+  completed_plans: 25
+  percent: 88
 ---
 
 # Project State
@@ -27,11 +27,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 3 of 4 (Content Generation)
-Current Plan: 3 of 8 in current phase
+Current Plan: 4 of 8 in current phase
 Status: In Progress
-Last activity: 2026-03-13 - Completed plan 03-05 (Wizard Store + Step 1 UI)
+Last activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 
-Progress: [████████░░] 85%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -73,6 +73,8 @@ Progress: [████████░░] 85%
 | Phase 03 P05 | 8.6 | 2 tasks | 5 files |
 | Phase 03 P02 | 11 | 2 tasks | 4 files |
 | Phase 03 P03 | 12 | 2 tasks | 10 files |
+| Phase 03 P06 | 5 | 2 tasks | 4 files |
+| Phase 03 P07 | 7 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -138,6 +140,13 @@ Recent decisions affecting current work:
 - [Phase 03]: Token budget management with 8000 token limit and truncation priority (competitor first, then viral)
 - [Phase 03]: TDD approach for learning system - tests written first, implementation second, all 17 tests passing
 - [Phase 03]: Service layer pattern: Pure functions (generateWarnings, calculatePillarBalance) separate from DB coupling
+- [Phase 03-06]: Ref-based token accumulation with 100ms interval - prevents flicker from rapid state updates during streaming
+- [Phase 03-06]: Manual mode auto-creates empty slides and skips to Step 3 - no generation needed, user fills content directly
+- [Phase 03-06]: Two-panel layout (40% editor, 60% preview) - preview is more important for visual validation, but editing needs space
+- [Phase 03-06]: Inline overlay for alternative hooks - keeps user in context, doesn't require modal navigation
+- [Phase 03-06]: Drag handle + thumbnail click separation - clear affordance for grab to reorder, click to select
+- [Phase 03]: Step 4 manual render trigger - user clicks 'Render & Preview' for control and to prevent unwanted API calls
+- [Phase 03]: Story HTML simple templates for 9:16 - faster for Phase 3, dedicated story templates deferred
 
 ### Pending Todos
 
@@ -149,7 +158,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T07:51:29.558Z
-Stopped at: Completed 03-03-PLAN.md (Learning System Backend)
+Last session: 2026-03-13T08:04:25.118Z
+Stopped at: Completed 03-07-PLAN.md (Render, Export, and Stories)
 Resume file: None
 
