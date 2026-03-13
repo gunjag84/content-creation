@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 15 of 15 in current phase
-status: completed
-stopped_at: Completed 03-04-PLAN.md (Generation & Export IPC)
-last_updated: "2026-03-13T07:47:23.016Z"
-last_activity: 2026-03-11 - Completed plan 02-15 (Add CRUD to Mechanics/StoryTools/Themes)
+current_plan: 3 of 8 in current phase
+status: executing
+stopped_at: Completed 03-05-PLAN.md (Wizard Store + Step 1 UI)
+last_updated: "2026-03-13T07:49:53.252Z"
+last_activity: 2026-03-13 - Completed plan 03-05 (Wizard Store + Step 1 UI)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 21
-  percent: 100
+  completed_plans: 22
+  percent: 85
 ---
 
 # Project State
@@ -22,16 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** The core loop must work end-to-end: pick a topic and mechanic, generate text via Claude, render branded images from HTML/CSS templates, and export upload-ready PNGs - all guided by brand settings and performance insights.
-**Current focus:** Phase 2 - Settings & Templates
+**Current focus:** Phase 3 - Content Generation
 
 ## Current Position
 
-Phase: 2 of 4 (Settings & Templates)
-Current Plan: 15 of 15 in current phase
-Status: Phase Complete
-Last activity: 2026-03-11 - Completed plan 02-15 (Add CRUD to Mechanics/StoryTools/Themes)
+Phase: 3 of 4 (Content Generation)
+Current Plan: 3 of 8 in current phase
+Status: In Progress
+Last activity: 2026-03-13 - Completed plan 03-05 (Wizard Store + Step 1 UI)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 85%
 
 ## Performance Metrics
 
@@ -70,6 +70,8 @@ Progress: [██████████] 100%
 | Phase 02-settings-templates P14 | 3.3 | 2 tasks | 1 files |
 | Phase 02-settings-templates PP15 | 6.2 | 2 tasks | 3 files |
 | Phase 03 P04 | 7 | 2 tasks | 6 files |
+| Phase 03 P05 | 8.6 | 2 tasks | 5 files |
+| Phase 03 P02 | 11 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -126,6 +128,11 @@ Recent decisions affecting current work:
 - [Phase 03-04]: SecurityService instance per IPC module - independent loadAPIKey() access without injection complexity
 - [Phase 03-04]: Partial response capture during streaming enables error recovery for salvaging incomplete JSON
 - [Phase 03-04]: Event listeners return cleanup functions following React useEffect pattern to prevent memory leaks
+- [Phase 03-05]: TDD approach for wizard store - RED tests first, then GREEN implementation ensures correctness
+- [Phase 03-05]: Zustand over Context API for wizard state - simpler, performant, established pattern from Phase 2
+- [Phase 03-05]: Step 1 loads recommendations on mount - automatic cold-start detection without extra user action
+- [Phase 03-05]: Warning badges inline on affected dropdowns - better UX than separate alert dialogs
+- [Phase 03-05]: Mode toggle controls CTA button text and routing - "Generate Content" (AI to Step 2) vs "Fill In Manually" (manual to Step 3)
 
 ### Pending Todos
 
@@ -137,7 +144,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T07:47:23.011Z
-Stopped at: Completed 03-04-PLAN.md (Generation & Export IPC)
-Resume file: None
+Last session: 2026-03-13T07:50:30.000Z
+Stopped at: Completed 03-05-PLAN.md (Wizard Store + Step 1 UI)
+Resume file: .planning/phases/03-content-generation/03-06-PLAN.md
 
