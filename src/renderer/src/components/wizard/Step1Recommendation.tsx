@@ -40,12 +40,12 @@ export function Step1Recommendation() {
     const loadData = async () => {
       try {
         const [recData, settingsData] = await Promise.all([
-          window.api.posts.getRecommendationData(),
+          window.api.posts.getRecommendationData(1, {}),
           window.api.loadSettings()
         ])
 
-        if (recData.recommendation) {
-          setRecommendation(recData.recommendation, recData.warnings || [])
+        if (recData.data?.recommendation) {
+          setRecommendation(recData.data.recommendation, recData.data.warnings || [])
         }
         setSettings(settingsData)
       } catch (error) {
@@ -86,9 +86,16 @@ export function Step1Recommendation() {
     )
   }
 
-  const pillars = settings?.pillar_config.pillars.map((p) => p.name) || []
-  const themes = settings?.learning.themes || []
-  const mechanics = settings?.learning.mechanics || []
+  const PILLAR_DISPLAY_NAMES: Record<string, string> = {
+    generateDemand: 'Generate Demand',
+    convertDemand: 'Convert Demand',
+    nurtureLoyalty: 'Nurture Loyalty'
+  }
+  const pillars = settings?.contentPillars
+    ? Object.keys(settings.contentPillars).map((k) => PILLAR_DISPLAY_NAMES[k] || k)
+    : []
+  const themes = settings?.themes?.oberthemen?.map((t) => t.name) || []
+  const mechanics = settings?.mechanics?.mechanics?.map((m) => m.name) || []
 
   // Find warnings for each dimension
   const pillarWarning = warnings.find((w) => w.variable_type === 'pillar' && w.variable_value === selectedPillar)

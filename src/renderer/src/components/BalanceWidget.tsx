@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
-import type { BalanceDashboardData, BalanceWarning } from '@shared/types/generation'
+import type { BalanceDashboardData, BalanceWarning } from '../../../shared/types/generation'
 
 interface BalanceWidgetProps {
   onNavigate: (page: 'create' | 'dashboard') => void
@@ -13,18 +13,23 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
   const [warnings, setWarnings] = useState<BalanceWarning[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [alertsOpen, setAlertsOpen] = useState(false)
 
   useEffect(() => {
     loadData()
   }, [])
 
+  useEffect(() => {
+    if (warnings.length > 0) setAlertsOpen(true)
+  }, [warnings])
+
   const loadData = async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const result = await window.api.posts.getRecommendationData()
-      setDashboardData(result.dashboardData)
-      setWarnings(result.warnings)
+      const result = await window.api.posts.getRecommendationData(1, {})
+      setDashboardData(result.data?.dashboardData ?? null)
+      setWarnings(result.data?.warnings ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load balance data')
     } finally {
@@ -71,10 +76,9 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
   }
 
   // Warm state - show data
-  const mechanicsMax = Math.max(...dashboardData.mechanics.map(m => m.count), 1)
-  const themesMax = Math.max(...dashboardData.themes.map(t => t.count), 1)
-  const warningSet = new Set(warnings.map(w => w.variable_value))
-  const [alertsOpen, setAlertsOpen] = useState(warnings.length > 0)
+  const mechanicsMax = Math.max(...dashboardData.mechanics.map((m) => m.count), 1)
+  const themesMax = Math.max(...dashboardData.themes.map((t) => t.count), 1)
+  const warningSet = new Set(warnings.map((w) => w.variable_value))
 
   return (
     <Card className="border-slate-700 bg-slate-800/50 p-6 space-y-6">

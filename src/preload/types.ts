@@ -1,8 +1,8 @@
 import type { Settings } from '../shared/types/settings'
 import type { Template, TemplateInsert, SettingsVersion, PostInsert, SlideInsert, Post, Slide, BalanceEntry } from '../main/db/queries'
-import type { GenerationResult, StoryProposal, ExportFile, BalanceWarning, BalanceDashboardData } from '../shared/types/generation'
+import type { GenerationResult, StoryProposal, ExportFile, BalanceWarning, BalanceDashboardData, BalanceRecommendation } from '../shared/types/generation'
 
-export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile, PostInsert, SlideInsert, Post, Slide, BalanceEntry, BalanceWarning, BalanceDashboardData }
+export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile, PostInsert, SlideInsert, Post, Slide, BalanceEntry, BalanceWarning, BalanceDashboardData, BalanceRecommendation }
 
 export interface IElectronAPI {
   // Settings
@@ -78,12 +78,13 @@ export interface IElectronAPI {
     saveSlides: (slides: SlideInsert[]) => Promise<{ success: boolean; slideIds?: number[]; error?: string }>
     updateStatus: (postId: number, status: 'draft' | 'approved' | 'exported') => Promise<{ success: boolean; error?: string }>
     getWithSlides: (postId: number) => Promise<{ success: boolean; data?: { post: Post; slides: Slide[] }; error?: string }>
-    getRecommendationData: (brandId: number, targetPercentages: Record<string, number>) => Promise<{
+    getRecommendationData: (brandId?: number, targetPercentages?: Record<string, number>) => Promise<{
       success: boolean
       data?: {
         balanceEntries: BalanceEntry[]
         warnings: BalanceWarning[]
         dashboardData: BalanceDashboardData
+        recommendation: BalanceRecommendation | null
       }
       error?: string
     }>

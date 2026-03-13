@@ -11,6 +11,7 @@ import {
 } from '../db/queries'
 import { generateWarnings } from '../services/learning-warnings'
 import { calculatePillarBalance } from '../services/pillar-balance'
+import { recommendContent } from '../services/recommendation'
 
 // Create new post
 ipcMain.handle('posts:create', async (event, data: PostInsert) => {
@@ -59,21 +60,31 @@ ipcMain.handle('posts:get-with-slides', async (event, postId: number) => {
   }
 })
 
-// Get recommendation data (balance matrix + warnings + dashboard data)
+// Get recommendation data (balance matrix + warnings + dashboard data + recommendation)
 ipcMain.handle(
   'posts:get-recommendation-data',
-  async (event, brandId: number, targetPercentages: Record<string, number>) => {
+  async (event, brandId: number = 1, targetPercentages: Record<string, number> = {}) => {
     try {
       const balanceEntries = getBalanceMatrix(brandId)
       const warnings = generateWarnings(balanceEntries)
       const dashboardData = calculatePillarBalance(balanceEntries, targetPercentages)
+
+      let recommendation = null
+      if (balanceEntries.length > 0) {
+        try {
+          recommendation = recommendContent(brandId, balanceEntries)
+        } catch {
+          // Cold start or insufficient data - recommendation stays null
+        }
+      }
 
       return {
         success: true,
         data: {
           balanceEntries,
           warnings,
-          dashboardData
+          dashboardData,
+          recommendation
         }
       }
     } catch (error) {
