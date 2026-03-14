@@ -54,14 +54,15 @@ export function Step5Stories() {
     loadSettings()
   }, [])
 
-  // Auto-generate stories on mount
+  // Auto-generate stories once settings are loaded (settings load async so we watch them)
   useEffect(() => {
+    if (!settings) return
     if (storyProposals.length === 0 && !isGenerating) {
       generateStories()
-    } else {
+    } else if (storyProposals.length > 0) {
       setStories(storyProposals.map(p => ({ ...p, isApproved: false, isRejected: false })))
     }
-  }, [])
+  }, [settings])
 
   const generateStories = async () => {
     if (!settings) return
@@ -217,7 +218,9 @@ Generate the stories now.`
         const storyHTML = buildStoryHTML(story, sourceSlide)
 
         // Render at 1080x1920
-        const dataUrl = await window.api.renderToPNG(storyHTML, { width: 1080, height: 1920 })
+        const raw = await window.api.renderToPNG(storyHTML, { width: 1080, height: 1920 })
+        const parsed = JSON.parse(raw)
+        const dataUrl = parsed.dataUrl
 
         storyFiles.push({
           name: `${date}_${themeSlug}_story-${String(i + 1).padStart(2, '0')}.png`,
