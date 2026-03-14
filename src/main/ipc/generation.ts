@@ -181,7 +181,14 @@ async function streamStories(win: BrowserWindow, apiKey: string, prompt: string)
     })
 
     const message = await stream.finalMessage()
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    const rawText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+    // Strip markdown code fences if Claude wrapped the JSON despite instructions
+    const responseText = rawText.trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/, '')
+      .replace(/\s*```$/, '')
+      .trim()
 
     // Parse as JSON array of StoryProposal objects
     const proposals: StoryProposal[] = JSON.parse(responseText)

@@ -119,9 +119,12 @@ export function assembleMasterPrompt(
   }
 
   // 5. Content Defaults (required)
+  const slidesConstraint = contentType === 'single'
+    ? '**Slides:** 1 (SINGLE POST - generate exactly ONE slide, not a carousel)'
+    : `**Carousel Slides:** ${settings.contentDefaults.carouselSlideMin}-${settings.contentDefaults.carouselSlideMax}`
   const defaultsSection = [
     '## Content Constraints',
-    `**Carousel Slides:** ${settings.contentDefaults.carouselSlideMin}-${settings.contentDefaults.carouselSlideMax}`,
+    slidesConstraint,
     `**Caption Max:** ${settings.contentDefaults.captionMaxChars} characters`,
     `**Hashtags:** ${settings.contentDefaults.hashtagMin}-${settings.contentDefaults.hashtagMax}`
   ]
@@ -212,9 +215,15 @@ export function assembleMasterPrompt(
   }
 
   // 10. JSON output instruction (always last - overrides any markdown format in template)
-  prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No text before or after the JSON. No markdown code blocks.\n' +
-    '{"slides":[{"slide_number":1,"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":""},{"slide_number":2,"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_number":3,"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
-    'Rules: slide_type must be "cover" for slide 1, "cta" for the last slide, "content" for all others. overlay_opacity defaults to 0.5.'
+  if (contentType === 'single') {
+    prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No text before or after the JSON. No markdown code blocks.\n' +
+      '{"slides":[{"slide_number":1,"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
+      'Rules: EXACTLY 1 slide for a single post. slide_type must be "cover". Include hook, body, and cta text all in the single slide. overlay_opacity defaults to 0.5.'
+  } else {
+    prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No text before or after the JSON. No markdown code blocks.\n' +
+      '{"slides":[{"slide_number":1,"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":""},{"slide_number":2,"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_number":3,"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
+      'Rules: slide_type must be "cover" for slide 1, "cta" for the last slide, "content" for all others. overlay_opacity defaults to 0.5.'
+  }
 
   return prompt
 }

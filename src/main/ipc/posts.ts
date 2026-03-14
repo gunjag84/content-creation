@@ -12,6 +12,9 @@ import {
 import { generateWarnings } from '../services/learning-warnings'
 import { calculatePillarBalance } from '../services/pillar-balance'
 import { recommendContent } from '../services/recommendation'
+import { SettingsService } from '../services/settings-service'
+
+const settingsService = new SettingsService()
 
 // Create new post
 ipcMain.handle('posts:create', async (event, data: PostInsert) => {
@@ -67,7 +70,17 @@ ipcMain.handle(
     try {
       const balanceEntries = getBalanceMatrix(brandId)
       const warnings = generateWarnings(balanceEntries)
-      const dashboardData = calculatePillarBalance(balanceEntries, targetPercentages)
+
+      // Build target percentages from settings contentPillars if caller didn't provide them
+      const settings = await settingsService.load()
+      const derivedTargets: Record<string, number> = {
+        'Generate Demand': settings.contentPillars?.generateDemand ?? 0,
+        'Convert Demand': settings.contentPillars?.convertDemand ?? 0,
+        'Nurture Loyalty': settings.contentPillars?.nurtureLoyalty ?? 0,
+        ...targetPercentages // caller-supplied values override
+      }
+
+      const dashboardData = calculatePillarBalance(balanceEntries, derivedTargets)
 
       let recommendation = null
       if (balanceEntries.length > 0) {

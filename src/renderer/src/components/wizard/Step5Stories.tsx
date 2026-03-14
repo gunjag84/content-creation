@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
@@ -40,6 +40,7 @@ export function Step5Stories() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [stories, setStories] = useState<EditableStory[]>([])
   const [isExporting, setIsExporting] = useState(false)
+  const hasStartedRef = useRef(false)
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -57,7 +58,8 @@ export function Step5Stories() {
   // Auto-generate stories once settings are loaded (settings load async so we watch them)
   useEffect(() => {
     if (!settings) return
-    if (storyProposals.length === 0 && !isGenerating) {
+    if (storyProposals.length === 0 && !hasStartedRef.current) {
+      hasStartedRef.current = true
       generateStories()
     } else if (storyProposals.length > 0) {
       setStories(storyProposals.map(p => ({ ...p, isApproved: false, isRejected: false })))
@@ -70,19 +72,24 @@ export function Step5Stories() {
     setIsGenerating(true)
 
     try {
-      // Build prompt using story-generator service (imported on main process)
-      // For now, build it here to avoid circular imports
       const prompt = buildStoryPromptLocal()
 
-      // Register completion listener
-      const cleanup = window.api.generation.onStoriesComplete((result) => {
+      const cleanups: (() => void)[] = []
+      const doCleanup = () => cleanups.forEach((fn) => fn())
+
+      cleanups.push(window.api.generation.onStoriesComplete((result) => {
         setStoryProposals(result.proposals)
         setStories(result.proposals.map(p => ({ ...p, isApproved: false, isRejected: false })))
         setIsGenerating(false)
-        cleanup()
-      })
+        doCleanup()
+      }))
 
-      // Start generation
+      cleanups.push(window.api.generation.onError((error) => {
+        console.error('Story generation failed:', error.message)
+        setIsGenerating(false)
+        doCleanup()
+      }))
+
       await window.api.generation.streamStories(prompt)
     } catch (error) {
       console.error('Failed to generate stories:', error)

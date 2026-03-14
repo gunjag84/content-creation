@@ -20,6 +20,7 @@ export function Step4RenderReview() {
     selectedTheme,
     selectedMechanic,
     contentType,
+    customBackgroundPath,
     setRenderedPNGs,
     setPostId,
     setExportFolder,
@@ -92,9 +93,12 @@ export function Step4RenderReview() {
       guidance?.ctaFont?.path ? `@font-face { font-family: 'CustomCTA'; src: url('file://${guidance.ctaFont.path}'); }` : ''
     ].filter(Boolean).join('\n')
 
-    // Background CSS from template
+    // Background CSS: custom upload > template > settings fallback
     let backgroundCSS = `background-color: ${guidance?.backgroundColor || '#1a1a2e'};`
-    if (template) {
+    if (customBackgroundPath) {
+      const bgUrl = customBackgroundPath.replace(/\\/g, '/')
+      backgroundCSS = `background-image: url('file:///${bgUrl}'); background-size: cover; background-position: center;`
+    } else if (template) {
       if (template.background_type === 'solid_color') {
         backgroundCSS = `background-color: ${template.background_value};`
       } else if (template.background_type === 'image') {
@@ -137,12 +141,19 @@ export function Step4RenderReview() {
       return `<div style="position:absolute;left:${zone.x}px;top:${zone.y}px;width:${zone.width}px;height:${zone.height}px;font-family:${fontFamily};font-size:${zone.fontSize || 40}px;color:${color};overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;padding:8px;word-wrap:break-word;white-space:pre-wrap;">${text}</div>`
     }).filter(Boolean).join('\n')
 
-    // Fallback centered layout when no zones defined
+    // Fallback layout when no zones defined: hook at top, body in middle, CTA at bottom
+    const headlineFamily = guidance?.headlineFont ? "'CustomHeadline', sans-serif" : 'sans-serif'
+    const bodyFamily = guidance?.bodyFont ? "'CustomBody', sans-serif" : 'sans-serif'
+    const ctaFamily = guidance?.ctaFont ? "'CustomCTA', sans-serif" : 'sans-serif'
     const fallback = zones.length === 0 ? `
-      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:32px;">
-        ${slide.hook_text ? `<div style="font-family:${guidance?.headlineFont ? "'CustomHeadline'" : 'sans-serif'};font-size:52px;color:${primaryColor};text-align:center;line-height:1.2;">${slide.hook_text}</div>` : ''}
-        ${slide.body_text ? `<div style="font-family:${guidance?.bodyFont ? "'CustomBody'" : 'sans-serif'};font-size:36px;color:${secondaryColor};text-align:center;line-height:1.5;max-width:880px;">${slide.body_text}</div>` : ''}
-        ${ctaText ? `<div style="font-family:${guidance?.ctaFont ? "'CustomCTA'" : 'sans-serif'};font-size:32px;color:${primaryColor};background-color:${secondaryColor};padding:16px 32px;border-radius:8px;font-weight:bold;">${ctaText}</div>` : ''}
+      <div style="position:absolute;top:0;left:0;right:0;height:340px;display:flex;align-items:center;justify-content:center;padding:60px 80px 30px;">
+        ${slide.hook_text ? `<div style="font-family:${headlineFamily};font-size:56px;color:${primaryColor};text-align:center;line-height:1.25;font-weight:bold;">${slide.hook_text}</div>` : ''}
+      </div>
+      <div style="position:absolute;top:340px;left:0;right:0;bottom:240px;display:flex;align-items:center;justify-content:center;padding:0 80px;">
+        ${slide.body_text ? `<div style="font-family:${bodyFamily};font-size:38px;color:${secondaryColor};text-align:center;line-height:1.6;">${slide.body_text}</div>` : ''}
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:240px;display:flex;align-items:center;justify-content:center;padding:30px 80px 60px;">
+        ${ctaText ? `<div style="font-family:${ctaFamily};font-size:34px;color:${primaryColor};text-align:center;font-weight:bold;">${ctaText}</div>` : ''}
       </div>` : ''
 
     const logoSize = { small: 80, medium: 120, large: 160 }[guidance?.logo?.size || 'medium'] || 120
