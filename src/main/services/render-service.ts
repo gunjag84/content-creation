@@ -64,10 +64,16 @@ export class RenderService {
 
     // Load HTML and wait for completion
     await new Promise<void>((resolve, reject) => {
-      this.renderWindow!.webContents.once('did-finish-load', () => {
+      const onLoad = () => {
+        this.renderWindow!.webContents.removeListener('did-fail-load', onFail)
         resolve()
-      })
-
+      }
+      const onFail = (_event: any, errorCode: number, errorDescription: string) => {
+        this.renderWindow!.webContents.removeListener('did-finish-load', onLoad)
+        reject(new Error(`Page load failed: ${errorDescription} (${errorCode})`))
+      }
+      this.renderWindow!.webContents.once('did-finish-load', onLoad)
+      this.renderWindow!.webContents.once('did-fail-load', onFail)
       this.renderWindow!.loadFile(htmlFilePath).catch(reject)
     })
 

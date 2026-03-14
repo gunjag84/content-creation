@@ -7,6 +7,7 @@ import { Label } from '../ui/label'
 import { Loader2 } from 'lucide-react'
 import type { Settings } from '../../../../shared/types/settings'
 import type { Template } from '../../../../preload/types'
+import type { Zone } from '../templates/ZoneEditor'
 
 export function Step4RenderReview() {
   const {
@@ -62,55 +63,97 @@ export function Step4RenderReview() {
       .replace(/[^a-z0-9-]/g, '')
   }
 
+  const getLogoPositionStyle = (logo: NonNullable<NonNullable<Settings['visualGuidance']>['logo']>): string => {
+    switch (logo.position) {
+      case 'top-left': return 'top: 40px; left: 40px;'
+      case 'top-center': return 'top: 40px; left: 50%; transform: translateX(-50%);'
+      case 'top-right': return 'top: 40px; right: 40px;'
+      case 'bottom-left': return 'bottom: 40px; left: 40px;'
+      case 'bottom-center': return 'bottom: 40px; left: 50%; transform: translateX(-50%);'
+      case 'bottom-right': return 'bottom: 40px; right: 40px;'
+      default: return 'bottom: 40px; left: 50%; transform: translateX(-50%);'
+    }
+  }
+
   const buildSlideHTML = (slideIndex: number): string => {
-    if (!template) return ''
-
     const slide = generatedSlides[slideIndex]
-    const zones = template.zones_config as any
+    const guidance = settings?.visualGuidance
 
-    // Simple HTML template injection (in production, use proper template engine)
-    let html = template.html_template || ''
-
-    // Replace zone placeholders with actual content
-    // Hook zone
-    if (zones.hook) {
-      html = html.replace('{{hook}}', slide.hook_text || '')
+    // Parse zones_config from template
+    let zones: Zone[] = []
+    if (template?.zones_config) {
+      try { zones = JSON.parse(template.zones_config) } catch (_) { zones = [] }
     }
 
-    // Body zone
-    if (zones.body) {
-      html = html.replace('{{body}}', slide.body_text || '')
-    }
+    // Font face declarations
+    const fontStyles = [
+      guidance?.headlineFont?.path ? `@font-face { font-family: 'CustomHeadline'; src: url('file://${guidance.headlineFont.path}'); }` : '',
+      guidance?.bodyFont?.path ? `@font-face { font-family: 'CustomBody'; src: url('file://${guidance.bodyFont.path}'); }` : '',
+      guidance?.ctaFont?.path ? `@font-face { font-family: 'CustomCTA'; src: url('file://${guidance.ctaFont.path}'); }` : ''
+    ].filter(Boolean).join('\n')
 
-    // CTA zone - apply POST-17 for last slide
-    if (zones.cta) {
-      let ctaText = slide.cta_text || ''
-
-      // If this is the last slide and it's a CTA type, use standard CTA from visual guidance
-      if (slideIndex === generatedSlides.length - 1 && slide.slide_type === 'cta') {
-        if (settings?.visualGuidance?.standardCTA) {
-          ctaText = settings.visualGuidance.standardCTA
-        }
+    // Background CSS from template
+    let backgroundCSS = `background-color: ${guidance?.backgroundColor || '#1a1a2e'};`
+    if (template) {
+      if (template.background_type === 'solid_color') {
+        backgroundCSS = `background-color: ${template.background_value};`
+      } else if (template.background_type === 'image') {
+        backgroundCSS = `background-image: url('file://${template.background_value}'); background-size: cover; background-position: center;`
+      } else if (template.background_type === 'gradient') {
+        backgroundCSS = `background: ${template.background_value};`
       }
-
-      html = html.replace('{{cta}}', ctaText)
     }
 
-    // Apply overlay opacity
-    html = html.replace('{{overlay_opacity}}', slide.overlay_opacity.toString())
+    const overlayOpacity = slide.overlay_opacity ?? 0.5
+    const overlayColor = template?.overlay_color || '#000000'
+    const showOverlay = template?.overlay_enabled ?? true
+    const primaryColor = guidance?.primaryColor || '#ffffff'
+    const secondaryColor = guidance?.secondaryColor || '#cccccc'
 
-    // Apply brand colors if available
-    if (settings?.visualGuidance) {
-      html = html.replace(/{{primary_color}}/g, settings.visualGuidance.primaryColor || '#000000')
-      html = html.replace(/{{secondary_color}}/g, settings.visualGuidance.secondaryColor || '#666666')
-      html = html.replace(/{{background_color}}/g, settings.visualGuidance.backgroundColor || '#ffffff')
-    }
+    // CTA text: last slide uses standardCTA if available (POST-17)
+    const ctaText = (slideIndex === generatedSlides.length - 1 && slide.slide_type === 'cta' && guidance?.standardCTA)
+      ? guidance.standardCTA
+      : (slide.cta_text || '')
 
-    return html
+    // Build zone divs from zones_config
+    const zoneElements = zones.map(zone => {
+      if (zone.type === 'no-text') return ''
+      let text = ''
+      let fontFamily = 'sans-serif'
+      let color = primaryColor
+      if (zone.type === 'hook') {
+        text = slide.hook_text || ''
+        fontFamily = guidance?.headlineFont ? "'CustomHeadline'" : 'sans-serif'
+        color = primaryColor
+      } else if (zone.type === 'body') {
+        text = slide.body_text || ''
+        fontFamily = guidance?.bodyFont ? "'CustomBody'" : 'sans-serif'
+        color = secondaryColor
+      } else if (zone.type === 'cta') {
+        text = ctaText
+        fontFamily = guidance?.ctaFont ? "'CustomCTA'" : 'sans-serif'
+        color = primaryColor
+      }
+      return `<div style="position:absolute;left:${zone.x}px;top:${zone.y}px;width:${zone.width}px;height:${zone.height}px;font-family:${fontFamily};font-size:${zone.fontSize || 40}px;color:${color};overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;padding:8px;word-wrap:break-word;white-space:pre-wrap;">${text}</div>`
+    }).filter(Boolean).join('\n')
+
+    // Fallback centered layout when no zones defined
+    const fallback = zones.length === 0 ? `
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:32px;">
+        ${slide.hook_text ? `<div style="font-family:${guidance?.headlineFont ? "'CustomHeadline'" : 'sans-serif'};font-size:52px;color:${primaryColor};text-align:center;line-height:1.2;">${slide.hook_text}</div>` : ''}
+        ${slide.body_text ? `<div style="font-family:${guidance?.bodyFont ? "'CustomBody'" : 'sans-serif'};font-size:36px;color:${secondaryColor};text-align:center;line-height:1.5;max-width:880px;">${slide.body_text}</div>` : ''}
+        ${ctaText ? `<div style="font-family:${guidance?.ctaFont ? "'CustomCTA'" : 'sans-serif'};font-size:32px;color:${primaryColor};background-color:${secondaryColor};padding:16px 32px;border-radius:8px;font-weight:bold;">${ctaText}</div>` : ''}
+      </div>` : ''
+
+    const logoSize = { small: 80, medium: 120, large: 160 }[guidance?.logo?.size || 'medium'] || 120
+    const logoHtml = guidance?.logo?.path ? `<img src="file://${guidance.logo.path}" style="position:absolute;${getLogoPositionStyle(guidance.logo)};width:${logoSize}px;height:auto;object-fit:contain;" alt="" />` : ''
+    const handleHtml = guidance?.instagramHandle ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${guidance?.bodyFont ? "'CustomBody'" : 'sans-serif'};font-size:20px;color:${secondaryColor};">${guidance.instagramHandle}</div>` : ''
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; ${backgroundCSS} } .overlay { position: absolute; inset: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; }</style></head><body>${showOverlay ? '<div class="overlay"></div>' : ''}${zoneElements}${fallback}${logoHtml}${handleHtml}</body></html>`
   }
 
   const handleRenderPreviews = async () => {
-    if (!template || generatedSlides.length === 0) return
+    if (generatedSlides.length === 0) return
 
     setIsRendering(true)
     setRenderProgress({ current: 0, total: generatedSlides.length })
@@ -120,10 +163,12 @@ export function Step4RenderReview() {
     try {
       for (let i = 0; i < generatedSlides.length; i++) {
         const html = buildSlideHTML(i)
-        const dataUrl = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+        const raw = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+        const parsed = JSON.parse(raw)
+        const dataUrl = parsed.dataUrl
 
         pngs.push(dataUrl)
-        setPreviewPNGs([...pngs]) // Update preview incrementally
+        setPreviewPNGs([...pngs])
         setRenderProgress({ current: i + 1, total: generatedSlides.length })
       }
 
@@ -137,16 +182,14 @@ export function Step4RenderReview() {
 
   const handleOpacityChange = async (slideIndex: number, value: number[]) => {
     const newOpacity = value[0] / 100
-
-    // Update store
     setSlide(slideIndex, 'overlay_opacity', newOpacity)
 
-    // Re-render this specific slide
     try {
       const html = buildSlideHTML(slideIndex)
-      const dataUrl = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+      const raw = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
+      const parsed = JSON.parse(raw)
+      const dataUrl = parsed.dataUrl
 
-      // Update preview and rendered PNGs
       const newPNGs = [...previewPNGs]
       newPNGs[slideIndex] = dataUrl
       setPreviewPNGs(newPNGs)
