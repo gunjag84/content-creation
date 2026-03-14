@@ -20,19 +20,25 @@ export class RenderService {
           webPreferences: {
             offscreen: false,
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
+            // Required for Electron 40 / Chromium 130+: allows file:// navigation
+            // from the render window without cross-origin blocking
+            webSecurity: false
           }
         })
 
-        // Load blank HTML page
-        const blankHTML = 'data:text/html,<html><body></body></html>'
+        // Initialize with a file:// URL so subsequent loadFile calls stay same-origin.
+        // Using data: as origin causes Chromium 130+ to block file:// navigation (ERR_ABORTED).
+        const tempDir = app.getPath('temp')
+        const initPath = path.join(tempDir, 'render_init.html')
+        fs.writeFileSync(initPath, '<!DOCTYPE html><html><body></body></html>', 'utf-8')
 
         // Wait for initial load to complete
         this.renderWindow.webContents.once('did-finish-load', () => {
           resolve()
         })
 
-        this.renderWindow.loadURL(blankHTML)
+        this.renderWindow.loadFile(initPath)
       } catch (error) {
         reject(error)
       }
