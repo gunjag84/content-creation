@@ -21,6 +21,12 @@ export function useAutoSave<T>(
   const timeoutRef = useRef<NodeJS.Timeout>()
   const initializedRef = useRef(false)
   const valueRef = useRef(value)
+  const onSaveRef = useRef(onSave)
+
+  // Keep onSave ref current without triggering effect
+  useEffect(() => {
+    onSaveRef.current = onSave
+  }, [onSave])
 
   useEffect(() => {
     // Skip save on initial mount
@@ -47,7 +53,7 @@ export function useAutoSave<T>(
       async () => {
         setSaving(true)
         try {
-          await onSave(value)
+          await onSaveRef.current(value)
           setLastSaved(new Date())
         } catch (err) {
           console.error('Auto-save failed:', err)
@@ -64,7 +70,7 @@ export function useAutoSave<T>(
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [value, onSave, delay])
+  }, [value, delay])
 
   return { saving, lastSaved }
 }
