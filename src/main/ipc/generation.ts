@@ -62,8 +62,23 @@ export function registerGenerationIPC() {
       return { started: false }
     }
 
+    // Build hooks prompt from context
+    const hooksPrompt = `You are a social media copywriting expert. Generate exactly 3 alternative hook options for an Instagram carousel slide.
+
+Current hook: "${args.currentHook}"
+
+Slide context: ${args.slideContext}
+
+Requirements:
+- Each hook must be a different angle/approach
+- Keep hooks concise (1-2 sentences max)
+- Make them attention-grabbing and scroll-stopping
+- Return ONLY a JSON array of 3 strings, no markdown, no explanation
+
+Example format: ["Hook option 1", "Hook option 2", "Hook option 3"]`
+
     // Start streaming (async - don't await)
-    streamHooks(win, apiKey, args.prompt).catch(err => {
+    streamHooks(win, apiKey, hooksPrompt).catch(err => {
       win.webContents.send('generate:error', { message: err.message })
     })
 
@@ -150,7 +165,14 @@ async function streamHooks(win: BrowserWindow, apiKey: string, prompt: string) {
     })
 
     const message = await stream.finalMessage()
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    const rawText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+    // Strip markdown code fences if Claude wrapped the JSON despite instructions
+    const responseText = rawText.trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/, '')
+      .replace(/\s*```$/, '')
+      .trim()
 
     // Parse as JSON array of hook strings
     const hooks: string[] = JSON.parse(responseText)

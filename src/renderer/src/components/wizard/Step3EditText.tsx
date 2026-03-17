@@ -129,6 +129,16 @@ export function Step3EditText() {
         setHookOptions(result.hooks)
         setIsLoadingHooks(false)
         cleanup()
+        cleanupError()
+      })
+
+      // Set up listener for errors so overlay never hangs
+      const cleanupError = window.api.generation.onError((error) => {
+        console.error('Hooks generation failed:', error.message)
+        setIsLoadingHooks(false)
+        setShowHooksOverlay(false)
+        cleanup()
+        cleanupError()
       })
 
       // Request alternative hooks
