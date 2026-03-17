@@ -10,16 +10,16 @@ const settingsService = new SettingsService()
 
 export function registerGenerationIPC() {
   // Generate content (feed post slides)
-  ipcMain.handle('generate:content', async (_event, args: {
+  ipcMain.handle('generate:content', async (event, args: {
     pillar: string
     theme: string
     mechanic: string
     contentType: 'single' | 'carousel'
     impulse: string
   }) => {
-    const win = BrowserWindow.getFocusedWindow()
+    const win = BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getAllWindows()[0]
     if (!win) {
-      throw new Error('No focused window')
+      throw new Error('No available window')
     }
 
     // Load API key
@@ -49,10 +49,10 @@ export function registerGenerationIPC() {
   })
 
   // Generate hook alternatives
-  ipcMain.handle('generate:hooks', async (_event, args: { currentHook: string; slideContext: string; prompt: string }) => {
-    const win = BrowserWindow.getFocusedWindow()
+  ipcMain.handle('generate:hooks', async (event, args: { currentHook: string; slideContext: string; prompt: string }) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getAllWindows()[0]
     if (!win) {
-      throw new Error('No focused window')
+      throw new Error('No available window')
     }
 
     // Load API key
@@ -86,10 +86,10 @@ Example format: ["Hook option 1", "Hook option 2", "Hook option 3"]`
   })
 
   // Generate story proposals
-  ipcMain.handle('generate:stories', async (_event, args: { prompt: string }) => {
-    const win = BrowserWindow.getFocusedWindow()
+  ipcMain.handle('generate:stories', async (event, args: { prompt: string }) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getAllWindows()[0]
     if (!win) {
-      throw new Error('No focused window')
+      throw new Error('No available window')
     }
 
     // Load API key
