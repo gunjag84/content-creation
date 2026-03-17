@@ -82,46 +82,50 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
 
   return (
     <Card className="border-slate-700 bg-slate-800/50 p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-slate-100">Balance Overview</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-100">Balance Overview</h2>
+        <span className="text-xs text-slate-500">{dashboardData.total_posts} posts total</span>
+      </div>
 
-      {/* Section 1: Content Pillars */}
+      {/* Section 1: Content Pillars - actual vs target */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-slate-300">Content Pillars</h3>
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-700 text-slate-300">
-            {dashboardData.total_posts} posts
-          </span>
+          <div className="flex items-center gap-3 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-1.5 rounded-full bg-blue-500" /> actual
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-1.5 rounded-full border border-dashed border-blue-400/60" /> target
+            </span>
+          </div>
         </div>
         <div className="space-y-3">
           {dashboardData.pillars.map((pillar) => {
             const deviation = Math.abs(pillar.actual_pct - pillar.target_pct)
-            const showWarning = deviation > 15
+            const offTarget = deviation > 15
             return (
               <div key={pillar.name} className="space-y-1">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={offTarget ? 'text-amber-400' : 'text-slate-400'}>
                     {pillar.name}
-                    {showWarning && (
-                      <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-                    )}
+                    {offTarget && ' - off target'}
                   </span>
-                  <span>{pillar.actual_pct.toFixed(0)}% / {pillar.target_pct}% target</span>
+                  <span className="text-slate-500">
+                    {pillar.actual_pct.toFixed(0)}% of {pillar.target_pct}%
+                  </span>
                 </div>
-                <div className="space-y-1">
-                  {/* Actual bar */}
-                  <div className="relative h-2 w-full bg-slate-700 rounded-full">
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-full bg-blue-500"
-                      style={{ width: `${pillar.actual_pct}%` }}
-                    />
-                  </div>
-                  {/* Target bar (dashed outline) */}
-                  <div className="relative h-2 w-full bg-transparent rounded-full border border-dashed border-blue-500/40">
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-full border-r border-blue-500/40"
-                      style={{ width: `${pillar.target_pct}%` }}
-                    />
-                  </div>
+                {/* Single combined bar: actual fill + target marker */}
+                <div className="relative h-2 w-full bg-slate-700 rounded-full">
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full ${offTarget ? 'bg-amber-500/80' : 'bg-blue-500'}`}
+                    style={{ width: `${pillar.actual_pct}%` }}
+                  />
+                  {/* Target marker line */}
+                  <div
+                    className="absolute inset-y-0 w-0.5 bg-blue-400/60"
+                    style={{ left: `${pillar.target_pct}%` }}
+                  />
                 </div>
               </div>
             )
@@ -129,59 +133,71 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
         </div>
       </div>
 
-      {/* Section 2: Mechanics */}
+      {/* Section 2: Mechanics - usage frequency */}
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-slate-300">Mechanics</h3>
         <div className="space-y-2">
           {dashboardData.mechanics
             .sort((a, b) => b.count - a.count)
-            .map((mechanic) => (
-              <div key={mechanic.name} className="space-y-1">
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                  {warningSet.has(mechanic.name) && (
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-                  )}
-                  <span>{mechanic.name} ({mechanic.count})</span>
+            .map((mechanic) => {
+              const hasWarning = warningSet.has(mechanic.name)
+              return (
+                <div key={mechanic.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={hasWarning ? 'text-amber-400' : 'text-slate-400'}>
+                      {mechanic.name}
+                      {hasWarning && ' - overused'}
+                    </span>
+                    <span className="text-slate-500">
+                      {mechanic.count}x used
+                    </span>
+                  </div>
+                  <div className="relative h-2 w-full bg-slate-700 rounded-full">
+                    <div
+                      className={`absolute inset-y-0 left-0 rounded-full ${hasWarning ? 'bg-amber-500/80' : 'bg-slate-500'}`}
+                      style={{ width: `${(mechanic.count / mechanicsMax) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="relative h-2 w-full bg-slate-700 rounded-full">
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-slate-500"
-                    style={{ width: `${(mechanic.count / mechanicsMax) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              )
+            })}
         </div>
       </div>
 
-      {/* Section 3: Themes */}
+      {/* Section 3: Themes - usage frequency */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-slate-300">Themes</h3>
           {dashboardData.themes.length > 8 && (
-            <span className="text-xs text-slate-500">(showing top 8)</span>
+            <span className="text-xs text-slate-500">(top 8)</span>
           )}
         </div>
         <div className="space-y-2">
           {dashboardData.themes
             .sort((a, b) => b.count - a.count)
             .slice(0, 8)
-            .map((theme) => (
-              <div key={theme.name} className="space-y-1">
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                  {warningSet.has(theme.name) && (
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-                  )}
-                  <span>{theme.name} ({theme.count})</span>
+            .map((theme) => {
+              const hasWarning = warningSet.has(theme.name)
+              return (
+                <div key={theme.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={hasWarning ? 'text-amber-400' : 'text-slate-400'}>
+                      {theme.name}
+                      {hasWarning && ' - overused'}
+                    </span>
+                    <span className="text-slate-500">
+                      {theme.count}x used
+                    </span>
+                  </div>
+                  <div className="relative h-2 w-full bg-slate-700 rounded-full">
+                    <div
+                      className={`absolute inset-y-0 left-0 rounded-full ${hasWarning ? 'bg-amber-500/80' : 'bg-slate-500'}`}
+                      style={{ width: `${(theme.count / themesMax) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="relative h-2 w-full bg-slate-700 rounded-full">
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-slate-500"
-                    style={{ width: `${(theme.count / themesMax) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              )
+            })}
         </div>
       </div>
 
