@@ -3,6 +3,7 @@ import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { SlideEditor } from './SlideEditor'
 import { LivePreview } from './LivePreview'
 import { SlideZoneOverrides } from './SlideZoneOverrides'
+import { SlidePresetManager } from './SlidePresetManager'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
@@ -412,6 +413,14 @@ export function Step3EditText() {
               {/* Zone Overrides Panel */}
               {zones.length > 0 && (
                 <SlideZoneOverrides zones={zones} slideIndex={activeSlideIndex} />
+              )}
+
+              {/* Preset Manager */}
+              {zones.length > 0 && (
+                <SlidePresetManager
+                  slideIndex={activeSlideIndex}
+                  templateId={template?.id}
+                />
               )}
             </TabsContent>
 
