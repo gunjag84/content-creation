@@ -26,9 +26,11 @@ export function Step1Recommendation() {
     contentType,
     impulse,
     customBackgroundPath,
+    adHoc,
     setMode,
     setRecommendation,
     setSelection,
+    setAdHoc,
     setStep,
     initManualSlides
   } = useCreatePostStore()
@@ -272,6 +274,19 @@ export function Step1Recommendation() {
                 </span>
               )}
             </div>
+          </div>
+
+          {/* Ad-hoc Post Toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900 p-4">
+            <div className="space-y-0.5">
+              <Label className="text-slate-300">Ad-hoc Post</Label>
+              <p className="text-sm text-slate-500">
+                {adHoc
+                  ? 'This post will not affect theme/mechanic rotation balance'
+                  : 'Post contributes to all rotation balances'}
+              </p>
+            </div>
+            <Switch checked={adHoc} onCheckedChange={(checked) => setAdHoc(checked)} />
           </div>
 
           {/* Mode Toggle */}

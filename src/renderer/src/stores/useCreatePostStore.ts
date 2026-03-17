@@ -21,6 +21,7 @@ interface CreatePostState {
   contentType: 'single' | 'carousel'
   impulse: string
   customBackgroundPath: string | null
+  adHoc: boolean
 
   // Step 2/3 - Generation & Editing
   generatedSlides: Slide[]
@@ -41,6 +42,7 @@ interface CreatePostState {
   setStep: (step: 1 | 2 | 3 | 4 | 5) => void
   setMode: (mode: 'ai' | 'manual') => void
   setRecommendation: (rec: BalanceRecommendation, warnings: BalanceWarning[]) => void
+  setAdHoc: (value: boolean) => void
   setSelection: (field: 'selectedPillar' | 'selectedTheme' | 'selectedMechanic' | 'contentType' | 'impulse' | 'customBackgroundPath', value: string | null) => void
   setSlide: (index: number, field: keyof Slide, value: string | number) => void
   reorderSlides: (fromIndex: number, toIndex: number) => void
@@ -72,6 +74,7 @@ const initialState = {
   contentType: 'carousel' as const,
   impulse: '',
   customBackgroundPath: null,
+  adHoc: false,
 
   // Step 2/3
   generatedSlides: [],
@@ -95,6 +98,8 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
   setStep: (step) => set({ currentStep: step }),
 
   setMode: (mode) => set({ mode }),
+
+  setAdHoc: (value) => set({ adHoc: value }),
 
   setRecommendation: (rec, warnings) => set({
     recommendation: rec,
