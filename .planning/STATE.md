@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03.1-02-PLAN.md (PresetsService JSON persistence, IPC handlers, applyPreset store action)
-last_updated: "2026-03-17T13:36:48.954Z"
+stopped_at: Completed 03.1-03-PLAN.md (SlideZoneOverrides panel, LivePreview iframe upgrade, Step3 template loading + undo/redo)
+last_updated: "2026-03-17T13:37:51.309Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 35
-  completed_plans: 33
+  completed_plans: 34
   percent: 91
 ---
 
@@ -100,6 +100,7 @@ Progress: [█████████░] 88%
 | Phase 03 P12 | 2 | 2 tasks | 4 files |
 | Phase 03.1-01 P01 | 5 | 2 tasks | 6 files |
 | Phase 03.1 P02 | 3 | 2 tasks | 8 files |
+| Phase 03.1 P03 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -189,6 +190,8 @@ Recent decisions affecting current work:
 - [Phase 03.1]: PresetsService uses synchronous fs for simplicity and consistent test isolation with temp dirs
 - [Phase 03.1]: applyPreset replaces zone_overrides entirely from preset (not merge) - preset represents complete visual config
 - [Phase 03.1]: overlay_opacity only applied in applyPreset if present in preset - preserves slide opacity when preset has no opacity
+- [Phase 03.1-03]: iframe with srcDoc instead of dangerouslySetInnerHTML for template preview - full document HTML requires style isolation
+- [Phase 03.1-03]: onValueCommit for zone sliders prevents history bloat from intermediate slider drag positions
 
 ### Pending Todos
 
@@ -204,7 +207,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T13:36:48.951Z
-Stopped at: Completed 03.1-02-PLAN.md (PresetsService JSON persistence, IPC handlers, applyPreset store action)
+Last session: 2026-03-17T13:37:51.305Z
+Stopped at: Completed 03.1-03-PLAN.md (SlideZoneOverrides panel, LivePreview iframe upgrade, Step3 template loading + undo/redo)
 Resume file: None
 
