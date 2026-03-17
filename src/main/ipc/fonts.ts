@@ -119,6 +119,13 @@ export function registerFontIPC() {
 
   // Read file as base64 data URL for renderer display
   ipcMain.handle('file:read-as-data-url', async (_event, filePath: string) => {
+    const allowedExtensions = ['.ttf', '.otf', '.woff', '.woff2', '.png', '.jpg', '.jpeg', '.svg', '.webp']
+    const ext = path.extname(filePath).toLowerCase()
+    const userDataDir = app.getPath('userData')
+    const resolved = path.resolve(filePath)
+    if (!allowedExtensions.includes(ext) && !resolved.startsWith(userDataDir)) {
+      throw new Error(`Access denied: file type not allowed and path outside userData`)
+    }
     const data = await fs.readFile(filePath)
     const ext = path.extname(filePath).toLowerCase().replace('.', '')
     const mimeType = ext === 'jpg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : `image/${ext}`
