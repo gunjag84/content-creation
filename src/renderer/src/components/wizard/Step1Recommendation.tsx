@@ -29,7 +29,8 @@ export function Step1Recommendation() {
     setMode,
     setRecommendation,
     setSelection,
-    setStep
+    setStep,
+    initManualSlides
   } = useCreatePostStore()
 
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -73,7 +74,8 @@ export function Step1Recommendation() {
     if (mode === 'ai') {
       setStep(2) // Go to generation step
     } else {
-      // Manual mode - skip generation, go directly to edit
+      // Manual mode - create empty slides and skip to edit
+      initManualSlides(contentType)
       setStep(3)
     }
   }

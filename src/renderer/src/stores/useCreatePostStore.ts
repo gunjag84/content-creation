@@ -54,6 +54,7 @@ interface CreatePostState {
   setExportFolder: (path: string) => void
   setIsGenerating: (value: boolean) => void
   setGenerationError: (error: string | null) => void
+  initManualSlides: (contentType: 'single' | 'carousel') => void
   reset: () => void
 }
 
@@ -175,6 +176,25 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
   setIsGenerating: (value) => set({ isGenerating: value }),
 
   setGenerationError: (error) => set({ generationError: error, isGenerating: false }),
+
+  initManualSlides: (contentType) => {
+    const slideCount = contentType === 'single' ? 1 : 5
+    const slides: Slide[] = []
+    for (let i = 0; i < slideCount; i++) {
+      const isFirst = i === 0
+      const isLast = i === slideCount - 1
+      slides.push({
+        uid: crypto.randomUUID(),
+        slide_number: i + 1,
+        slide_type: isFirst ? 'cover' : isLast ? 'cta' : 'content',
+        hook_text: '',
+        body_text: '',
+        cta_text: '',
+        overlay_opacity: 0.5
+      })
+    }
+    set({ generatedSlides: slides, caption: '' })
+  },
 
   reset: () => set({
     ...initialState,

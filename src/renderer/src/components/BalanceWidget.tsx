@@ -98,13 +98,14 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
             const showWarning = deviation > 15
             return (
               <div key={pillar.name} className="space-y-1">
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                  <span>
-                    {pillar.name} ({pillar.count} posts, {pillar.actual_pct.toFixed(0)}% actual / {pillar.target_pct}% target)
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    {pillar.name}
+                    {showWarning && (
+                      <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
+                    )}
                   </span>
-                  {showWarning && (
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-                  )}
+                  <span>{pillar.actual_pct.toFixed(0)}% / {pillar.target_pct}% target</span>
                 </div>
                 <div className="space-y-1">
                   {/* Actual bar */}
