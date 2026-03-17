@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-11-PLAN.md (UAT Bug Fixes - Background Images, Auto-Render, Click-to-Zoom)
-last_updated: "2026-03-17T10:19:51.689Z"
+stopped_at: Completed 03-08-PLAN.md (BalanceWidget and Dashboard integration)
+last_updated: "2026-03-17T10:37:22.411Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 29
-  completed_plans: 28
+  completed_plans: 29
   percent: 88
 ---
 
@@ -78,6 +78,7 @@ Progress: [█████████░] 88%
 | Phase 03 P10 | 2 | 1 tasks | 2 files |
 | Phase 03 P09 | 3 | 2 tasks | 4 files |
 | Phase 03 P11 | 4 | 2 tasks | 2 files |
+| Phase 03 P08 | pre-existing | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Stable dnd-kit IDs: always use uid field on Slide, never derive from array index to prevent snapback
 - [Phase 03]: JS-injected image-load wait replaces fixed 300ms delay in render-service - waits for all img and CSS background-image URLs before capturePage()
 - [Phase 03]: Step 4 auto-renders on mount via useEffect watching settings and generatedSlides - no manual button click required
+- [Phase 03-08]: BalanceWidget onNavigate prop uses 'create'|'dashboard' subset of NavItem, fully compatible without type narrowing
 
 ### Pending Todos
 
@@ -168,7 +170,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T10:19:51.686Z
-Stopped at: Completed 03-11-PLAN.md (UAT Bug Fixes - Background Images, Auto-Render, Click-to-Zoom)
+Last session: 2026-03-17T10:37:15.628Z
+Stopped at: Completed 03-08-PLAN.md (BalanceWidget and Dashboard integration)
 Resume file: None
 
