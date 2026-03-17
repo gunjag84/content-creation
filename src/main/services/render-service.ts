@@ -21,9 +21,6 @@ export class RenderService {
             offscreen: false,
             nodeIntegration: false,
             contextIsolation: true,
-            // Required for Electron 40 / Chromium 130+: allows file:// navigation
-            // from the render window without cross-origin blocking
-            webSecurity: false
           }
         })
 
