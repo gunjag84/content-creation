@@ -107,7 +107,7 @@ export function Step3EditText() {
         if (activeSlideIndex === oldIndex) {
           setActiveSlideIndex(newIndex)
         } else if (activeSlideIndex === newIndex) {
-          setActiveSlideIndex(oldIndex > newIndex ? activeSlideIndex + 1 : activeSlideIndex - 1)
+          setActiveSlideIndex(Math.max(0, oldIndex > newIndex ? activeSlideIndex + 1 : activeSlideIndex - 1))
         }
       }
     }
