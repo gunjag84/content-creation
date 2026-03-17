@@ -9,6 +9,7 @@ import {
   type PostInsert,
   type SlideInsert
 } from '../db/queries'
+import { getDatabase } from '../db/index'
 import { generateWarnings } from '../services/learning-warnings'
 import { calculatePillarBalance } from '../services/pillar-balance'
 import { recommendContent } from '../services/recommendation'
@@ -29,11 +30,16 @@ ipcMain.handle('posts:create', async (event, data: PostInsert) => {
 // Save slides for a post
 ipcMain.handle('posts:save-slides', async (event, slides: SlideInsert[]) => {
   try {
-    const slideIds: number[] = []
-    for (const slide of slides) {
-      const slideId = insertSlide(slide)
-      slideIds.push(slideId)
-    }
+    const db = getDatabase()
+    const insertAllSlides = db.transaction((slides: SlideInsert[]) => {
+      const slideIds: number[] = []
+      for (const slide of slides) {
+        const slideId = insertSlide(slide)
+        slideIds.push(slideId)
+      }
+      return slideIds
+    })
+    const slideIds = insertAllSlides(slides)
     return { success: true, slideIds }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -115,9 +121,13 @@ ipcMain.handle(
     variables: Array<{ type: string; value: string }>
   ) => {
     try {
-      for (const variable of variables) {
-        updateBalanceMatrix(brandId, variable.type, variable.value)
-      }
+      const db = getDatabase()
+      const updateAll = db.transaction((variables: Array<{ type: string; value: string }>) => {
+        for (const variable of variables) {
+          updateBalanceMatrix(brandId, variable.type, variable.value)
+        }
+      })
+      updateAll(variables)
       return { success: true }
     } catch (error) {
       return { success: false, error: (error as Error).message }
