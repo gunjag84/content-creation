@@ -61,9 +61,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **VSED-03**: User can undo the last zone override change (restores previous slide state)
 - [x] **VSED-04**: User can redo an undone change (re-applies the forward state)
 - [x] **VSED-05**: History stack is capped at 50 entries to prevent unbounded memory growth
-- [ ] **VSED-06**: User can save zone override configurations as named presets and apply them to any slide
+- [x] **VSED-06**: User can save zone override configurations as named presets and apply them to any slide
 - [x] **VSED-07**: buildSlideHTML applies zone_overrides over template zones when rendering HTML for both preview and PNG export
-- [ ] **VSED-08**: Presets persist to disk (JSON file) and survive app restart with save/load/delete round-trip
+- [x] **VSED-08**: Presets persist to disk (JSON file) and survive app restart with save/load/delete round-trip
 
 ### Story Generation
 
@@ -195,9 +195,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VSED-03 | Phase 03.1 | Complete |
 | VSED-04 | Phase 03.1 | Complete |
 | VSED-05 | Phase 03.1 | Complete |
-| VSED-06 | Phase 03.1 | Pending |
+| VSED-06 | Phase 03.1 | Complete |
 | VSED-07 | Phase 03.1 | Complete |
-| VSED-08 | Phase 03.1 | Pending |
+| VSED-08 | Phase 03.1 | Complete |
 | STORY-01 | Phase 3 | Complete |
 | STORY-02 | Phase 3 | Complete |
 | STORY-03 | Phase 3 | Complete |

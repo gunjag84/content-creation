@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03.1-01-PLAN.md (ZoneOverride types, shared buildSlideHTML utility, useCreatePostStore undo/redo history)
-last_updated: "2026-03-17T13:31:23.582Z"
+stopped_at: Completed 03.1-02-PLAN.md (PresetsService JSON persistence, IPC handlers, applyPreset store action)
+last_updated: "2026-03-17T13:36:48.954Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 35
-  completed_plans: 32
+  completed_plans: 33
   percent: 91
 ---
 
@@ -99,6 +99,7 @@ Progress: [█████████░] 88%
 | Phase 03 P13 | 2 | 2 tasks | 3 files |
 | Phase 03 P12 | 2 | 2 tasks | 4 files |
 | Phase 03.1-01 P01 | 5 | 2 tasks | 6 files |
+| Phase 03.1 P02 | 3 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -185,6 +186,9 @@ Recent decisions affecting current work:
 - [Phase 03.1]: Parameter-based buildSlideHTML (BuildSlideHTMLParams) instead of closure - testable, reusable, decoupled from component state
 - [Phase 03.1]: Zone override merge: override.x ?? zone.x pattern - nullish coalescing preserves explicit 0 values
 - [Phase 03.1]: Undo/redo history stack capped at 50 entries via .slice(-50) - prevents unbounded memory growth
+- [Phase 03.1]: PresetsService uses synchronous fs for simplicity and consistent test isolation with temp dirs
+- [Phase 03.1]: applyPreset replaces zone_overrides entirely from preset (not merge) - preset represents complete visual config
+- [Phase 03.1]: overlay_opacity only applied in applyPreset if present in preset - preserves slide opacity when preset has no opacity
 
 ### Pending Todos
 
@@ -200,7 +204,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T13:31:23.575Z
-Stopped at: Completed 03.1-01-PLAN.md (ZoneOverride types, shared buildSlideHTML utility, useCreatePostStore undo/redo history)
+Last session: 2026-03-17T13:36:48.951Z
+Stopped at: Completed 03.1-02-PLAN.md (PresetsService JSON persistence, IPC handlers, applyPreset store action)
 Resume file: None
 
