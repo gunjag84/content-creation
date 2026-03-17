@@ -34,6 +34,7 @@ export function Step4RenderReview() {
   const [renderProgress, setRenderProgress] = useState({ current: 0, total: 0 })
   const [isExporting, setIsExporting] = useState(false)
   const [previewPNGs, setPreviewPNGs] = useState<string[]>([])
+  const [zoomIndex, setZoomIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -153,7 +154,7 @@ export function Step4RenderReview() {
         ${slide.body_text ? `<div style="font-family:${bodyFamily};font-size:38px;color:${secondaryColor};text-align:center;line-height:1.6;">${slide.body_text}</div>` : ''}
       </div>
       <div style="position:absolute;bottom:0;left:0;right:0;height:240px;display:flex;align-items:center;justify-content:center;padding:30px 80px 60px;">
-        ${ctaText ? `<div style="font-family:${ctaFamily};font-size:34px;color:${primaryColor};text-align:center;font-weight:bold;">${ctaText}</div>` : ''}
+        ${ctaText ? `<div style="font-family:${ctaFamily};font-size:48px;color:${primaryColor};text-align:center;font-weight:bold;">${ctaText}</div>` : ''}
       </div>` : ''
 
     const logoSize = { small: 80, medium: 120, large: 160 }[guidance?.logo?.size || 'medium'] || 120
@@ -190,6 +191,14 @@ export function Step4RenderReview() {
       setIsRendering(false)
     }
   }
+
+  // Auto-render when settings and slides are ready
+  useEffect(() => {
+    if (settings && generatedSlides.length > 0 && previewPNGs.length === 0 && !isRendering) {
+      handleRenderPreviews()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings, generatedSlides.length])
 
   const handleOpacityChange = async (slideIndex: number, value: number[]) => {
     const newOpacity = value[0] / 100
@@ -317,24 +326,11 @@ export function Step4RenderReview() {
           <CardTitle className="text-slate-100">Render & Review</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Render Button */}
-          {!hasRendered && (
-            <div className="flex justify-center">
-              <Button
-                size="lg"
-                onClick={handleRenderPreviews}
-                disabled={isRendering || generatedSlides.length === 0}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isRendering ? (
-                  <>
-                    <Loader2 className="mr-2 animate-spin" size={20} />
-                    Rendering...
-                  </>
-                ) : (
-                  'Render & Preview'
-                )}
-              </Button>
+          {/* Loading state while waiting for settings/slides before auto-render begins */}
+          {!hasRendered && !isRendering && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+              <span className="ml-3 text-slate-400">Loading settings...</span>
             </div>
           )}
 
@@ -379,12 +375,15 @@ export function Step4RenderReview() {
             <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
               {previewPNGs.map((dataUrl, idx) => (
                 <div key={idx} className="space-y-2">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-slate-700 bg-slate-900">
+                  <button
+                    onClick={() => setZoomIndex(idx)}
+                    className="relative aspect-[4/5] w-full overflow-hidden rounded-lg border border-slate-700 bg-slate-900 cursor-pointer hover:border-blue-500 transition-colors"
+                  >
                     <img src={dataUrl} alt={`Slide ${idx + 1}`} className="h-full w-full object-cover" />
                     <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
                       Slide {idx + 1} - {generatedSlides[idx]?.slide_type}
                     </div>
-                  </div>
+                  </button>
 
                   {/* Overlay Opacity Slider */}
                   <div className="space-y-1">
@@ -425,6 +424,26 @@ export function Step4RenderReview() {
           )}
         </CardContent>
       </Card>
+
+      {/* Zoom Modal */}
+      {zoomIndex !== null && previewPNGs[zoomIndex] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-8"
+          onClick={() => setZoomIndex(null)}
+        >
+          <div className="relative max-h-full max-w-2xl" onClick={e => e.stopPropagation()}>
+            <img
+              src={previewPNGs[zoomIndex]}
+              alt={`Slide ${zoomIndex + 1} full size`}
+              className="max-h-[85vh] w-auto rounded-lg shadow-2xl"
+            />
+            <div className="mt-2 text-center text-sm text-slate-300">
+              Slide {zoomIndex + 1} - {generatedSlides[zoomIndex]?.slide_type}
+              <span className="ml-4 text-slate-500">Click outside to close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
