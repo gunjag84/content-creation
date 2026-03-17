@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-13-PLAN.md (Ad-hoc post support with theme balance exclusion)
-last_updated: "2026-03-17T11:46:28.682Z"
+stopped_at: Completed 03-12-PLAN.md (avg_performance gap closure - BalanceDashboardData type, service passthrough, BalanceWidget conditional render)
+last_updated: "2026-03-17T11:46:40.256Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
@@ -163,6 +163,7 @@ Recent decisions affecting current work:
 - [Phase 03-08]: BalanceWidget onNavigate prop uses 'create'|'dashboard' subset of NavItem, fully compatible without type narrowing
 - [Phase 03-13]: Ad-hoc filtering done on renderer side - balance variable array built conditionally before IPC call, no IPC changes needed
 - [Phase 03-13]: Pillar always updates balance regardless of adHoc flag - preserves pillar distribution tracking for all posts
+- [Phase 03-12]: avg_performance surfaced from BalanceEntry through BalanceDashboardData - Phase 4 performance scores will display in BalanceWidget without further changes
 
 ### Pending Todos
 
@@ -174,7 +175,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:46:22.001Z
-Stopped at: Completed 03-13-PLAN.md (Ad-hoc post support with theme balance exclusion)
+Last session: 2026-03-17T11:46:40.252Z
+Stopped at: Completed 03-12-PLAN.md (avg_performance gap closure - BalanceDashboardData type, service passthrough, BalanceWidget conditional render)
 Resume file: None
 
