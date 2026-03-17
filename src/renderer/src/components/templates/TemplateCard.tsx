@@ -22,13 +22,7 @@ export function TemplateCard({ template, onEdit, onDelete, onDuplicate }: Templa
   }
 
   const handleDuplicate = () => {
-    const newName = window.prompt(
-      'Enter a name for the duplicated template:',
-      `${template.name} (Copy)`
-    )
-    if (newName && newName.trim()) {
-      onDuplicate()
-    }
+    onDuplicate()
   }
 
   // Parse zones count
