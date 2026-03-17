@@ -426,21 +426,31 @@ export function ZoneEditor({
                 listening={false}
               />
             )}
-            {backgroundType === 'gradient' && backgroundColor && (
-              <Rect
-                width={CANVAS_WIDTH * scale}
-                height={canvasHeight * scale}
-                fillLinearGradientStartPoint={{ x: 0, y: 0 }}
-                fillLinearGradientEndPoint={{ x: 0, y: canvasHeight * scale }}
-                fillLinearGradientColorStops={[
-                  0,
-                  backgroundColor.split(',')[0] || '#000000',
-                  1,
-                  backgroundColor.split(',')[1] || '#ffffff'
-                ]}
-                listening={false}
-              />
-            )}
+            {backgroundType === 'gradient' && backgroundColor && (() => {
+              const parts = backgroundColor.split(',')
+              const color1 = parts[0] || '#000000'
+              const color2 = parts[1] || '#ffffff'
+              const direction = parts[2] || 'vertical'
+              const w = CANVAS_WIDTH * scale
+              const h = canvasHeight * scale
+              let startPoint = { x: 0, y: 0 }
+              let endPoint = { x: 0, y: h }
+              if (direction === 'horizontal') {
+                endPoint = { x: w, y: 0 }
+              } else if (direction === 'diagonal') {
+                endPoint = { x: w, y: h }
+              }
+              return (
+                <Rect
+                  width={w}
+                  height={h}
+                  fillLinearGradientStartPoint={startPoint}
+                  fillLinearGradientEndPoint={endPoint}
+                  fillLinearGradientColorStops={[0, color1, 1, color2]}
+                  listening={false}
+                />
+              )
+            })()}
 
             {/* Overlay — listening={false} so clicks fall through to zones/Stage */}
             {overlayEnabled && (
