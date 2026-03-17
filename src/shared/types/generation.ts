@@ -1,3 +1,13 @@
+// Saved visual configuration preset for reuse across slides
+export interface SlidePreset {
+  id: string
+  name: string
+  template_id?: number
+  zone_overrides: Record<string, ZoneOverride>
+  overlay_opacity?: number
+  created_at: number
+}
+
 // Per-zone visual overrides applied at render time (merged over template zone defaults)
 export interface ZoneOverride {
   x?: number

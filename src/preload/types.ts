@@ -1,8 +1,8 @@
 import type { Settings } from '../shared/types/settings'
 import type { Template, TemplateInsert, SettingsVersion, PostInsert, SlideInsert, Post, Slide, BalanceEntry } from '../main/db/queries'
-import type { GenerationResult, StoryProposal, ExportFile, BalanceWarning, BalanceDashboardData, BalanceRecommendation } from '../shared/types/generation'
+import type { GenerationResult, StoryProposal, ExportFile, BalanceWarning, BalanceDashboardData, BalanceRecommendation, SlidePreset } from '../shared/types/generation'
 
-export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile, PostInsert, SlideInsert, Post, Slide, BalanceEntry, BalanceWarning, BalanceDashboardData, BalanceRecommendation }
+export type { Settings, Template, TemplateInsert, SettingsVersion, GenerationResult, StoryProposal, ExportFile, PostInsert, SlideInsert, Post, Slide, BalanceEntry, BalanceWarning, BalanceDashboardData, BalanceRecommendation, SlidePreset }
 
 export interface IElectronAPI {
   // Settings
@@ -70,6 +70,13 @@ export interface IElectronAPI {
   export: {
     selectFolder: () => Promise<{ canceled: boolean; path?: string }>
     saveFiles: (folderPath: string, files: ExportFile[]) => Promise<{ success: boolean; error?: string }>
+  }
+
+  // Presets
+  presets: {
+    list: () => Promise<SlidePreset[]>
+    save: (preset: SlidePreset) => Promise<void>
+    delete: (id: string) => Promise<void>
   }
 
   // Posts

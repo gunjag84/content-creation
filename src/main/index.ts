@@ -12,6 +12,7 @@ import { registerTemplateIPC } from './ipc/templates'
 import { registerFontIPC } from './ipc/fonts'
 import { registerGenerationIPC } from './ipc/generation'
 import { registerExportIPC } from './ipc/export'
+import { registerPresetsHandlers } from './ipc/presets'
 import './ipc/posts'  // Post CRUD and balance IPC handlers
 
 // Global reference to render service for lifecycle management
@@ -61,6 +62,7 @@ app.whenReady().then(async () => {
   registerFontIPC()
   registerGenerationIPC()
   registerExportIPC()
+  registerPresetsHandlers()
 
   // App info handler
   ipcMain.handle('app:info', async () => {

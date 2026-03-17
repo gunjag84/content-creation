@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { IElectronAPI } from './types'
+import type { IElectronAPI, SlidePreset } from './types'
 
 const api: IElectronAPI = {
   // Settings
@@ -91,6 +91,13 @@ const api: IElectronAPI = {
   export: {
     selectFolder: () => ipcRenderer.invoke('export:select-folder'),
     saveFiles: (folderPath, files) => ipcRenderer.invoke('export:save-files', { folderPath, files })
+  },
+
+  // Presets
+  presets: {
+    list: () => ipcRenderer.invoke('presets:list'),
+    save: (preset: SlidePreset) => ipcRenderer.invoke('presets:save', preset),
+    delete: (id: string) => ipcRenderer.invoke('presets:delete', id)
   },
 
   // Posts
