@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-10-PLAN.md (Fix Alternative Hooks)
-last_updated: "2026-03-17T10:18:13.516Z"
+stopped_at: Completed 03-11-PLAN.md (UAT Bug Fixes - Background Images, Auto-Render, Click-to-Zoom)
+last_updated: "2026-03-17T10:19:51.689Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 29
-  completed_plans: 26
+  completed_plans: 28
   percent: 88
 ---
 
@@ -76,6 +76,8 @@ Progress: [█████████░] 88%
 | Phase 03 P06 | 5 | 2 tasks | 4 files |
 | Phase 03 P07 | 7 | 2 tasks | 4 files |
 | Phase 03 P10 | 2 | 1 tasks | 2 files |
+| Phase 03 P09 | 3 | 2 tasks | 4 files |
+| Phase 03 P11 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -150,6 +152,11 @@ Recent decisions affecting current work:
 - [Phase 03]: Story HTML simple templates for 9:16 - faster for Phase 3, dedicated story templates deferred
 - [Phase 03]: Hooks prompt assembled in IPC handler from currentHook + slideContext - frontend passes empty string as placeholder, keeping API surface stable
 - [Phase 03]: onError listener cleanup calls both onHooksComplete cleanup and itself to prevent listener leaks on either success or error path
+- [Phase 03]: uid assigned at slide creation sites not in type constructor - keeps Slide type simple, UUID fresh per session
+- [Phase 03]: displayText guard for Content Ready header - minimal fix matching actual intent of status ternary
+- [Phase 03]: Stable dnd-kit IDs: always use uid field on Slide, never derive from array index to prevent snapback
+- [Phase 03]: JS-injected image-load wait replaces fixed 300ms delay in render-service - waits for all img and CSS background-image URLs before capturePage()
+- [Phase 03]: Step 4 auto-renders on mount via useEffect watching settings and generatedSlides - no manual button click required
 
 ### Pending Todos
 
@@ -161,7 +168,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T10:18:13.513Z
-Stopped at: Completed 03-10-PLAN.md (Fix Alternative Hooks)
+Last session: 2026-03-17T10:19:51.686Z
+Stopped at: Completed 03-11-PLAN.md (UAT Bug Fixes - Background Images, Auto-Render, Click-to-Zoom)
 Resume file: None
 
