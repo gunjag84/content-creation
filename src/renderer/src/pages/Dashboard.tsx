@@ -12,10 +12,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [dbStatus, setDbStatus] = useState<{ ok: boolean; tables: number } | null>(null)
   const [settings, setSettings] = useState<Settings | null>(null)
   const [settingsError, setSettingsError] = useState<string | null>(null)
+  const [ipcError, setIpcError] = useState<string | null>(null)
 
   useEffect(() => {
-    window.api.getAppInfo().then(setAppInfo)
-    window.api.getDbStatus().then(setDbStatus)
+    window.api.getAppInfo().then(setAppInfo).catch((err) => {
+      console.error('getAppInfo failed:', err)
+      setIpcError(err.message)
+      setAppInfo({ version: 'unknown', userData: '' })
+    })
+    window.api.getDbStatus().then(setDbStatus).catch((err) => {
+      console.error('getDbStatus failed:', err)
+      setIpcError(err.message)
+      setDbStatus({ ok: false, tables: 0 })
+    })
     window.api
       .loadSettings()
       .then(setSettings)
