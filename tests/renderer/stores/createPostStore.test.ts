@@ -97,4 +97,188 @@ describe('useCreatePostStore', () => {
       expect(useCreatePostStore.getState().currentStep).toBe(5)
     })
   })
+
+  describe('setZoneOverride', () => {
+    it('sets zone_overrides on the correct slide (VSED-01)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [
+          { slide_type: 'cover', hook_text: 'A', body_text: '', cta_text: '' },
+          { slide_type: 'content', hook_text: 'B', body_text: '', cta_text: '' }
+        ],
+        caption: ''
+      })
+
+      store.setZoneOverride(0, 'zone-1', { fontSize: 60 })
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].zone_overrides?.['zone-1']?.fontSize).toBe(60)
+    })
+
+    it('merges with existing overrides rather than replacing entire map (VSED-01)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'A', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+
+      store.setZoneOverride(0, 'zone-1', { fontSize: 48 })
+      store.setZoneOverride(0, 'zone-2', { color: '#ff0000' })
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].zone_overrides?.['zone-1']?.fontSize).toBe(48)
+      expect(slides[0].zone_overrides?.['zone-2']?.color).toBe('#ff0000')
+    })
+
+    it('pushes previous generatedSlides to slideHistory before mutating (VSED-02)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Original', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+
+      store.setZoneOverride(0, 'zone-1', { fontSize: 60 })
+
+      const state = useCreatePostStore.getState()
+      expect(state.slideHistory.length).toBe(1)
+      expect(state.slideHistory[0][0].hook_text).toBe('Original')
+    })
+  })
+
+  describe('history (undo/redo)', () => {
+    it('undo() restores generatedSlides to previous state (VSED-03)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Before', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 60 })
+
+      store.undo()
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].zone_overrides).toBeUndefined()
+    })
+
+    it('undo() does nothing when slideHistory is empty (VSED-03)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Stable', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+
+      // No override set, so history is empty
+      expect(() => store.undo()).not.toThrow()
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].hook_text).toBe('Stable')
+    })
+
+    it('redo() after undo() restores the undone state (VSED-04)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 72 })
+      store.undo()
+
+      store.redo()
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].zone_overrides?.['zone-1']?.fontSize).toBe(72)
+    })
+
+    it('redo() does nothing when slideHistoryFuture is empty (VSED-04)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Stable', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+
+      expect(() => store.redo()).not.toThrow()
+    })
+
+    it('new mutation after undo clears slideHistoryFuture (VSED-04)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 60 })
+      store.undo()
+
+      // New mutation after undo
+      store.setZoneOverride(0, 'zone-2', { color: '#00ff00' })
+
+      const state = useCreatePostStore.getState()
+      expect(state.slideHistoryFuture.length).toBe(0)
+    })
+
+    it('slideHistory is capped at 50 entries (VSED-05)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+
+      // Push 55 overrides
+      for (let i = 0; i < 55; i++) {
+        store.setZoneOverride(0, 'zone-1', { fontSize: i + 10 })
+      }
+
+      const state = useCreatePostStore.getState()
+      expect(state.slideHistory.length).toBe(50)
+    })
+  })
+
+  describe('canUndo / canRedo', () => {
+    it('canUndo() returns false when history is empty', () => {
+      expect(useCreatePostStore.getState().canUndo()).toBe(false)
+    })
+
+    it('canUndo() returns true when history has entries', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 40 })
+
+      expect(useCreatePostStore.getState().canUndo()).toBe(true)
+    })
+
+    it('canRedo() returns false when future is empty', () => {
+      expect(useCreatePostStore.getState().canRedo()).toBe(false)
+    })
+
+    it('canRedo() returns true after undo', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 40 })
+      store.undo()
+
+      expect(useCreatePostStore.getState().canRedo()).toBe(true)
+    })
+  })
+
+  describe('reset clears history', () => {
+    it('reset() clears slideHistory and slideHistoryFuture', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [{ slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }],
+        caption: ''
+      })
+      store.setZoneOverride(0, 'zone-1', { fontSize: 40 })
+      store.undo()
+
+      store.reset()
+
+      const state = useCreatePostStore.getState()
+      expect(state.slideHistory).toEqual([])
+      expect(state.slideHistoryFuture).toEqual([])
+    })
+  })
 })

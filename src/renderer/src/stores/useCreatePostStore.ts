@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type {
   Slide,
+  ZoneOverride,
   BalanceRecommendation,
   BalanceWarning,
   GenerationResult,
@@ -38,6 +39,10 @@ interface CreatePostState {
   approvedStories: Set<number> // indices
   exportFolder: string | null
 
+  // History (undo/redo)
+  slideHistory: Slide[][]
+  slideHistoryFuture: Slide[][]
+
   // Actions
   setStep: (step: 1 | 2 | 3 | 4 | 5) => void
   setMode: (mode: 'ai' | 'manual') => void
@@ -46,6 +51,11 @@ interface CreatePostState {
   setSelection: (field: 'selectedPillar' | 'selectedTheme' | 'selectedMechanic' | 'contentType' | 'impulse' | 'customBackgroundPath', value: string | null) => void
   setSlide: (index: number, field: keyof Slide, value: string | number) => void
   reorderSlides: (fromIndex: number, toIndex: number) => void
+  setZoneOverride: (slideIndex: number, zoneId: string, override: Partial<ZoneOverride>) => void
+  undo: () => void
+  redo: () => void
+  canUndo: () => boolean
+  canRedo: () => boolean
   setCaption: (text: string) => void
   appendGeneratingToken: (token: string) => void
   setGenerationComplete: (result: GenerationResult) => void
@@ -89,7 +99,11 @@ const initialState = {
   // Step 5
   storyProposals: [],
   approvedStories: new Set<number>(),
-  exportFolder: null
+  exportFolder: null,
+
+  // History
+  slideHistory: [],
+  slideHistoryFuture: []
 }
 
 export const useCreatePostStore = create<CreatePostState>((set) => ({
@@ -138,6 +152,52 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
 
     return { generatedSlides: reordered }
   }),
+
+  setZoneOverride: (slideIndex, zoneId, override) => set((state) => {
+    const prevSlides = state.generatedSlides
+    const newHistory = [...state.slideHistory, prevSlides].slice(-50)
+    const slides = prevSlides.map((slide, idx) => {
+      if (idx !== slideIndex) return slide
+      const existing = slide.zone_overrides ?? {}
+      return {
+        ...slide,
+        zone_overrides: {
+          ...existing,
+          [zoneId]: { ...(existing[zoneId] ?? {}), ...override }
+        }
+      }
+    })
+    return {
+      generatedSlides: slides,
+      slideHistory: newHistory,
+      slideHistoryFuture: []
+    }
+  }),
+
+  undo: () => set((state) => {
+    if (state.slideHistory.length === 0) return {}
+    const history = [...state.slideHistory]
+    const previous = history.pop()!
+    return {
+      generatedSlides: previous,
+      slideHistory: history,
+      slideHistoryFuture: [state.generatedSlides, ...state.slideHistoryFuture]
+    }
+  }),
+
+  redo: () => set((state) => {
+    if (state.slideHistoryFuture.length === 0) return {}
+    const [next, ...remainingFuture] = state.slideHistoryFuture
+    return {
+      generatedSlides: next,
+      slideHistory: [...state.slideHistory, state.generatedSlides],
+      slideHistoryFuture: remainingFuture
+    }
+  }),
+
+  canUndo: () => useCreatePostStore.getState().slideHistory.length > 0,
+
+  canRedo: () => useCreatePostStore.getState().slideHistoryFuture.length > 0,
 
   setCaption: (text) => set({ caption: text }),
 
@@ -203,6 +263,8 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
 
   reset: () => set({
     ...initialState,
-    approvedStories: new Set<number>() // Create new Set instance
+    approvedStories: new Set<number>(), // Create new Set instance
+    slideHistory: [],
+    slideHistoryFuture: []
   })
 }))
