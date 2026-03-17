@@ -15,7 +15,30 @@ import {
 import { AlertCircle, Upload } from 'lucide-react'
 import type { Settings } from '../../../../shared/types/settings'
 
-export function Step1Recommendation() {
+function BackgroundPreview({ path }: { path: string | null }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!path) { setDataUrl(null); return }
+    window.api.readFileAsDataUrl(path).then(setDataUrl).catch(() => setDataUrl(null))
+  }, [path])
+
+  if (!dataUrl) return null
+
+  return (
+    <div className="mt-2 flex justify-center">
+      <div className="w-28 overflow-hidden rounded-lg border border-slate-600" style={{ aspectRatio: '4/5' }}>
+        <img src={dataUrl} alt="Custom background preview" className="h-full w-full object-cover" />
+      </div>
+    </div>
+  )
+}
+
+interface Step1RecommendationProps {
+  onRequestTemplateBuilder?: (imagePath: string) => void
+}
+
+export function Step1Recommendation({ onRequestTemplateBuilder }: Step1RecommendationProps) {
   const {
     mode,
     recommendation,
@@ -66,6 +89,10 @@ export function Step1Recommendation() {
       const path = await window.api.templates.uploadBackground()
       if (path) {
         setSelection('customBackgroundPath', path)
+        // Route to Template Builder if callback provided
+        if (onRequestTemplateBuilder) {
+          onRequestTemplateBuilder(path)
+        }
       }
     } catch (error) {
       console.error('Failed to upload background:', error)
@@ -107,7 +134,7 @@ export function Step1Recommendation() {
   const mechanicWarning = warnings.find((w) => w.variable_type === 'mechanic' && w.variable_value === selectedMechanic)
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
+    <div className="space-y-6 px-6 py-6">
       {/* Recommendation Card */}
       <Card className="border-slate-700 bg-slate-800">
         <CardHeader>
@@ -263,10 +290,10 @@ export function Step1Recommendation() {
           {/* Custom Background */}
           <div className="space-y-2">
             <Label className="text-slate-300">Custom Background (Optional)</Label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button variant="outline" onClick={handleUploadBackground} className="gap-2">
                 <Upload size={16} />
-                Upload Image
+                {customBackgroundPath ? 'Change Image' : 'Upload Image'}
               </Button>
               {customBackgroundPath && (
                 <span className="text-xs text-slate-400">
@@ -274,6 +301,7 @@ export function Step1Recommendation() {
                 </span>
               )}
             </div>
+            <BackgroundPreview path={customBackgroundPath} />
           </div>
 
           {/* Ad-hoc Post Toggle */}

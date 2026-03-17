@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Stage, Layer, Rect, Transformer, Image as KonvaImage, Text as KonvaText } from 'react-konva'
 import { Button } from '../ui/button'
-import { ZonePopover } from './ZonePopover'
 import type { Settings } from '../../../../shared/types/settings'
 
 export interface Zone {
@@ -27,16 +26,17 @@ interface ZoneEditorProps {
   onZonesChange: (zones: Zone[]) => void
   brandGuidance: Settings['visualGuidance']
   format: 'feed' | 'story'
+  selectedZoneId?: string | null
+  onSelectZone?: (zoneId: string | null) => void
 }
 
-const CANVAS_WIDTH = 1080
-const CANVAS_HEIGHT_FEED = 1350
-const CANVAS_HEIGHT_STORY = 1920
-const MIN_ZONE_SIZE = 50
-const MAX_DISPLAY_HEIGHT = 500 // px - cap canvas height to avoid excessive scrolling
+export const CANVAS_WIDTH = 1080
+export const CANVAS_HEIGHT_FEED = 1350
+export const CANVAS_HEIGHT_STORY = 1920
+export const MIN_ZONE_SIZE = 50
 
 // Zone visual styling by type
-const ZONE_STYLES = {
+export const ZONE_STYLES = {
   hook: { fill: 'rgba(59, 130, 246, 0.3)', stroke: '#3b82f6' },
   body: { fill: 'rgba(34, 197, 94, 0.3)', stroke: '#22c55e' },
   cta: { fill: 'rgba(249, 115, 22, 0.3)', stroke: '#f97316' },
@@ -60,24 +60,37 @@ export function ZoneEditor({
   zones,
   onZonesChange,
   brandGuidance,
-  format
+  format,
+  selectedZoneId: externalSelectedZoneId,
+  onSelectZone
 }: ZoneEditorProps) {
   const [drawMode, setDrawMode] = useState(false)
-  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
-  const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null)
+  // Use external selection if provided, otherwise internal
+  const [internalSelectedZoneId, setInternalSelectedZoneId] = useState<string | null>(null)
   const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null)
   const [tempZone, setTempZone] = useState<Zone | null>(null)
+  // Image position for panning (canvas coords) - keeps original aspect ratio, user can move
+  const [imageOffset, setImageOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
 
   const containerRef = useRef<HTMLDivElement>(null)
   const transformerRef = useRef<any>(null)
   const stageRef = useRef<any>(null)
 
+  const selectedZoneId = externalSelectedZoneId !== undefined ? externalSelectedZoneId : internalSelectedZoneId
+  const setSelectedZoneId = (id: string | null) => {
+    if (onSelectZone) {
+      onSelectZone(id)
+    } else {
+      setInternalSelectedZoneId(id)
+    }
+  }
+
   const canvasHeight = format === 'feed' ? CANVAS_HEIGHT_FEED : CANVAS_HEIGHT_STORY
   const scale = containerSize ? containerSize.width / CANVAS_WIDTH : 1
 
-  // Responsive canvas sizing
+  // Responsive canvas sizing - always fit to container, no height adjustment with image size
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -85,9 +98,9 @@ export function ZoneEditor({
       const entry = entries[0]
       if (entry) {
         const width = entry.contentRect.width
-        // Compute scale limited by BOTH width and height constraints
+        const height = entry.contentRect.height
         const scaleByWidth = width / CANVAS_WIDTH
-        const scaleByHeight = MAX_DISPLAY_HEIGHT / canvasHeight
+        const scaleByHeight = height > 0 ? height / canvasHeight : scaleByWidth
         const constrainedScale = Math.min(scaleByWidth, scaleByHeight)
         const constrainedWidth = CANVAS_WIDTH * constrainedScale
         const constrainedHeight = canvasHeight * constrainedScale
@@ -98,6 +111,21 @@ export function ZoneEditor({
     resizeObserver.observe(containerRef.current)
     return () => resizeObserver.disconnect()
   }, [canvasHeight])
+
+  // Reset image position when background image changes (scale so smaller side fills frame)
+  useEffect(() => {
+    if (backgroundType === 'image' && backgroundImage && containerSize) {
+      const imgW = backgroundImage.naturalWidth
+      const imgH = backgroundImage.naturalHeight
+      const fitScale = Math.max(CANVAS_WIDTH / imgW, canvasHeight / imgH)
+      const imgCanvasW = imgW * fitScale
+      const imgCanvasH = imgH * fitScale
+      setImageOffset({
+        x: (CANVAS_WIDTH - imgCanvasW) / 2,
+        y: (canvasHeight - imgCanvasH) / 2
+      })
+    }
+  }, [backgroundImage, backgroundType, canvasHeight, containerSize])
 
   // Update transformer when selection changes
   useEffect(() => {
@@ -129,37 +157,23 @@ export function ZoneEditor({
     }
   }
 
-  // Convert Stage-relative coords to viewport coords for position:fixed popover
-  const toViewportPos = (stageX: number, stageY: number) => {
-    const rect = stageRef.current?.container()?.getBoundingClientRect()
-    return { x: (rect?.left ?? 0) + stageX, y: (rect?.top ?? 0) + stageY }
-  }
-
   const handleStageMouseDown = (e: any) => {
     const clickedOnEmpty = e.target === e.target.getStage()
 
     if (!clickedOnEmpty) {
-      // Clicked on a zone
+      // Clicked on a zone rect
       const clickedId = e.target.id().replace('zone-', '')
       if (clickedId && zones.some((z) => z.id === clickedId)) {
         setSelectedZoneId(clickedId)
         setDrawMode(false)
-
-        // Position popover near the zone (convert to viewport coords for position:fixed)
-        const stage = e.target.getStage()
-        const pointerPos = stage.getPointerPosition()
-        const vp = toViewportPos(pointerPos.x, pointerPos.y)
-        setPopoverPosition({ x: vp.x, y: vp.y - 20 })
       }
       return
     }
 
     // Clicked on empty canvas
     setSelectedZoneId(null)
-    setPopoverPosition(null)
 
     if (drawMode) {
-      // Start drawing new zone
       const stage = e.target.getStage()
       const pos = stage.getPointerPosition()
       const x = pos.x / scale
@@ -199,7 +213,6 @@ export function ZoneEditor({
     if (isDrawing && drawStart) {
       let finalZone = tempZone
 
-      // Fallback: if tempZone is null (mouse moved too fast), calculate zone from current position
       if (!finalZone) {
         const stage = e.target.getStage()
         const pos = stage.getPointerPosition()
@@ -223,7 +236,6 @@ export function ZoneEditor({
         }
       }
 
-      // Finalize the zone
       if (finalZone.width >= MIN_ZONE_SIZE && finalZone.height >= MIN_ZONE_SIZE) {
         const newZone: Zone = {
           ...finalZone,
@@ -231,20 +243,11 @@ export function ZoneEditor({
         }
         onZonesChange([...zones, newZone])
         setSelectedZoneId(newZone.id)
-
-        // Position popover for the new zone
-        const stage = stageRef.current
-        if (stage) {
-          const pos = stage.getPointerPosition()
-          const vp = toViewportPos(pos.x, pos.y)
-          setPopoverPosition({ x: vp.x, y: Math.max(20, vp.y - 100) })
-        }
       }
 
       setIsDrawing(false)
       setDrawStart(null)
       setTempZone(null)
-      // Keep draw mode active so user can draw multiple zones
     }
   }
 
@@ -266,8 +269,14 @@ export function ZoneEditor({
     const node = e.target
     const scaleX = node.scaleX()
     const scaleY = node.scaleY()
+    const newDisplayWidth = Math.max(MIN_ZONE_SIZE * scale, node.width() * scaleX)
+    const newDisplayHeight = Math.max(MIN_ZONE_SIZE * scale, node.height() * scaleY)
+    const newCanvasWidth = newDisplayWidth / scale
+    const newCanvasHeight = newDisplayHeight / scale
 
-    // Reset scale and apply to width/height
+    // Update node dimensions before resetting scale so it doesn't snap back to text size
+    node.width(newDisplayWidth)
+    node.height(newDisplayHeight)
     node.scaleX(1)
     node.scaleY(1)
 
@@ -277,42 +286,20 @@ export function ZoneEditor({
             ...zone,
             x: Math.max(0, node.x() / scale),
             y: Math.max(0, node.y() / scale),
-            width: Math.max(MIN_ZONE_SIZE, node.width() * scaleX),
-            height: Math.max(MIN_ZONE_SIZE, node.height() * scaleY)
+            width: newCanvasWidth,
+            height: newCanvasHeight
           }
         : zone
     )
     onZonesChange(updatedZones)
   }
 
-  const handleZoneUpdate = (zoneId: string, updates: Partial<Zone>) => {
-    const updatedZones = zones.map((zone) => {
-      if (zone.id === zoneId) {
-        const newZone = { ...zone, ...updates }
-        // Auto-update fontSize when type changes
-        if (updates.type && updates.type !== zone.type) {
-          newZone.fontSize = getFontSizeForType(updates.type)
-        }
-        return newZone
-      }
-      return zone
-    })
-    onZonesChange(updatedZones)
-  }
-
-  const handleZoneDelete = (zoneId: string) => {
-    onZonesChange(zones.filter((z) => z.id !== zoneId))
-    setSelectedZoneId(null)
-    setPopoverPosition(null)
-  }
-
   const handleDeleteSelected = () => {
     if (selectedZoneId) {
-      handleZoneDelete(selectedZoneId)
+      onZonesChange(zones.filter((z) => z.id !== selectedZoneId))
+      setSelectedZoneId(null)
     }
   }
-
-  const selectedZone = zones.find((z) => z.id === selectedZoneId)
 
   const renderZone = (zone: Zone, isTemp = false) => {
     const style = ZONE_STYLES[zone.type]
@@ -354,9 +341,9 @@ export function ZoneEditor({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full min-h-0">
       {/* Toolbar */}
-      <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg border border-slate-700">
+      <div className="flex shrink-0 items-center justify-between p-2 bg-slate-800 rounded-lg border border-slate-700">
         <div className="flex gap-2">
           <Button
             variant={drawMode ? 'default' : 'outline'}
@@ -364,7 +351,6 @@ export function ZoneEditor({
             onClick={() => {
               setDrawMode(!drawMode)
               setSelectedZoneId(null)
-              setPopoverPosition(null)
             }}
             className={drawMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border-slate-600 text-slate-300 hover:bg-slate-700'}
           >
@@ -380,17 +366,17 @@ export function ZoneEditor({
             Delete Selected
           </Button>
         </div>
-        <div className="text-sm text-slate-400">{zones.length} zones defined</div>
+        <div className="text-sm text-slate-400">{zones.length} zones</div>
       </div>
 
       {zones.length === 0 && (
-        <p className="text-xs text-slate-500 text-center">
+        <p className="text-xs text-slate-500 text-center shrink-0">
           Click "Draw Zone" then drag on the canvas to define text areas
         </p>
       )}
 
-      {/* Canvas — outer wrapper fills available width and is observed for sizing */}
-      <div ref={containerRef} className="w-full">
+      {/* Canvas - fills remaining space, scales to fit */}
+      <div ref={containerRef} className="flex-1 min-h-0 w-full flex items-center justify-center">
         {containerSize && (
         <div
           className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900 mx-auto"
@@ -409,15 +395,30 @@ export function ZoneEditor({
           onMouseUp={handleStageMouseUp}
         >
           <Layer>
-            {/* Background — listening={false} so clicks fall through to Stage */}
-            {backgroundType === 'image' && backgroundImage && (
-              <KonvaImage
-                image={backgroundImage}
-                width={CANVAS_WIDTH * scale}
-                height={canvasHeight * scale}
-                listening={false}
-              />
-            )}
+            {/* Background - image: scale so smaller side fills frame, draggable for panning */}
+            {backgroundType === 'image' && backgroundImage && (() => {
+              const imgW = backgroundImage.naturalWidth
+              const imgH = backgroundImage.naturalHeight
+              const fitScale = Math.max(CANVAS_WIDTH / imgW, canvasHeight / imgH)
+              const imgCanvasW = imgW * fitScale
+              const imgCanvasH = imgH * fitScale
+              return (
+                <KonvaImage
+                  image={backgroundImage}
+                  x={imageOffset.x * scale}
+                  y={imageOffset.y * scale}
+                  width={imgCanvasW * scale}
+                  height={imgCanvasH * scale}
+                  draggable={!drawMode}
+                  listening={!drawMode}
+                  onDragEnd={(e) => {
+                    const node = e.target
+                    setImageOffset({ x: node.x() / scale, y: node.y() / scale })
+                  }}
+                  onDragStart={() => setSelectedZoneId(null)}
+                />
+              )
+            })()}
             {backgroundType === 'solid_color' && (
               <Rect
                 width={CANVAS_WIDTH * scale}
@@ -452,7 +453,7 @@ export function ZoneEditor({
               )
             })()}
 
-            {/* Overlay — listening={false} so clicks fall through to zones/Stage */}
+            {/* Overlay */}
             {overlayEnabled && (
               <Rect
                 width={CANVAS_WIDTH * scale}
@@ -494,7 +495,6 @@ export function ZoneEditor({
               <Transformer
                 ref={transformerRef}
                 boundBoxFunc={(oldBox, newBox) => {
-                  // Limit minimum size
                   if (newBox.width < MIN_ZONE_SIZE || newBox.height < MIN_ZONE_SIZE) {
                     return oldBox
                   }
@@ -507,21 +507,6 @@ export function ZoneEditor({
         </div>
         )}
       </div>
-
-      {/* Zone Popover */}
-      {selectedZone && popoverPosition && (
-        <ZonePopover
-          zone={selectedZone}
-          position={popoverPosition}
-          onUpdate={(updates) => handleZoneUpdate(selectedZone.id, updates)}
-          onDelete={() => handleZoneDelete(selectedZone.id)}
-          brandGuidance={brandGuidance}
-          onClose={() => {
-            setSelectedZoneId(null)
-            setPopoverPosition(null)
-          }}
-        />
-      )}
     </div>
   )
 }

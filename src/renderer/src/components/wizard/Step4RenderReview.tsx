@@ -44,13 +44,10 @@ export function Step4RenderReview() {
         const settingsData = await window.api.loadSettings()
         setSettings(settingsData)
 
-        // Load template (assume first template for now, in production get from user selection)
-        const templates = await window.api.templates.list()
-        if (templates.length > 0) {
-          const templateData = await window.api.templates.get(templates[0].id)
-          if (templateData) {
-            setTemplate(templateData)
-          }
+        // Load template (ensures default exists)
+        const templateData = await window.api.templates.ensureDefault()
+        if (templateData) {
+          setTemplate(templateData)
         }
       } catch (error) {
         console.error('Failed to load settings/template:', error)
@@ -249,7 +246,7 @@ export function Step4RenderReview() {
   const hasRendered = previewPNGs.length > 0
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
+    <div className="space-y-6 px-6 py-6">
       <Card className="border-slate-700 bg-slate-800">
         <CardHeader>
           <CardTitle className="text-slate-100">Render & Review</CardTitle>

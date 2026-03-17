@@ -17,6 +17,8 @@ export interface ZoneOverride {
   fontSize?: number
   fontWeight?: 'normal' | 'bold' | '600' | '700'
   color?: string
+  textAlign?: 'left' | 'center' | 'right'
+  fontFamily?: string
 }
 
 // Slide content for wizard state and DB persistence

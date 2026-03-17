@@ -2,7 +2,28 @@ import { useState, useEffect, useRef } from 'react'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
-import { ChevronDown, ChevronUp, AlertCircle, Sparkles, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertCircle, Sparkles, Loader2, ImageIcon } from 'lucide-react'
+
+function BackgroundBanner({ path }: { path: string }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    window.api.readFileAsDataUrl(path).then(setDataUrl).catch(() => setDataUrl(null))
+  }, [path])
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-700">
+      <div className="flex items-center gap-2 bg-slate-800 px-4 py-2">
+        <ImageIcon size={14} className="text-slate-400" />
+        <span className="text-xs font-medium text-slate-400">Custom Background</span>
+        <span className="text-xs text-slate-500">{path.split(/[\\/]/).pop()}</span>
+      </div>
+      {dataUrl && (
+        <img src={dataUrl} alt="Custom background" className="h-40 w-full object-cover" />
+      )}
+    </div>
+  )
+}
 
 export function Step2Generation() {
   const {
@@ -170,7 +191,12 @@ export function Step2Generation() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
+    <div className="space-y-6 px-6 py-6">
+      {/* Custom Background Preview */}
+      {customBackgroundPath && (
+        <BackgroundBanner path={customBackgroundPath} />
+      )}
+
       {/* Generation Display Card */}
       <Card className="border-slate-700 bg-slate-800">
         <CardHeader>

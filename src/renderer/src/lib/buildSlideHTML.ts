@@ -12,6 +12,8 @@ export interface BuildSlideHTMLParams {
   overlayEnabled: boolean
   customBackgroundPath: string | null
   opacityOverride?: number
+  /** Pre-resolved data URL for custom background (use in renderer iframe where file:// is blocked) */
+  customBackgroundDataUrl?: string
 }
 
 function getLogoPositionStyle(
@@ -38,7 +40,8 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     overlayColor,
     overlayEnabled,
     customBackgroundPath,
-    opacityOverride
+    opacityOverride,
+    customBackgroundDataUrl
   } = params
 
   const guidance = settings?.visualGuidance
@@ -52,7 +55,9 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
 
   // Background CSS: custom upload > template > settings fallback
   let backgroundCSS = `background-color: ${guidance?.backgroundColor || '#1a1a2e'};`
-  if (customBackgroundPath) {
+  if (customBackgroundDataUrl) {
+    backgroundCSS = `background-image: url('${customBackgroundDataUrl}'); background-size: cover; background-position: center;`
+  } else if (customBackgroundPath) {
     const bgUrl = customBackgroundPath.replace(/\\/g, '/')
     backgroundCSS = `background-image: url('file:///${bgUrl}'); background-size: cover; background-position: center;`
   } else if (templateBackground) {
@@ -86,6 +91,8 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     const effectiveHeight = override.height ?? zone.height
     const effectiveFontSize = override.fontSize ?? zone.fontSize ?? 40
     const effectiveFontWeight = override.fontWeight ?? 'normal'
+    const effectiveTextAlign = override.textAlign ?? 'center'
+    const justifyMap = { left: 'flex-start', center: 'center', right: 'flex-end' }
 
     let text = ''
     let fontFamily = 'sans-serif'
@@ -105,7 +112,12 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
       color = override.color ?? primaryColor
     }
 
-    return `<div style="position:absolute;left:${effectiveX}px;top:${effectiveY}px;width:${effectiveWidth}px;height:${effectiveHeight}px;font-family:${fontFamily};font-size:${effectiveFontSize}px;font-weight:${effectiveFontWeight};color:${color};overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;padding:8px;word-wrap:break-word;white-space:pre-wrap;">${text}</div>`
+    // fontFamily override takes precedence
+    if (override.fontFamily) {
+      fontFamily = `'${override.fontFamily}'`
+    }
+
+    return `<div style="position:absolute;left:${effectiveX}px;top:${effectiveY}px;width:${effectiveWidth}px;height:${effectiveHeight}px;font-family:${fontFamily};font-size:${effectiveFontSize}px;font-weight:${effectiveFontWeight};color:${color};overflow:hidden;display:flex;align-items:${effectiveTextAlign === 'center' ? 'center' : 'flex-start'};justify-content:${justifyMap[effectiveTextAlign]};text-align:${effectiveTextAlign};line-height:1.3;padding:8px;word-wrap:break-word;white-space:pre-wrap;">${text}</div>`
   }).filter(Boolean).join('\n')
 
   // Fallback layout when no zones defined: hook at top, body in middle, CTA at bottom

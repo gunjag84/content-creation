@@ -22,7 +22,7 @@ export function LivePreview({ slide, templateHtml }: LivePreviewProps) {
           <iframe
             srcDoc={templateHtml}
             style={{ width: 1080, height: 1350, border: 'none' }}
-            sandbox="allow-same-origin"
+            sandbox="allow-same-origin allow-scripts"
             title="Slide preview"
           />
         </div>

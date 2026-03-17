@@ -9,6 +9,7 @@ const api: IElectronAPI = {
   // Templates
   templates: {
     list: () => ipcRenderer.invoke('templates:list'),
+    ensureDefault: () => ipcRenderer.invoke('templates:ensure-default'),
     create: (template) => ipcRenderer.invoke('templates:create', template),
     get: (id) => ipcRenderer.invoke('templates:get', id),
     update: (id, data) => ipcRenderer.invoke('templates:update', id, data),

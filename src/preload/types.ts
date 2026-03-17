@@ -12,6 +12,7 @@ export interface IElectronAPI {
   // Templates
   templates: {
     list: () => Promise<Template[]>
+    ensureDefault: () => Promise<Template>
     create: (template: TemplateInsert) => Promise<number>
     get: (id: number) => Promise<Template | undefined>
     update: (id: number, data: Partial<TemplateInsert>) => Promise<void>

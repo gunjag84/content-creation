@@ -5,12 +5,14 @@ import { TemplateBuilder } from '../templates/TemplateBuilder'
 import type { Template } from '../../../../preload/types'
 
 interface TemplateSectionProps {
-  // Templates are managed separately from Settings object
+  pendingBackgroundImage?: string | null
+  onTemplateSaveAndReturn?: (templateId: number) => void
 }
 
-export function TemplateSection(props: TemplateSectionProps) {
+export function TemplateSection({ pendingBackgroundImage, onTemplateSaveAndReturn }: TemplateSectionProps) {
   const [view, setView] = useState<'list' | 'builder'>('list')
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null)
+  const [initialBgPath, setInitialBgPath] = useState<string | undefined>(undefined)
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -18,6 +20,15 @@ export function TemplateSection(props: TemplateSectionProps) {
   useEffect(() => {
     loadTemplates()
   }, [])
+
+  // Auto-open builder when pending image is set
+  useEffect(() => {
+    if (pendingBackgroundImage) {
+      setEditingTemplateId(null)
+      setInitialBgPath(pendingBackgroundImage)
+      setView('builder')
+    }
+  }, [pendingBackgroundImage])
 
   const loadTemplates = async () => {
     setLoading(true)
@@ -33,11 +44,13 @@ export function TemplateSection(props: TemplateSectionProps) {
 
   const handleCreateTemplate = () => {
     setEditingTemplateId(null)
+    setInitialBgPath(undefined)
     setView('builder')
   }
 
   const handleEditTemplate = (id: number) => {
     setEditingTemplateId(id)
+    setInitialBgPath(undefined)
     setView('builder')
   }
 
@@ -71,23 +84,27 @@ export function TemplateSection(props: TemplateSectionProps) {
   }
 
   const handleBuilderSave = (templateId: number) => {
-    // Return to list view and refresh
     setView('list')
     setEditingTemplateId(null)
+    setInitialBgPath(undefined)
     loadTemplates()
+
+    // If we came from create flow, navigate back
+    if (onTemplateSaveAndReturn) {
+      onTemplateSaveAndReturn(templateId)
+    }
   }
 
   const handleBuilderCancel = () => {
-    // Return to list view
     setView('list')
     setEditingTemplateId(null)
+    setInitialBgPath(undefined)
   }
 
   // List view
   if (view === 'list') {
     return (
       <div className="space-y-4">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-100">Templates</h2>
@@ -98,14 +115,12 @@ export function TemplateSection(props: TemplateSectionProps) {
           <Button onClick={handleCreateTemplate}>Create Template</Button>
         </div>
 
-        {/* Template count */}
         {!loading && templates.length > 0 && (
           <div className="text-sm text-slate-400">
             {templates.length} template{templates.length !== 1 ? 's' : ''}
           </div>
         )}
 
-        {/* Template list */}
         <TemplateList
           templates={templates}
           onEdit={handleEditTemplate}
@@ -117,11 +132,12 @@ export function TemplateSection(props: TemplateSectionProps) {
     )
   }
 
-  // Builder view
+  // Builder view - render full height (no -my-6 to avoid hiding behind Settings header)
   return (
-    <div>
+    <div className="-mx-6 -mb-6 h-[calc(100vh-180px)] pr-4 min-w-0">
       <TemplateBuilder
         templateId={editingTemplateId || undefined}
+        initialBackgroundPath={initialBgPath}
         onSave={handleBuilderSave}
         onCancel={handleBuilderCancel}
       />

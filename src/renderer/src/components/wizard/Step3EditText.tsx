@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { SlideEditor } from './SlideEditor'
-import { LivePreview } from './LivePreview'
+import { InteractiveSlideCanvas } from './InteractiveSlideCanvas'
 import { SlideZoneOverrides } from './SlideZoneOverrides'
 import { SlidePresetManager } from './SlidePresetManager'
 import { Card, CardContent } from '../ui/card'
@@ -31,7 +31,6 @@ import type { Slide } from '../../../../shared/types/generation'
 import type { Template } from '../../../../preload/types'
 import type { Settings } from '../../../../shared/types/settings'
 import type { Zone } from '../templates/ZoneEditor'
-import { buildSlideHTML } from '../../lib/buildSlideHTML'
 
 interface SortableThumbnailProps {
   slide: Slide
@@ -101,32 +100,36 @@ export function Step3EditText() {
   const [hookOptions, setHookOptions] = useState<string[]>([])
   const [isLoadingHooks, setIsLoadingHooks] = useState(false)
   const [showNewDraftConfirm, setShowNewDraftConfirm] = useState(false)
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
 
-  // Template and zone state for zone overrides and live preview
+  // Template and zone state
   const [template, setTemplate] = useState<Template | null>(null)
   const [settings, setSettings] = useState<Settings | null>(null)
   const [zones, setZones] = useState<Zone[]>([])
+  const [bgDataUrl, setBgDataUrl] = useState<string | undefined>(undefined)
 
   // Load template and settings on mount
   useEffect(() => {
     const load = async () => {
       const settingsData = await window.api.loadSettings()
       setSettings(settingsData)
-      const templates = await window.api.templates.list()
-      if (templates.length > 0) {
-        const t = await window.api.templates.get(templates[0].id)
-        if (t) {
-          setTemplate(t)
-          try {
-            setZones(JSON.parse(t.zones_config))
-          } catch {
-            setZones([])
-          }
-        }
+      const t = await window.api.templates.ensureDefault()
+      if (t) {
+        setTemplate(t)
+        try {
+          const parsed = JSON.parse(t.zones_config)
+          if (parsed.length > 0) setZones(parsed)
+        } catch { /* zones stays empty */ }
       }
     }
     load()
   }, [])
+
+  // Load custom background as data URL
+  useEffect(() => {
+    if (!customBackgroundPath) { setBgDataUrl(undefined); return }
+    window.api.readFileAsDataUrl(customBackgroundPath).then(setBgDataUrl).catch(() => setBgDataUrl(undefined))
+  }, [customBackgroundPath])
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -143,24 +146,6 @@ export function Step3EditText() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [])
-
-  // Compute live preview HTML for active slide
-  const activeSlideHtml = useMemo(() => {
-    if (!settings || zones.length === 0 || !generatedSlides[activeSlideIndex]) return undefined
-    return buildSlideHTML({
-      slide: generatedSlides[activeSlideIndex],
-      allSlides: generatedSlides,
-      zones,
-      settings,
-      templateBackground: template
-        ? { type: template.background_type, value: template.background_value }
-        : null,
-      overlayColor: template?.overlay_color || '#000000',
-      overlayEnabled: template?.overlay_enabled ?? true,
-      customBackgroundPath,
-      opacityOverride: undefined
-    })
-  }, [generatedSlides, activeSlideIndex, settings, zones, template, customBackgroundPath])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -196,7 +181,6 @@ export function Step3EditText() {
     setShowHooksOverlay(true)
 
     try {
-      // Set up listener for hooks completion
       const cleanup = window.api.generation.onHooksComplete((result) => {
         setHookOptions(result.hooks)
         setIsLoadingHooks(false)
@@ -204,7 +188,6 @@ export function Step3EditText() {
         cleanupError()
       })
 
-      // Set up listener for errors so overlay never hangs
       const cleanupError = window.api.generation.onError((error) => {
         console.error('Hooks generation failed:', error.message)
         setIsLoadingHooks(false)
@@ -213,11 +196,10 @@ export function Step3EditText() {
         cleanupError()
       })
 
-      // Request alternative hooks
       await window.api.generation.streamHooks({
         currentHook: activeSlide.hook_text,
         slideContext: `${activeSlide.body_text.substring(0, 200)}...`,
-        prompt: '' // Will be assembled in backend
+        prompt: ''
       })
     } catch (error) {
       console.error('Failed to request hooks:', error)
@@ -237,14 +219,11 @@ export function Step3EditText() {
       setShowNewDraftConfirm(true)
       return
     }
-
-    // Confirmed - return to Step 2 for new generation
     setStep(2)
   }
 
   const handleApprove = async () => {
     try {
-      // Save post to DB
       const createResult = await window.api.posts.create({
         pillar: selectedPillar,
         theme: selectedTheme,
@@ -258,7 +237,6 @@ export function Step3EditText() {
       if (createResult.success && createResult.postId) {
         setPostId(createResult.postId)
 
-        // Save slides
         const slidesData = generatedSlides.map((slide) => ({
           post_id: createResult.postId!,
           slide_number: slide.slide_number,
@@ -270,8 +248,6 @@ export function Step3EditText() {
         }))
 
         await window.api.posts.saveSlides(slidesData)
-
-        // Advance to Step 4
         setStep(4)
       } else {
         console.error('Failed to create post:', createResult.error)
@@ -406,13 +382,19 @@ export function Step3EditText() {
                   className="w-full"
                 />
                 <p className="text-xs text-slate-500">
-                  Adjust background overlay darkness (preview tool - final render in Step 4)
+                  Adjust background overlay darkness
                 </p>
               </div>
 
               {/* Zone Overrides Panel */}
               {zones.length > 0 && (
-                <SlideZoneOverrides zones={zones} slideIndex={activeSlideIndex} />
+                <SlideZoneOverrides
+                  zones={zones}
+                  slideIndex={activeSlideIndex}
+                  settings={settings}
+                  selectedZoneId={selectedZoneId}
+                  onSelectZone={setSelectedZoneId}
+                />
               )}
 
               {/* Preset Manager */}
@@ -443,9 +425,19 @@ export function Step3EditText() {
           </Tabs>
         </div>
 
-        {/* Right Panel: Live Preview (60%) */}
-        <div className="w-3/5 bg-slate-950">
-          <LivePreview slide={activeSlide} templateHtml={activeSlideHtml} />
+        {/* Right Panel: Interactive Canvas (60%) */}
+        <div className="w-3/5 bg-slate-950 p-4">
+          <InteractiveSlideCanvas
+            slide={activeSlide}
+            slideIndex={activeSlideIndex}
+            zones={zones}
+            template={template}
+            settings={settings}
+            bgDataUrl={bgDataUrl}
+            customBackgroundPath={customBackgroundPath}
+            selectedZoneId={selectedZoneId}
+            onSelectZone={setSelectedZoneId}
+          />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { Component, useState } from 'react'
+import { Component, useState, useCallback } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { AppLayout } from './components/layout/AppLayout'
 import { Sidebar, type NavItem, type SettingsTab } from './components/layout/Sidebar'
@@ -56,22 +56,53 @@ function App() {
   const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTab>('brand-voice')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  // Template routing state for create flow -> template builder -> back
+  const [pendingTemplateImage, setPendingTemplateImage] = useState<string | null>(null)
+  const [returnToCreate, setReturnToCreate] = useState(false)
+
   const handleNavigate = (item: NavItem) => {
     setActiveItem(item)
-    // Auto-expand sidebar when navigating to settings
     if (item === 'settings') {
       setSidebarCollapsed(false)
     }
   }
+
+  // Called from create flow when user uploads an image and wants to configure template
+  const handleCreateFlowTemplateRequest = useCallback((imagePath: string) => {
+    setPendingTemplateImage(imagePath)
+    setReturnToCreate(true)
+    setActiveSettingsTab('templates')
+    setActiveItem('settings')
+  }, [])
+
+  // Called when template is saved from create flow routing
+  const handleTemplateSaveAndReturn = useCallback(() => {
+    setPendingTemplateImage(null)
+    if (returnToCreate) {
+      setReturnToCreate(false)
+      setActiveItem('create')
+    }
+  }, [returnToCreate])
 
   const renderPage = () => {
     switch (activeItem) {
       case 'dashboard':
         return <Dashboard onNavigate={handleNavigate} />
       case 'create':
-        return <CreatePost onNavigate={handleNavigate} />
+        return (
+          <CreatePost
+            onNavigate={handleNavigate}
+            onRequestTemplateBuilder={handleCreateFlowTemplateRequest}
+          />
+        )
       case 'settings':
-        return <Settings activeTab={activeSettingsTab} />
+        return (
+          <Settings
+            activeTab={activeSettingsTab}
+            pendingTemplateImage={pendingTemplateImage}
+            onTemplateSaveAndReturn={handleTemplateSaveAndReturn}
+          />
+        )
       default:
         return <Dashboard onNavigate={handleNavigate} />
     }

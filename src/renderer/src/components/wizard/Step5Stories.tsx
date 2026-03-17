@@ -336,7 +336,7 @@ Generate the stories now.`
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
+    <div className="space-y-6 px-6 py-6">
       <Card className="border-slate-700 bg-slate-800">
         <CardHeader>
           <CardTitle className="text-slate-100">Story Proposals</CardTitle>

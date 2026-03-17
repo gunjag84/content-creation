@@ -3,7 +3,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { ZoneEditor, type Zone } from './ZoneEditor'
-import { CarouselVariantEditor, type CarouselVariants } from './CarouselVariantEditor'
+import { ZonePopover } from './ZonePopover'
 import { OverlayControls } from './OverlayControls'
 import { BackgroundSelector } from './BackgroundSelector'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -11,11 +11,14 @@ import type { TemplateInsert } from '../../../../preload/types'
 
 interface TemplateBuilderProps {
   templateId?: number
+  initialBackgroundPath?: string
   onSave: (templateId: number) => void
   onCancel: () => void
 }
 
-export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilderProps) {
+type VariantTab = 'cover' | 'content' | 'cta'
+
+export function TemplateBuilder({ templateId, initialBackgroundPath, onSave, onCancel }: TemplateBuilderProps) {
   const { settings, loadSettings } = useSettingsStore()
 
   // Template state
@@ -31,13 +34,15 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
   const [overlayOpacity, setOverlayOpacity] = useState(50)
   const [zones, setZones] = useState<Zone[]>([])
   const [isCarousel, setIsCarousel] = useState(false)
-  const [carouselVariants, setCarouselVariants] = useState<CarouselVariants>({
+  const [carouselVariants, setCarouselVariants] = useState<{ cover: Zone[]; content: Zone[]; cta: Zone[] }>({
     cover: [],
     content: [],
     cta: []
   })
+  const [activeVariantTab, setActiveVariantTab] = useState<VariantTab>('cover')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
 
   // Load settings on mount
   useEffect(() => {
@@ -53,6 +58,15 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
     }
   }, [templateId])
 
+  // Handle initial background path from create flow
+  useEffect(() => {
+    if (initialBackgroundPath && !templateId) {
+      setBackgroundType('image')
+      setBackgroundValue(initialBackgroundPath)
+      loadBackgroundImage(initialBackgroundPath)
+    }
+  }, [initialBackgroundPath, templateId])
+
   const loadTemplate = async (id: number) => {
     setLoading(true)
     try {
@@ -66,11 +80,9 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
         setOverlayColor(template.overlay_color || '#000000')
         setOverlayOpacity(template.overlay_opacity || 50)
 
-        // Parse zones from JSON
         try {
           const parsedZones = JSON.parse(template.zones_config)
 
-          // Check if it's carousel format
           if (parsedZones && typeof parsedZones === 'object' && !Array.isArray(parsedZones)) {
             if (parsedZones.type === 'carousel' && parsedZones.cover && parsedZones.content && parsedZones.cta) {
               setIsCarousel(true)
@@ -89,7 +101,6 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
           console.error('Failed to parse zones config:', err)
         }
 
-        // Load background image if type is image
         if (template.background_type === 'image' && template.background_value) {
           loadBackgroundImage(template.background_value)
         }
@@ -156,14 +167,50 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
     setFormat(newFormat)
   }
 
+  // Get the currently active zones (carousel vs single)
+  const activeZones = isCarousel ? carouselVariants[activeVariantTab] : zones
+  const setActiveZones = (newZones: Zone[]) => {
+    if (isCarousel) {
+      setCarouselVariants({ ...carouselVariants, [activeVariantTab]: newZones })
+    } else {
+      setZones(newZones)
+    }
+  }
+
+  const handleZoneUpdate = (zoneId: string, updates: Partial<Zone>) => {
+    const updatedZones = activeZones.map((zone) => {
+      if (zone.id === zoneId) {
+        const newZone = { ...zone, ...updates }
+        if (updates.type && updates.type !== zone.type) {
+          const getFontSizeForType = (type: Zone['type']): number => {
+            if (!brandGuidance) return 24
+            switch (type) {
+              case 'hook': return brandGuidance.headlineFontSize || 48
+              case 'body': return brandGuidance.bodyFontSize || 24
+              case 'cta': return brandGuidance.ctaFontSize || 32
+              case 'no-text': return 16
+            }
+          }
+          newZone.fontSize = getFontSizeForType(updates.type)
+        }
+        return newZone
+      }
+      return zone
+    })
+    setActiveZones(updatedZones)
+  }
+
+  const handleZoneDelete = (zoneId: string) => {
+    setActiveZones(activeZones.filter((z) => z.id !== zoneId))
+    setSelectedZoneId(null)
+  }
+
   const handleSave = async () => {
-    // Validate
     if (!name.trim()) {
       alert('Please enter a template name')
       return
     }
 
-    // Check zones for both single and carousel
     const hasZones = isCarousel
       ? carouselVariants.cover.length > 0 || carouselVariants.content.length > 0 || carouselVariants.cta.length > 0
       : zones.length > 0
@@ -177,7 +224,6 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
 
     setSaving(true)
     try {
-      // Serialize zones based on carousel mode
       const zonesConfig = isCarousel
         ? JSON.stringify({
             type: 'carousel',
@@ -200,11 +246,9 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
 
       let resultId: number
       if (templateId) {
-        // Update existing
         await window.api.templates.update(templateId, templateData)
         resultId = templateId
       } else {
-        // Create new
         resultId = await window.api.templates.create(templateData)
       }
 
@@ -224,6 +268,8 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
     backgroundColor: brandGuidance?.backgroundColor || '#ffffff'
   }
 
+  const selectedZone = activeZones.find((z) => z.id === selectedZoneId)
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -232,45 +278,36 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
     )
   }
 
-  return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">
-          {templateId ? 'Edit Template' : 'Create Template'}
-        </h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save Template'}
-          </Button>
-        </div>
-      </div>
+  const VARIANT_TABS: { key: VariantTab; label: string }[] = [
+    { key: 'cover', label: 'Cover' },
+    { key: 'content', label: 'Content' },
+    { key: 'cta', label: 'CTA' },
+  ]
 
-      {/* Name and Format */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="template-name">Template Name</Label>
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900 shrink-0">
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-bold text-slate-100">
+            {templateId ? 'Edit Template' : 'Create Template'}
+          </h2>
+          {/* Name */}
           <Input
-            id="template-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="My Template"
-            required
-            className="bg-slate-700 border-slate-600 text-slate-100 placeholder:text-slate-400"
+            placeholder="Template name"
+            className="w-48 h-8 text-sm bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-400"
           />
-        </div>
-        <div className="space-y-2">
-          <Label>Format</Label>
-          <div className="flex gap-2">
+          {/* Format */}
+          <div className="flex gap-1">
             <Button
               type="button"
               variant={format === 'feed' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFormatChange('feed')}
+              className="h-8 text-xs"
             >
               Feed (4:5)
             </Button>
@@ -279,96 +316,135 @@ export function TemplateBuilder({ templateId, onSave, onCancel }: TemplateBuilde
               variant={format === 'story' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFormatChange('story')}
+              className="h-8 text-xs"
             >
               Story (9:16)
             </Button>
           </div>
+          {/* Carousel toggle */}
+          {format === 'feed' && (
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isCarousel}
+                onChange={(e) => {
+                  const newCarousel = e.target.checked
+                  if (newCarousel && zones.length > 0) {
+                    const confirmed = window.confirm('Switching to carousel mode will reset your zones. Continue?')
+                    if (!confirmed) return
+                    setZones([])
+                  } else if (!newCarousel && (carouselVariants.cover.length > 0 || carouselVariants.content.length > 0 || carouselVariants.cta.length > 0)) {
+                    const confirmed = window.confirm('Switching to single slide mode will reset your carousel zones. Continue?')
+                    if (!confirmed) return
+                    setCarouselVariants({ cover: [], content: [], cta: [] })
+                  }
+                  setIsCarousel(newCarousel)
+                  setSelectedZoneId(null)
+                }}
+                className="w-3.5 h-3.5"
+              />
+              Carousel
+            </label>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
         </div>
       </div>
 
-      {/* Carousel Mode Toggle (only for feed format) */}
-      {format === 'feed' && (
-        <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
-          <input
-            type="checkbox"
-            id="carousel-mode"
-            checked={isCarousel}
-            onChange={(e) => {
-              const newCarousel = e.target.checked
-              if (newCarousel && zones.length > 0) {
-                const confirmed = window.confirm(
-                  'Switching to carousel mode will reset your zones. Continue?'
-                )
-                if (!confirmed) return
-                setZones([])
-              } else if (!newCarousel && (carouselVariants.cover.length > 0 || carouselVariants.content.length > 0 || carouselVariants.cta.length > 0)) {
-                const confirmed = window.confirm(
-                  'Switching to single slide mode will reset your carousel zones. Continue?'
-                )
-                if (!confirmed) return
-                setCarouselVariants({ cover: [], content: [], cta: [] })
-              }
-              setIsCarousel(newCarousel)
-            }}
-            className="w-4 h-4"
+      {/* Main content: side-by-side */}
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        {/* Left Panel - Controls */}
+        <div className="w-[320px] shrink-0 min-w-0 overflow-y-auto overflow-x-hidden border-r border-slate-700 bg-slate-900 p-4 space-y-4 pr-2">
+          {/* Background Selector */}
+          <BackgroundSelector
+            backgroundType={backgroundType}
+            backgroundValue={backgroundValue}
+            brandColors={brandColors}
+            onTypeChange={handleBackgroundTypeChange}
+            onImageUpload={handleImageUpload}
           />
-          <Label htmlFor="carousel-mode" className="cursor-pointer">
-            Carousel Template
-            <span className="block text-xs text-slate-400 font-normal mt-1">
-              Create separate zone layouts for cover, content, and CTA slides
-            </span>
-          </Label>
+
+          {/* Overlay Controls */}
+          <OverlayControls
+            enabled={overlayEnabled}
+            color={overlayColor}
+            opacity={overlayOpacity}
+            onChange={handleOverlayChange}
+          />
+
+          {/* Zone Configuration Panel (docked) */}
+          <div className="p-4 bg-slate-800 rounded-lg border border-slate-700">
+            <h3 className="font-semibold text-sm text-slate-200 mb-3">Zone Configuration</h3>
+            {selectedZone ? (
+              <ZonePopover
+                zone={selectedZone}
+                onUpdate={(updates) => handleZoneUpdate(selectedZone.id, updates)}
+                onDelete={() => handleZoneDelete(selectedZone.id)}
+                brandGuidance={brandGuidance}
+              />
+            ) : (
+              <p className="text-xs text-slate-500">
+                Click a zone on the canvas to configure it
+              </p>
+            )}
+          </div>
         </div>
-      )}
 
-      {/* Background Selector */}
-      <BackgroundSelector
-        backgroundType={backgroundType}
-        backgroundValue={backgroundValue}
-        brandColors={brandColors}
-        onTypeChange={handleBackgroundTypeChange}
-        onImageUpload={handleImageUpload}
-      />
+        {/* Right Panel - Canvas */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 bg-slate-950 p-4">
+          {/* Carousel variant tabs above canvas */}
+          {isCarousel && (
+            <div className="flex gap-2 mb-3 shrink-0">
+              {VARIANT_TABS.map((tab) => {
+                const count = carouselVariants[tab.key].length
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      setActiveVariantTab(tab.key)
+                      setSelectedZoneId(null)
+                    }}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeVariantTab === tab.key
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-800 text-slate-400 hover:text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {tab.label}
+                    {count > 0 && (
+                      <span className="ml-1.5 text-xs opacity-70">({count})</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
-      {/* Zone Editor or Carousel Variant Editor */}
-      <div className="space-y-2">
-        <Label>{isCarousel ? 'Carousel Zones' : 'Template Zones'}</Label>
-        {isCarousel ? (
-          <CarouselVariantEditor
-            variants={carouselVariants}
-            onChange={setCarouselVariants}
-            brandGuidance={brandGuidance}
-            backgroundImage={backgroundImage}
-            backgroundType={backgroundType}
-            backgroundColor={backgroundValue}
-            overlayColor={overlayColor}
-            overlayOpacity={overlayOpacity}
-            overlayEnabled={overlayEnabled}
-            format={format}
-          />
-        ) : (
-          <ZoneEditor
-            backgroundImage={backgroundImage}
-            backgroundType={backgroundType}
-            backgroundColor={backgroundValue}
-            overlayColor={overlayColor}
-            overlayOpacity={overlayOpacity}
-            overlayEnabled={overlayEnabled}
-            zones={zones}
-            onZonesChange={setZones}
-            brandGuidance={brandGuidance}
-            format={format}
-          />
-        )}
+          {/* Zone Editor Canvas */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden pr-2">
+            <ZoneEditor
+              backgroundImage={backgroundImage}
+              backgroundType={backgroundType}
+              backgroundColor={backgroundValue}
+              overlayColor={overlayColor}
+              overlayOpacity={overlayOpacity}
+              overlayEnabled={overlayEnabled}
+              zones={activeZones}
+              onZonesChange={setActiveZones}
+              brandGuidance={brandGuidance}
+              format={format}
+              selectedZoneId={selectedZoneId}
+              onSelectZone={setSelectedZoneId}
+            />
+          </div>
+        </div>
       </div>
-
-      {/* Overlay Controls */}
-      <OverlayControls
-        enabled={overlayEnabled}
-        color={overlayColor}
-        opacity={overlayOpacity}
-        onChange={handleOverlayChange}
-      />
     </div>
   )
 }

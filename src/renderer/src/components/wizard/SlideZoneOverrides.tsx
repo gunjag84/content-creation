@@ -1,15 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
 import { HexColorPicker } from 'react-colorful'
-import { ChevronDown, ChevronUp, Layers } from 'lucide-react'
+import { ChevronDown, ChevronUp, Layers, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { Slider } from '../ui/slider'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import type { Zone } from '../templates/ZoneEditor'
+import type { Settings } from '../../../../shared/types/settings'
 
 const ZONE_COLORS: Record<string, string> = {
   hook: '#3b82f6',
   body: '#22c55e',
   cta: '#f97316'
 }
+
+const SYSTEM_FONTS = [
+  'sans-serif',
+  'serif',
+  'monospace',
+  'Arial',
+  'Georgia',
+  'Helvetica',
+  'Times New Roman',
+  'Verdana',
+]
 
 interface ColorPickerPopoverProps {
   color: string
@@ -20,12 +32,14 @@ interface ColorPickerPopoverProps {
 function ColorPickerPopover({ color, onChange, onCommit }: ColorPickerPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [localColor, setLocalColor] = useState(color)
+  const [hexInput, setHexInput] = useState(color.replace('#', ''))
   const popoverRef = useRef<HTMLDivElement>(null)
   const swatchRef = useRef<HTMLButtonElement>(null)
 
-  // Sync local color when external color changes (e.g. on slide switch)
+  // Sync local color when external color changes
   useEffect(() => {
     setLocalColor(color)
+    setHexInput(color.replace('#', ''))
   }, [color])
 
   // Close popover on outside click and commit
@@ -46,9 +60,22 @@ function ColorPickerPopover({ color, onChange, onCommit }: ColorPickerPopoverPro
     return () => document.removeEventListener('mousedown', handler)
   }, [isOpen, localColor, onCommit])
 
-  const handleChange = (newColor: string) => {
+  const handlePickerChange = (newColor: string) => {
     setLocalColor(newColor)
+    setHexInput(newColor.replace('#', ''))
     onChange(newColor)
+  }
+
+  const handleHexInputChange = (value: string) => {
+    const clean = value.replace('#', '')
+    if (/^[0-9A-Fa-f]{0,6}$/.test(clean)) {
+      setHexInput(clean)
+      if (clean.length === 6 || clean.length === 3) {
+        const fullColor = `#${clean}`
+        setLocalColor(fullColor)
+        onChange(fullColor)
+      }
+    }
   }
 
   const handleClose = () => {
@@ -57,21 +84,33 @@ function ColorPickerPopover({ color, onChange, onCommit }: ColorPickerPopoverPro
   }
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-2">
       <button
         ref={swatchRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-6 w-6 rounded border border-slate-500 cursor-pointer hover:border-slate-300 transition-colors"
+        className="h-6 w-6 rounded border border-slate-500 cursor-pointer hover:border-slate-300 transition-colors shrink-0"
         style={{ backgroundColor: localColor }}
         title="Pick color"
       />
+      {/* Hex text input */}
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-slate-500">#</span>
+        <input
+          type="text"
+          value={hexInput}
+          onChange={(e) => handleHexInputChange(e.target.value)}
+          maxLength={6}
+          className="w-16 px-1.5 py-0.5 text-xs bg-slate-700 border border-slate-600 rounded text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="ffffff"
+        />
+      </div>
       {isOpen && (
         <div
           ref={popoverRef}
           className="absolute left-0 top-8 z-50 rounded-lg border border-slate-600 bg-slate-800 p-3 shadow-xl"
         >
-          <HexColorPicker color={localColor} onChange={handleChange} />
+          <HexColorPicker color={localColor} onChange={handlePickerChange} />
           <button
             className="mt-2 w-full rounded bg-slate-700 py-1 text-xs text-slate-300 hover:bg-slate-600"
             onClick={handleClose}
@@ -87,9 +126,12 @@ function ColorPickerPopover({ color, onChange, onCommit }: ColorPickerPopoverPro
 interface SlideZoneOverridesProps {
   zones: Zone[]
   slideIndex: number
+  settings?: Settings | null
+  selectedZoneId?: string | null
+  onSelectZone?: (zoneId: string | null) => void
 }
 
-export function SlideZoneOverrides({ zones, slideIndex }: SlideZoneOverridesProps) {
+export function SlideZoneOverrides({ zones, slideIndex, settings, selectedZoneId, onSelectZone }: SlideZoneOverridesProps) {
   const [expanded, setExpanded] = useState(true)
   const { generatedSlides, setZoneOverride } = useCreatePostStore()
   const slide = generatedSlides[slideIndex]
@@ -97,6 +139,13 @@ export function SlideZoneOverrides({ zones, slideIndex }: SlideZoneOverridesProp
   const textZones = zones.filter(z => z.type !== 'no-text')
 
   if (!slide || textZones.length === 0) return null
+
+  // Build font options from settings + system fonts
+  const customFonts: string[] = []
+  const guidance = settings?.visualGuidance
+  if (guidance?.headlineFont?.path) customFonts.push('CustomHeadline')
+  if (guidance?.bodyFont?.path) customFonts.push('CustomBody')
+  if (guidance?.ctaFont?.path) customFonts.push('CustomCTA')
 
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-800">
@@ -123,22 +172,55 @@ export function SlideZoneOverrides({ zones, slideIndex }: SlideZoneOverridesProp
             const overrides = slide.zone_overrides?.[zone.id] ?? {}
             const currentFontSize = overrides.fontSize ?? zone.fontSize
             const currentFontWeight = overrides.fontWeight ?? 'normal'
-            const xDelta = (overrides.x ?? zone.x) - zone.x
-            const yDelta = (overrides.y ?? zone.y) - zone.y
+            const currentTextAlign = overrides.textAlign ?? 'center'
+            const currentFontFamily = overrides.fontFamily ?? ''
 
-            // Default color: hook/cta use primaryColor, body uses secondaryColor
             const defaultColor =
               zone.type === 'body' ? '#cccccc' : '#ffffff'
             const currentColor = overrides.color ?? defaultColor
 
+            const isSelected = selectedZoneId === zone.id
+
             return (
-              <div key={zone.id} className="space-y-3">
+              <div
+                key={zone.id}
+                className={`space-y-3 rounded-lg p-2 transition-colors cursor-pointer ${
+                  isSelected ? 'bg-slate-700/50 ring-1 ring-blue-500/50' : 'hover:bg-slate-700/30'
+                }`}
+                onClick={() => onSelectZone?.(zone.id)}
+              >
                 {/* Zone Label */}
                 <div
                   className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-white"
                   style={{ backgroundColor: ZONE_COLORS[zone.type] ?? '#64748b' }}
                 >
                   {zone.label || zone.type}
+                </div>
+
+                {/* Font Family */}
+                <div className="space-y-1">
+                  <span className="text-xs text-slate-500">Font</span>
+                  <select
+                    value={currentFontFamily}
+                    onChange={(e) =>
+                      setZoneOverride(slideIndex, zone.id, { fontFamily: e.target.value || undefined })
+                    }
+                    className="w-full h-7 text-xs bg-slate-700 border border-slate-600 rounded text-slate-200 px-2"
+                  >
+                    <option value="">Default</option>
+                    {customFonts.length > 0 && (
+                      <optgroup label="Custom Fonts">
+                        {customFonts.map(f => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label="System Fonts">
+                      {SYSTEM_FONTS.map(f => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
 
                 {/* Font Size */}
@@ -152,43 +234,74 @@ export function SlideZoneOverrides({ zones, slideIndex }: SlideZoneOverridesProp
                     max={120}
                     step={1}
                     value={[currentFontSize]}
-                    onValueCommit={([val]) =>
+                    onValueChange={([val]) =>
                       setZoneOverride(slideIndex, zone.id, { fontSize: val })
                     }
                     className="w-full"
                   />
                 </div>
 
-                {/* Font Weight */}
-                <div className="space-y-1">
-                  <span className="text-xs text-slate-500">Font weight</span>
-                  <div className="flex gap-1">
-                    {(['normal', 'bold'] as const).map(weight => (
-                      <button
-                        key={weight}
-                        type="button"
-                        onClick={() =>
-                          setZoneOverride(slideIndex, zone.id, { fontWeight: weight })
-                        }
-                        className={`rounded px-3 py-1 text-xs capitalize transition-colors ${
-                          currentFontWeight === weight
-                            ? 'bg-slate-600 text-white'
-                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                        }`}
-                      >
-                        {weight}
-                      </button>
-                    ))}
+                {/* Font Weight + Text Align row */}
+                <div className="flex items-center gap-4">
+                  {/* Font Weight */}
+                  <div className="space-y-1">
+                    <span className="text-xs text-slate-500">Weight</span>
+                    <div className="flex gap-1">
+                      {(['normal', 'bold'] as const).map(weight => (
+                        <button
+                          key={weight}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setZoneOverride(slideIndex, zone.id, { fontWeight: weight })
+                          }}
+                          className={`rounded px-3 py-1 text-xs capitalize transition-colors ${
+                            currentFontWeight === weight
+                              ? 'bg-slate-600 text-white'
+                              : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                          }`}
+                        >
+                          {weight}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Text Align */}
+                  <div className="space-y-1">
+                    <span className="text-xs text-slate-500">Align</span>
+                    <div className="flex gap-1">
+                      {([
+                        { value: 'left' as const, icon: AlignLeft },
+                        { value: 'center' as const, icon: AlignCenter },
+                        { value: 'right' as const, icon: AlignRight }
+                      ]).map(({ value, icon: Icon }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setZoneOverride(slideIndex, zone.id, { textAlign: value })
+                          }}
+                          className={`rounded p-1.5 transition-colors ${
+                            currentTextAlign === value
+                              ? 'bg-slate-600 text-white'
+                              : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                          }`}
+                        >
+                          <Icon size={14} />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Color */}
-                <div className="flex items-center gap-2">
+                {/* Color with hex input */}
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <span className="text-xs text-slate-500">Color</span>
                   <ColorPickerPopover
                     color={currentColor}
                     onChange={(val) => {
-                      // Optimistic local preview — no history entry yet
                       useCreatePostStore
                         .getState()
                         .setZoneOverride(slideIndex, zone.id, { color: val })
@@ -196,49 +309,6 @@ export function SlideZoneOverrides({ zones, slideIndex }: SlideZoneOverridesProp
                     onCommit={(val) =>
                       setZoneOverride(slideIndex, zone.id, { color: val })
                     }
-                  />
-                  <span className="text-xs text-slate-400">{currentColor}</span>
-                </div>
-
-                {/* X Offset */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">X offset</span>
-                    <span className="text-xs text-slate-300">
-                      {xDelta >= 0 ? '+' : ''}
-                      {xDelta}px
-                    </span>
-                  </div>
-                  <Slider
-                    min={-200}
-                    max={200}
-                    step={1}
-                    value={[xDelta]}
-                    onValueCommit={([delta]) =>
-                      setZoneOverride(slideIndex, zone.id, { x: zone.x + delta })
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Y Offset */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">Y offset</span>
-                    <span className="text-xs text-slate-300">
-                      {yDelta >= 0 ? '+' : ''}
-                      {yDelta}px
-                    </span>
-                  </div>
-                  <Slider
-                    min={-200}
-                    max={200}
-                    step={1}
-                    value={[yDelta]}
-                    onValueCommit={([delta]) =>
-                      setZoneOverride(slideIndex, zone.id, { y: zone.y + delta })
-                    }
-                    className="w-full"
                   />
                 </div>
 

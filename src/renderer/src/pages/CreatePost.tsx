@@ -11,11 +11,12 @@ import type { NavItem } from '../components/layout/Sidebar'
 
 interface CreatePostProps {
   onNavigate: (item: NavItem) => void
+  onRequestTemplateBuilder?: (imagePath: string) => void
 }
 
 const STEP_LABELS = ['Recommendation', 'Generate', 'Edit', 'Render', 'Stories']
 
-export function CreatePost({ onNavigate }: CreatePostProps) {
+export function CreatePost({ onNavigate, onRequestTemplateBuilder }: CreatePostProps) {
   const { currentStep, reset } = useCreatePostStore()
 
   const handleExit = () => {
@@ -26,7 +27,7 @@ export function CreatePost({ onNavigate }: CreatePostProps) {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1Recommendation />
+        return <Step1Recommendation onRequestTemplateBuilder={onRequestTemplateBuilder} />
       case 2:
         return <Step2Generation />
       case 3:

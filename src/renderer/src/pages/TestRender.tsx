@@ -106,7 +106,7 @@ export function TestRender() {
   }
 
   return (
-    <div className="max-w-6xl">
+    <div className="px-6 py-6">
       <h1 className="text-4xl font-bold mb-2 text-slate-100">Rendering Test</h1>
       <p className="text-slate-400 mb-8">
         Test the HTML-to-PNG rendering pipeline at Instagram dimensions

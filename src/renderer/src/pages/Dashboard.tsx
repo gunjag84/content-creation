@@ -15,24 +15,31 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [ipcError, setIpcError] = useState<string | null>(null)
 
   useEffect(() => {
-    window.api.getAppInfo().then(setAppInfo).catch((err) => {
+    const api = typeof window !== 'undefined' ? window.api : undefined
+    if (!api) {
+      setAppInfo({ version: 'web', userData: '' })
+      setDbStatus({ ok: false, tables: 0 })
+      setIpcError('Electron API not available (running in browser)')
+      return
+    }
+    api.getAppInfo().then(setAppInfo).catch((err) => {
       console.error('getAppInfo failed:', err)
       setIpcError(err.message)
       setAppInfo({ version: 'unknown', userData: '' })
     })
-    window.api.getDbStatus().then(setDbStatus).catch((err) => {
+    api.getDbStatus().then(setDbStatus).catch((err) => {
       console.error('getDbStatus failed:', err)
       setIpcError(err.message)
       setDbStatus({ ok: false, tables: 0 })
     })
-    window.api
+    api
       .loadSettings()
       .then(setSettings)
       .catch((err) => setSettingsError(err.message))
   }, [])
 
   return (
-    <div className="max-w-4xl">
+    <div className="px-6 py-6">
       <h1 className="text-4xl font-bold mb-2 text-slate-100">
         Content Creation System
       </h1>

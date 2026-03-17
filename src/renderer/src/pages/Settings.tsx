@@ -17,9 +17,11 @@ import { APIKeySection } from '../components/settings/APIKeySection'
 
 interface SettingsProps {
   activeTab: string
+  pendingTemplateImage?: string | null
+  onTemplateSaveAndReturn?: () => void
 }
 
-export function Settings({ activeTab }: SettingsProps) {
+export function Settings({ activeTab, pendingTemplateImage, onTemplateSaveAndReturn }: SettingsProps) {
   const { settings, loading, lastSaved, loadSettings, updateSection } = useSettingsStore()
   const [showSavedIndicator, setShowSavedIndicator] = useState(false)
 
@@ -78,7 +80,12 @@ export function Settings({ activeTab }: SettingsProps) {
       case 'master-prompt':
         return <MasterPromptSection settings={settings} onUpdate={updateSection} />
       case 'templates':
-        return <TemplateSection />
+        return (
+          <TemplateSection
+            pendingBackgroundImage={pendingTemplateImage}
+            onTemplateSaveAndReturn={onTemplateSaveAndReturn ? (id) => onTemplateSaveAndReturn() : undefined}
+          />
+        )
       case 'settings-history':
         return <SettingsHistorySection />
       default:
@@ -87,8 +94,8 @@ export function Settings({ activeTab }: SettingsProps) {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
+    <div className="h-full flex flex-col min-h-0 px-6 py-6">
+      <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h1 className="text-4xl font-bold text-slate-100 mb-2">Settings</h1>
           <p className="text-slate-400">Configure your brand, content strategy, and generation defaults</p>
@@ -100,7 +107,7 @@ export function Settings({ activeTab }: SettingsProps) {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-4">
         {renderSection()}
       </div>
     </div>

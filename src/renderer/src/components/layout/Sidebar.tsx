@@ -42,7 +42,7 @@ export function Sidebar({ activeItem, activeSettingsTab, onNavigate, onSettingsT
   return (
     <div
       className={cn(
-        'flex flex-col h-full bg-slate-900 border-r border-slate-800 transition-all duration-300',
+        'flex flex-col h-full bg-slate-900 border-r border-slate-800 transition-all duration-300 overflow-hidden shrink-0',
         collapsed ? 'w-16' : 'w-64'
       )}
     >
@@ -79,7 +79,7 @@ export function Sidebar({ activeItem, activeSettingsTab, onNavigate, onSettingsT
 
               {/* Settings sub-items */}
               {isSettings && showSettingsSubItems && (
-                <div className="mt-1 space-y-0.5 overflow-y-auto max-h-[calc(100vh-300px)]">
+                <div className="mt-1 space-y-0.5 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-300px)] min-w-0 pr-2">
                   {settingsItems.map((subItem) => {
                     const isSubActive = activeSettingsTab === subItem.id
 

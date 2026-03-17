@@ -98,28 +98,15 @@ export function BackgroundSelector({
       {backgroundType === 'image' && (
         <div className="space-y-2">
           {backgroundValue ? (
-            <div className="space-y-2">
-              <div className="aspect-[4/5] w-full max-w-[200px] rounded-lg border overflow-hidden bg-slate-700">
-                <img
-                  src={`file://${backgroundValue}`}
-                  alt="Background preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback for preview errors
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleImageUpload}
-                disabled={uploading}
-              >
-                {uploading ? 'Uploading...' : 'Change Image'}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleImageUpload}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading...' : 'Change Image'}
+            </Button>
           ) : (
             <Button
               type="button"
@@ -219,21 +206,6 @@ export function BackgroundSelector({
             ))}
           </div>
 
-          {/* Gradient Preview */}
-          <div className="space-y-2">
-            <Label className="text-slate-300">Preview</Label>
-            <div
-              className="w-full h-20 rounded-md border"
-              style={{
-                background:
-                  currentGradientDirection === 'vertical'
-                    ? `linear-gradient(to bottom, ${brandColors.primaryColor}, ${brandColors.secondaryColor})`
-                    : currentGradientDirection === 'horizontal'
-                      ? `linear-gradient(to right, ${brandColors.primaryColor}, ${brandColors.secondaryColor})`
-                      : `linear-gradient(135deg, ${brandColors.primaryColor}, ${brandColors.secondaryColor})`
-              }}
-            />
-          </div>
           <p className="text-xs text-slate-500">
             Uses brand primary and secondary colors
           </p>
