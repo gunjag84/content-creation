@@ -74,6 +74,10 @@ export function Step3EditText() {
     generatedSlides,
     caption,
     postId,
+    selectedPillar,
+    selectedTheme,
+    selectedMechanic,
+    impulse,
     setSlide,
     reorderSlides,
     setCaption,
@@ -172,11 +176,11 @@ export function Step3EditText() {
     try {
       // Save post to DB
       const createResult = await window.api.posts.create({
-        pillar: '', // Will be populated from store in IPC handler
-        theme: '',
-        mechanic: '',
+        pillar: selectedPillar,
+        theme: selectedTheme,
+        mechanic: selectedMechanic,
         content_type: generatedSlides.length > 1 ? 'carousel' : 'single',
-        impulse: '',
+        impulse: impulse || '',
         status: 'draft',
         slide_count: generatedSlides.length
       })
