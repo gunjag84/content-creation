@@ -1,3 +1,14 @@
+// Per-zone visual overrides applied at render time (merged over template zone defaults)
+export interface ZoneOverride {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  fontSize?: number
+  fontWeight?: 'normal' | 'bold' | '600' | '700'
+  color?: string
+}
+
 // Slide content for wizard state and DB persistence
 export interface Slide {
   id?: number              // DB id (undefined for new slides)
@@ -9,6 +20,7 @@ export interface Slide {
   cta_text: string
   overlay_opacity: number  // 0-1, default 0.5
   custom_background_path?: string
+  zone_overrides?: Record<string, ZoneOverride>  // per-zone style overrides keyed by zone id
 }
 
 // System recommendation from balance engine
