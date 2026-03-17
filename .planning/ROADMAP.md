@@ -77,7 +77,7 @@ Plans:
   5. System generates 2-4 story proposals linked to feed post with interactive tool recommendations and dedicated story templates
   6. User can approve and export upload-ready feed PNGs and story PNGs with caption text file
   7. Learning system tracks balance matrix across steerable variables and generates soft-signal warnings when variables are overused
-**Plans**: 8 plans
+**Plans**: 11 plans
 
 Plans:
 - [ ] 03-01-PLAN.md - Install deps (@anthropic-ai/sdk, @dnd-kit, react-hook-form), shared generation types, Wave 0 test scaffolds
@@ -88,6 +88,9 @@ Plans:
 - [x] 03-06-PLAN.md - Step 2 (streaming generation display) + Step 3 (two-panel text editor, thumbnails, caption, drag reorder)
 - [ ] 03-07-PLAN.md - Step 4 (render & review, export) + Step 5 (story proposals, story render, story export)
 - [ ] 03-08-PLAN.md - Dashboard BalanceWidget + final end-to-end UAT checkpoint
+- [ ] 03-09-PLAN.md - [GAP CLOSURE] Fix Step 2 header ternary, manual mode spinner, and drag-and-drop UID-based reorder
+- [ ] 03-10-PLAN.md - [GAP CLOSURE] Fix alternative hooks prompt assembly and error handling
+- [ ] 03-11-PLAN.md - [GAP CLOSURE] Fix render service image wait, auto-render on mount, and click-to-zoom modal
 
 ### Phase 4: Production Readiness
 **Goal**: Production-ready app with performance tracking, logging, error handling, and polished UX
@@ -114,5 +117,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
 | 2. Settings & Templates | 15/15 | Complete | 2026-03-11 |
-| 3. Content Generation | 3/8 | In Progress | - |
+| 3. Content Generation | 3/11 | In Progress | - |
 | 4. Production Readiness | 0/2 | Not started | - |
