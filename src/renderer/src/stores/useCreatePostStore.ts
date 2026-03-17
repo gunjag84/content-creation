@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type {
   Slide,
   ZoneOverride,
+  SlidePreset,
   BalanceRecommendation,
   BalanceWarning,
   GenerationResult,
@@ -52,6 +53,7 @@ interface CreatePostState {
   setSlide: (index: number, field: keyof Slide, value: string | number) => void
   reorderSlides: (fromIndex: number, toIndex: number) => void
   setZoneOverride: (slideIndex: number, zoneId: string, override: Partial<ZoneOverride>) => void
+  applyPreset: (slideIndex: number, preset: SlidePreset) => void
   undo: () => void
   redo: () => void
   canUndo: () => boolean
@@ -170,6 +172,22 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
     return {
       generatedSlides: slides,
       slideHistory: newHistory,
+      slideHistoryFuture: []
+    }
+  }),
+
+  applyPreset: (slideIndex, preset) => set((state) => {
+    const slides = [...state.generatedSlides]
+    if (slideIndex < 0 || slideIndex >= slides.length) return state
+    const slide = { ...slides[slideIndex] }
+    slide.zone_overrides = { ...preset.zone_overrides }
+    if (preset.overlay_opacity !== undefined) {
+      slide.overlay_opacity = preset.overlay_opacity
+    }
+    slides[slideIndex] = slide
+    return {
+      generatedSlides: slides,
+      slideHistory: [...state.slideHistory, state.generatedSlides].slice(-50),
       slideHistoryFuture: []
     }
   }),

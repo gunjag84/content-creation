@@ -264,6 +264,98 @@ describe('useCreatePostStore', () => {
     })
   })
 
+  describe('applyPreset', () => {
+    it('applyPreset(0, preset) sets generatedSlides[0].zone_overrides to preset.zone_overrides (VSED-06)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [
+          { slide_type: 'cover', hook_text: 'A', body_text: '', cta_text: '' }
+        ],
+        caption: ''
+      })
+
+      store.applyPreset(0, {
+        id: 'p1',
+        name: 'Test',
+        zone_overrides: { 'zone-title': { fontSize: 56 } },
+        created_at: Date.now()
+      })
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].zone_overrides?.['zone-title']?.fontSize).toBe(56)
+    })
+
+    it('applyPreset with overlay_opacity sets generatedSlides[0].overlay_opacity (VSED-06)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [
+          { slide_type: 'cover', hook_text: 'A', body_text: '', cta_text: '' }
+        ],
+        caption: ''
+      })
+
+      store.applyPreset(0, {
+        id: 'p1',
+        name: 'Test',
+        zone_overrides: {},
+        overlay_opacity: 0.8,
+        created_at: Date.now()
+      })
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].overlay_opacity).toBe(0.8)
+    })
+
+    it('applyPreset pushes to slideHistory (undoable) (VSED-06)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [
+          { slide_type: 'cover', hook_text: 'Base', body_text: '', cta_text: '' }
+        ],
+        caption: ''
+      })
+
+      store.applyPreset(0, {
+        id: 'p1',
+        name: 'Test',
+        zone_overrides: { 'zone-1': { fontSize: 48 } },
+        created_at: Date.now()
+      })
+
+      const state = useCreatePostStore.getState()
+      expect(state.slideHistory.length).toBe(1)
+
+      store.undo()
+
+      const afterUndo = useCreatePostStore.getState().generatedSlides
+      expect(afterUndo[0].zone_overrides).toBeUndefined()
+    })
+
+    it('applyPreset without overlay_opacity leaves slide.overlay_opacity unchanged (VSED-06)', () => {
+      const store = useCreatePostStore.getState()
+      store.setGenerationComplete({
+        slides: [
+          { slide_type: 'cover', hook_text: 'A', body_text: '', cta_text: '' }
+        ],
+        caption: ''
+      })
+
+      // Set an initial opacity value
+      const initialOpacity = useCreatePostStore.getState().generatedSlides[0].overlay_opacity
+
+      store.applyPreset(0, {
+        id: 'p1',
+        name: 'No Opacity Preset',
+        zone_overrides: { 'zone-title': { fontSize: 32 } },
+        // overlay_opacity intentionally omitted
+        created_at: Date.now()
+      })
+
+      const slides = useCreatePostStore.getState().generatedSlides
+      expect(slides[0].overlay_opacity).toBe(initialOpacity)
+    })
+  })
+
   describe('reset clears history', () => {
     it('reset() clears slideHistory and slideHistoryFuture', () => {
       const store = useCreatePostStore.getState()
