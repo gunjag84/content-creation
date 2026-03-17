@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
-import { ChevronDown, ChevronUp, AlertCircle, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertCircle, Sparkles, Loader2 } from 'lucide-react'
 
 export function Step2Generation() {
   const {
@@ -144,9 +144,14 @@ export function Step2Generation() {
     setStep(3)
   }
 
-  // Don't render anything if manual mode (will redirect in useEffect)
+  // Show spinner for manual mode until useEffect fires setStep(3)
   if (mode === 'manual') {
-    return null
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <span className="ml-3 text-slate-400">Setting up slides...</span>
+      </div>
+    )
   }
 
   return (
@@ -160,8 +165,10 @@ export function Step2Generation() {
               <span className="animate-pulse">Generating your content...</span>
             ) : generationError ? (
               <span className="text-red-400">Generation Failed</span>
-            ) : (
+            ) : displayText ? (
               <span className="text-green-400">Content Ready!</span>
+            ) : (
+              <span className="text-slate-400">Preparing...</span>
             )}
           </CardTitle>
         </CardHeader>
