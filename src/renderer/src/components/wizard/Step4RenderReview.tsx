@@ -21,6 +21,7 @@ export function Step4RenderReview() {
     selectedMechanic,
     contentType,
     customBackgroundPath,
+    adHoc,
     setRenderedPNGs,
     setPostId,
     setExportFolder,
@@ -270,6 +271,7 @@ export function Step4RenderReview() {
           content_type: contentType,
           caption: caption,
           status: 'approved' as const,
+          ad_hoc: adHoc ? 1 : 0,
           settings_version_id: null // TODO: implement settings versioning
         }
 
@@ -301,12 +303,17 @@ export function Step4RenderReview() {
         await window.api.posts.updateStatus(currentPostId, 'approved')
       }
 
-      // Update balance matrix
-      await window.api.posts.updateBalance(1, [
-        { type: 'pillar', value: selectedPillar },
-        { type: 'theme', value: selectedTheme },
-        { type: 'mechanic', value: selectedMechanic }
-      ])
+      // Update balance matrix - ad-hoc posts only update pillar, not theme/mechanic (LEARN-05)
+      const balanceVariables: Array<{ type: string; value: string }> = [
+        { type: 'pillar', value: selectedPillar }
+      ]
+      if (!adHoc) {
+        balanceVariables.push(
+          { type: 'theme', value: selectedTheme },
+          { type: 'mechanic', value: selectedMechanic }
+        )
+      }
+      await window.api.posts.updateBalance(1, balanceVariables)
 
       // Show success and advance to Step 5
       setStep(5)
