@@ -28,6 +28,7 @@ export function Step2Generation() {
   const textRef = useRef('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasStartedRef = useRef(false)
+  const cleanupRef = useRef<(() => void) | null>(null)
 
   // Manual mode: skip generation entirely
   useEffect(() => {
@@ -60,6 +61,13 @@ export function Step2Generation() {
       hasStartedRef.current = true
       startGeneration()
     }
+
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current()
+        cleanupRef.current = null
+      }
+    }
   }, [mode])
 
   // Token accumulation anti-flicker
@@ -86,7 +94,10 @@ export function Step2Generation() {
 
     // Set up event listeners - collect cleanup functions for deferred call
     const cleanups: (() => void)[] = []
-    const doCleanup = () => cleanups.forEach((fn) => fn())
+    const doCleanup = () => {
+      cleanups.forEach((fn) => fn())
+      cleanupRef.current = null
+    }
 
     cleanups.push(window.api.generation.onToken((token: string) => {
       textRef.current += token
@@ -101,6 +112,8 @@ export function Step2Generation() {
       setGenerationError(error.message)
       doCleanup()
     }))
+
+    cleanupRef.current = doCleanup
 
     try {
       const response = await window.api.generation.streamContent({
