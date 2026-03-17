@@ -59,7 +59,7 @@ export interface BalanceWarning {
 // Learning dashboard data
 export interface BalanceDashboardData {
   pillars: Array<{ name: string; actual_pct: number; target_pct: number; count: number }>
-  mechanics: Array<{ name: string; count: number }>
-  themes: Array<{ name: string; count: number }>
+  mechanics: Array<{ name: string; count: number; avg_performance: number | null }>
+  themes: Array<{ name: string; count: number; avg_performance: number | null }>
   total_posts: number
 }

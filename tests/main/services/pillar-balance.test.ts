@@ -117,6 +117,24 @@ describe('Pillar Balance', () => {
       expect(result.themes).toHaveLength(0)
     })
 
+    it('should pass through avg_performance from BalanceEntry to mechanics and themes', () => {
+      const entries: BalanceEntry[] = [
+        { id: 3, brand_id: 1, variable_type: 'mechanic', variable_value: 'Hook', usage_count: 15, last_used: null, avg_performance: 7.5 },
+        { id: 4, brand_id: 1, variable_type: 'mechanic', variable_value: 'Story', usage_count: 10, last_used: null, avg_performance: null },
+        { id: 5, brand_id: 1, variable_type: 'theme', variable_value: 'Coaching', usage_count: 8, last_used: null, avg_performance: 4.2 },
+        { id: 6, brand_id: 1, variable_type: 'theme', variable_value: 'Personal Story', usage_count: 12, last_used: null, avg_performance: null }
+      ]
+      const result = calculatePillarBalance(entries, {})
+      const hookMechanic = result.mechanics.find(m => m.name === 'Hook')
+      const storyMechanic = result.mechanics.find(m => m.name === 'Story')
+      expect(hookMechanic?.avg_performance).toBe(7.5)
+      expect(storyMechanic?.avg_performance).toBeNull()
+      const coachingTheme = result.themes.find(t => t.name === 'Coaching')
+      const personalStoryTheme = result.themes.find(t => t.name === 'Personal Story')
+      expect(coachingTheme?.avg_performance).toBe(4.2)
+      expect(personalStoryTheme?.avg_performance).toBeNull()
+    })
+
     it('should set target_pct to 0 for pillars not in targetPercentages', () => {
       const entries: BalanceEntry[] = [
         {

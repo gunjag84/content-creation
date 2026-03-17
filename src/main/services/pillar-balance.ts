@@ -12,8 +12,8 @@ export function calculatePillarBalance(
   targetPercentages: Record<string, number>
 ): BalanceDashboardData {
   const pillars: Array<{ name: string; actual_pct: number; target_pct: number; count: number }> = []
-  const mechanics: Array<{ name: string; count: number }> = []
-  const themes: Array<{ name: string; count: number }> = []
+  const mechanics: Array<{ name: string; count: number; avg_performance: number | null }> = []
+  const themes: Array<{ name: string; count: number; avg_performance: number | null }> = []
 
   // Group entries by variable type
   const pillarEntries = entries.filter((e) => e.variable_type === 'pillar')
@@ -40,7 +40,8 @@ export function calculatePillarBalance(
   for (const entry of mechanicEntries) {
     mechanics.push({
       name: entry.variable_value,
-      count: entry.usage_count
+      count: entry.usage_count,
+      avg_performance: entry.avg_performance
     })
   }
 
@@ -48,7 +49,8 @@ export function calculatePillarBalance(
   for (const entry of themeEntries) {
     themes.push({
       name: entry.variable_value,
-      count: entry.usage_count
+      count: entry.usage_count,
+      avg_performance: entry.avg_performance
     })
   }
 
