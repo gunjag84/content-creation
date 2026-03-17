@@ -4,11 +4,28 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
+stopped_at: Completed 03.1-01-PLAN.md (ZoneOverride types, shared buildSlideHTML utility, useCreatePostStore undo/redo history)
+last_updated: "2026-03-17T13:31:23.582Z"
+last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
+progress:
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 35
+  completed_plans: 32
+  percent: 91
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_plan: 4 of 8 in current phase
+status: executing
 stopped_at: Completed 03-12-PLAN.md (avg_performance gap closure - BalanceDashboardData type, service passthrough, BalanceWidget conditional render)
 last_updated: "2026-03-17T11:51:16.604Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
-  total_phases: 4
+  [█████████░] 91%
   completed_phases: 3
   total_plans: 31
   completed_plans: 31
@@ -81,6 +98,7 @@ Progress: [█████████░] 88%
 | Phase 03 P08 | pre-existing | 1 tasks | 3 files |
 | Phase 03 P13 | 2 | 2 tasks | 3 files |
 | Phase 03 P12 | 2 | 2 tasks | 4 files |
+| Phase 03.1-01 P01 | 5 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -164,10 +182,17 @@ Recent decisions affecting current work:
 - [Phase 03-13]: Ad-hoc filtering done on renderer side - balance variable array built conditionally before IPC call, no IPC changes needed
 - [Phase 03-13]: Pillar always updates balance regardless of adHoc flag - preserves pillar distribution tracking for all posts
 - [Phase 03-12]: avg_performance surfaced from BalanceEntry through BalanceDashboardData - Phase 4 performance scores will display in BalanceWidget without further changes
+- [Phase 03.1]: Parameter-based buildSlideHTML (BuildSlideHTMLParams) instead of closure - testable, reusable, decoupled from component state
+- [Phase 03.1]: Zone override merge: override.x ?? zone.x pattern - nullish coalescing preserves explicit 0 values
+- [Phase 03.1]: Undo/redo history stack capped at 50 entries via .slice(-50) - prevents unbounded memory growth
 
 ### Pending Todos
 
 None yet.
+
+### Roadmap Evolution
+
+- Phase 03.1 inserted after Phase 3: Visual Slide Editor - per-slide zone positioning, font controls, undo/redo, presets (INSERTED)
 
 ### Blockers/Concerns
 
@@ -175,7 +200,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:46:40.252Z
-Stopped at: Completed 03-12-PLAN.md (avg_performance gap closure - BalanceDashboardData type, service passthrough, BalanceWidget conditional render)
+Last session: 2026-03-17T13:31:23.575Z
+Stopped at: Completed 03.1-01-PLAN.md (ZoneOverride types, shared buildSlideHTML utility, useCreatePostStore undo/redo history)
 Resume file: None
 

@@ -56,13 +56,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Visual Slide Editor (Inserted - Phase 03.1)
 
-- [ ] **VSED-01**: User can set per-slide zone overrides (position X/Y, width, height, font size, font weight, color) that merge over template zone defaults at render time
-- [ ] **VSED-02**: History system captures current slide state before each mutation for undo support
-- [ ] **VSED-03**: User can undo the last zone override change (restores previous slide state)
-- [ ] **VSED-04**: User can redo an undone change (re-applies the forward state)
-- [ ] **VSED-05**: History stack is capped at 50 entries to prevent unbounded memory growth
+- [x] **VSED-01**: User can set per-slide zone overrides (position X/Y, width, height, font size, font weight, color) that merge over template zone defaults at render time
+- [x] **VSED-02**: History system captures current slide state before each mutation for undo support
+- [x] **VSED-03**: User can undo the last zone override change (restores previous slide state)
+- [x] **VSED-04**: User can redo an undone change (re-applies the forward state)
+- [x] **VSED-05**: History stack is capped at 50 entries to prevent unbounded memory growth
 - [ ] **VSED-06**: User can save zone override configurations as named presets and apply them to any slide
-- [ ] **VSED-07**: buildSlideHTML applies zone_overrides over template zones when rendering HTML for both preview and PNG export
+- [x] **VSED-07**: buildSlideHTML applies zone_overrides over template zones when rendering HTML for both preview and PNG export
 - [ ] **VSED-08**: Presets persist to disk (JSON file) and survive app restart with save/load/delete round-trip
 
 ### Story Generation
@@ -190,13 +190,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-15 | Phase 3 | Complete |
 | POST-16 | Phase 3 | Complete |
 | POST-17 | Phase 3 | Complete |
-| VSED-01 | Phase 03.1 | Pending |
-| VSED-02 | Phase 03.1 | Pending |
-| VSED-03 | Phase 03.1 | Pending |
-| VSED-04 | Phase 03.1 | Pending |
-| VSED-05 | Phase 03.1 | Pending |
+| VSED-01 | Phase 03.1 | Complete |
+| VSED-02 | Phase 03.1 | Complete |
+| VSED-03 | Phase 03.1 | Complete |
+| VSED-04 | Phase 03.1 | Complete |
+| VSED-05 | Phase 03.1 | Complete |
 | VSED-06 | Phase 03.1 | Pending |
-| VSED-07 | Phase 03.1 | Pending |
+| VSED-07 | Phase 03.1 | Complete |
 | VSED-08 | Phase 03.1 | Pending |
 | STORY-01 | Phase 3 | Complete |
 | STORY-02 | Phase 3 | Complete |
