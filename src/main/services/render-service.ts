@@ -83,8 +83,56 @@ export class RenderService {
       this.renderWindow!.loadFile(htmlFilePath).catch(reject)
     })
 
-    // Add 300ms delay for CSS rendering and fonts from file:// references
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    // Wait for all images (including CSS background-image) to load
+    await this.renderWindow!.webContents.executeJavaScript(`
+      new Promise((resolve) => {
+        // Collect all image sources: <img> tags and CSS background-image
+        const imgElements = Array.from(document.querySelectorAll('img'));
+        const bgElements = Array.from(document.querySelectorAll('*')).filter(el => {
+          const bg = getComputedStyle(el).backgroundImage;
+          return bg && bg !== 'none';
+        });
+
+        const promises = [];
+
+        // Wait for <img> elements
+        imgElements.forEach(img => {
+          if (!img.complete) {
+            promises.push(new Promise(r => {
+              img.onload = r;
+              img.onerror = r;
+            }));
+          }
+        });
+
+        // Wait for CSS background images by preloading them
+        bgElements.forEach(el => {
+          const bg = getComputedStyle(el).backgroundImage;
+          const match = bg.match(/url\\(["']?(.+?)["']?\\)/);
+          if (match && match[1]) {
+            const testImg = new Image();
+            promises.push(new Promise(r => {
+              testImg.onload = r;
+              testImg.onerror = r;
+              testImg.src = match[1];
+            }));
+          }
+        });
+
+        if (promises.length === 0) {
+          // No images to wait for, but give CSS a frame to paint
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(undefined)));
+        } else {
+          Promise.all(promises).then(() => {
+            // Extra frame for paint after images load
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve(undefined)));
+          });
+        }
+
+        // Safety timeout: never wait more than 5 seconds
+        setTimeout(resolve, 5000);
+      })
+    `)
 
     // Capture the page as PNG
     const image = await this.renderWindow.webContents.capturePage()
