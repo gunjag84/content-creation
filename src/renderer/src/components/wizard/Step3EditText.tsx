@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useCreatePostStore } from '../../stores/useCreatePostStore'
 import { SlideEditor } from './SlideEditor'
 import { LivePreview } from './LivePreview'
+import { SlideZoneOverrides } from './SlideZoneOverrides'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
@@ -18,15 +19,18 @@ import {
   DragEndEvent
 } from '@dnd-kit/core'
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Sparkles, RefreshCw, ArrowLeft } from 'lucide-react'
+import { GripVertical, Sparkles, RefreshCw, ArrowLeft, Undo2, Redo2 } from 'lucide-react'
 import type { Slide } from '../../../../shared/types/generation'
+import type { Template } from '../../../../preload/types'
+import type { Settings } from '../../../../shared/types/settings'
+import type { Zone } from '../templates/ZoneEditor'
+import { buildSlideHTML } from '../../lib/buildSlideHTML'
 
 interface SortableThumbnailProps {
   slide: Slide
@@ -78,11 +82,16 @@ export function Step3EditText() {
     selectedTheme,
     selectedMechanic,
     impulse,
+    customBackgroundPath,
     setSlide,
     reorderSlides,
     setCaption,
     setStep,
-    setPostId
+    setPostId,
+    undo,
+    redo,
+    canUndo,
+    canRedo
   } = useCreatePostStore()
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0)
@@ -91,6 +100,66 @@ export function Step3EditText() {
   const [hookOptions, setHookOptions] = useState<string[]>([])
   const [isLoadingHooks, setIsLoadingHooks] = useState(false)
   const [showNewDraftConfirm, setShowNewDraftConfirm] = useState(false)
+
+  // Template and zone state for zone overrides and live preview
+  const [template, setTemplate] = useState<Template | null>(null)
+  const [settings, setSettings] = useState<Settings | null>(null)
+  const [zones, setZones] = useState<Zone[]>([])
+
+  // Load template and settings on mount
+  useEffect(() => {
+    const load = async () => {
+      const settingsData = await window.api.loadSettings()
+      setSettings(settingsData)
+      const templates = await window.api.templates.list()
+      if (templates.length > 0) {
+        const t = await window.api.templates.get(templates[0].id)
+        if (t) {
+          setTemplate(t)
+          try {
+            setZones(JSON.parse(t.zones_config))
+          } catch {
+            setZones([])
+          }
+        }
+      }
+    }
+    load()
+  }, [])
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        useCreatePostStore.getState().undo()
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        useCreatePostStore.getState().redo()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  // Compute live preview HTML for active slide
+  const activeSlideHtml = useMemo(() => {
+    if (!settings || zones.length === 0 || !generatedSlides[activeSlideIndex]) return undefined
+    return buildSlideHTML({
+      slide: generatedSlides[activeSlideIndex],
+      allSlides: generatedSlides,
+      zones,
+      settings,
+      templateBackground: template
+        ? { type: template.background_type, value: template.background_value }
+        : null,
+      overlayColor: template?.overlay_color || '#000000',
+      overlayEnabled: template?.overlay_enabled ?? true,
+      customBackgroundPath,
+      opacityOverride: undefined
+    })
+  }, [generatedSlides, activeSlideIndex, settings, zones, template, customBackgroundPath])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -237,6 +306,16 @@ export function Step3EditText() {
 
             {/* Slides Tab */}
             <TabsContent value="slides" className="space-y-6">
+              {/* Undo / Redo Toolbar */}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={!canUndo()} onClick={undo}>
+                  <Undo2 size={16} />
+                </Button>
+                <Button variant="outline" size="sm" disabled={!canRedo()} onClick={redo}>
+                  <Redo2 size={16} />
+                </Button>
+              </div>
+
               {/* Thumbnail Strip with Drag & Drop */}
               <div className="space-y-3">
                 <Label className="text-slate-300">Slide Order</Label>
@@ -329,6 +408,11 @@ export function Step3EditText() {
                   Adjust background overlay darkness (preview tool - final render in Step 4)
                 </p>
               </div>
+
+              {/* Zone Overrides Panel */}
+              {zones.length > 0 && (
+                <SlideZoneOverrides zones={zones} slideIndex={activeSlideIndex} />
+              )}
             </TabsContent>
 
             {/* Caption Tab */}
@@ -352,7 +436,7 @@ export function Step3EditText() {
 
         {/* Right Panel: Live Preview (60%) */}
         <div className="w-3/5 bg-slate-950">
-          <LivePreview slide={activeSlide} />
+          <LivePreview slide={activeSlide} templateHtml={activeSlideHtml} />
         </div>
       </div>
 
