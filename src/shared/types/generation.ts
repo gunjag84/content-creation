@@ -1,6 +1,7 @@
 // Slide content for wizard state and DB persistence
 export interface Slide {
   id?: number              // DB id (undefined for new slides)
+  uid: string              // Stable client-side identity for dnd-kit
   slide_number: number
   slide_type: 'cover' | 'content' | 'cta'
   hook_text: string

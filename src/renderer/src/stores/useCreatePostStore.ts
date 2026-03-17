@@ -141,6 +141,7 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
 
   setGenerationComplete: (result) => set({
     generatedSlides: result.slides.map((slide, idx) => ({
+      uid: crypto.randomUUID(),
       slide_number: idx + 1,
       slide_type: slide.slide_type,
       hook_text: slide.hook_text,

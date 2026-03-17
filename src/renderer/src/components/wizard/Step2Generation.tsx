@@ -36,6 +36,7 @@ export function Step2Generation() {
       // Create empty slide structure based on contentType
       const slideCount = contentType === 'carousel' ? 5 : 1
       const emptySlides = Array.from({ length: slideCount }, (_, idx) => ({
+        uid: crypto.randomUUID(),
         slide_number: idx + 1,
         slide_type: (idx === 0 ? 'cover' : idx === slideCount - 1 ? 'cta' : 'content') as 'cover' | 'content' | 'cta',
         hook_text: '',

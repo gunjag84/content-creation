@@ -37,7 +37,7 @@ interface SortableThumbnailProps {
 
 function SortableThumbnail({ slide, index, isActive, onClick }: SortableThumbnailProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: `slide-${index}`
+    id: slide.uid
   })
 
   const style = {
@@ -99,18 +99,16 @@ export function Step3EditText() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-
     if (over && active.id !== over.id) {
-      const oldIndex = parseInt(active.id.toString().split('-')[1])
-      const newIndex = parseInt(over.id.toString().split('-')[1])
-
-      reorderSlides(oldIndex, newIndex)
-
-      // Update active index if needed
-      if (activeSlideIndex === oldIndex) {
-        setActiveSlideIndex(newIndex)
-      } else if (activeSlideIndex === newIndex) {
-        setActiveSlideIndex(oldIndex > newIndex ? activeSlideIndex + 1 : activeSlideIndex - 1)
+      const oldIndex = generatedSlides.findIndex(s => s.uid === active.id)
+      const newIndex = generatedSlides.findIndex(s => s.uid === over.id)
+      if (oldIndex !== -1 && newIndex !== -1) {
+        reorderSlides(oldIndex, newIndex)
+        if (activeSlideIndex === oldIndex) {
+          setActiveSlideIndex(newIndex)
+        } else if (activeSlideIndex === newIndex) {
+          setActiveSlideIndex(oldIndex > newIndex ? activeSlideIndex + 1 : activeSlideIndex - 1)
+        }
       }
     }
   }
@@ -244,13 +242,13 @@ export function Step3EditText() {
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={generatedSlides.map((_, idx) => `slide-${idx}`)}
+                    items={generatedSlides.map(s => s.uid)}
                     strategy={verticalListSortingStrategy}
                   >
                     <div className="flex flex-wrap gap-2">
                       {generatedSlides.map((slide, idx) => (
                         <SortableThumbnail
-                          key={idx}
+                          key={slide.uid}
                           slide={slide}
                           index={idx}
                           isActive={idx === activeSlideIndex}
