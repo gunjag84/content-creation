@@ -127,8 +127,8 @@ export function registerFontIPC() {
       throw new Error(`Access denied: file type not allowed and path outside userData`)
     }
     const data = await fs.readFile(filePath)
-    const ext = path.extname(filePath).toLowerCase().replace('.', '')
-    const mimeType = ext === 'jpg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : `image/${ext}`
+    const mimeExt = ext.replace('.', '')
+    const mimeType = mimeExt === 'jpg' ? 'image/jpeg' : mimeExt === 'png' ? 'image/png' : `image/${mimeExt}`
     return `data:${mimeType};base64,${data.toString('base64')}`
   })
 }
