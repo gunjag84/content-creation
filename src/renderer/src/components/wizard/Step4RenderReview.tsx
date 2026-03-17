@@ -78,7 +78,7 @@ export function Step4RenderReview() {
     }
   }
 
-  const buildSlideHTML = (slideIndex: number): string => {
+  const buildSlideHTML = (slideIndex: number, opacityOverride?: number): string => {
     const slide = generatedSlides[slideIndex]
     const guidance = settings?.visualGuidance
 
@@ -110,7 +110,7 @@ export function Step4RenderReview() {
       }
     }
 
-    const overlayOpacity = slide.overlay_opacity ?? 0.5
+    const overlayOpacity = opacityOverride ?? slide.overlay_opacity ?? 0.5
     const overlayColor = template?.overlay_color || '#000000'
     const showOverlay = template?.overlay_enabled ?? true
     const primaryColor = guidance?.primaryColor || '#ffffff'
@@ -206,7 +206,7 @@ export function Step4RenderReview() {
     setSlide(slideIndex, 'overlay_opacity', newOpacity)
 
     try {
-      const html = buildSlideHTML(slideIndex)
+      const html = buildSlideHTML(slideIndex, newOpacity)
       const raw = await window.api.renderToPNG(html, { width: 1080, height: 1350 })
       const parsed = JSON.parse(raw)
       const dataUrl = parsed.dataUrl
