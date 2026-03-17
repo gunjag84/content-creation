@@ -63,9 +63,8 @@ export function BackgroundSelector({
             variant={backgroundType === 'image' ? 'default' : 'outline'}
             size="sm"
             onClick={() => {
-              if (backgroundType !== 'image' && backgroundValue) {
-                // Keep existing value if switching back
-                onTypeChange('image', backgroundValue)
+              if (backgroundType !== 'image') {
+                handleImageUpload()
               }
             }}
           >
