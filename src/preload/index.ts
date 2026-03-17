@@ -56,8 +56,12 @@ const api: IElectronAPI = {
     streamContent: (args) => ipcRenderer.invoke('generate:content', args),
     streamHooks: (args) => ipcRenderer.invoke('generate:hooks', args),
     streamStories: (prompt) => ipcRenderer.invoke('generate:stories', { prompt }),
-    onToken: (callback) => {
-      const listener = (_event: any, token: string) => callback(token)
+    onToken: (callback, streamType) => {
+      const listener = (_event: any, payload: { token: string; type: string }) => {
+        if (!streamType || payload.type === streamType) {
+          callback(payload.token)
+        }
+      }
       ipcRenderer.on('generate:token', listener)
       return () => ipcRenderer.removeListener('generate:token', listener)
     },

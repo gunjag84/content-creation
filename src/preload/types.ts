@@ -59,7 +59,7 @@ export interface IElectronAPI {
     streamContent: (args: { pillar: string; theme: string; mechanic: string; contentType: 'single' | 'carousel'; impulse: string }) => Promise<{ started: boolean; prompt?: string }>
     streamHooks: (args: { currentHook: string; slideContext: string; prompt: string }) => Promise<{ started: boolean }>
     streamStories: (prompt: string) => Promise<{ started: boolean }>
-    onToken: (callback: (token: string) => void) => () => void
+    onToken: (callback: (token: string) => void, streamType?: 'content' | 'hooks' | 'stories') => () => void
     onComplete: (callback: (result: GenerationResult) => void) => () => void
     onHooksComplete: (callback: (result: { hooks: string[] }) => void) => () => void
     onStoriesComplete: (callback: (result: { proposals: StoryProposal[] }) => void) => () => void

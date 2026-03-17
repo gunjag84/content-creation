@@ -101,7 +101,7 @@ export function Step2Generation() {
 
     cleanups.push(window.api.generation.onToken((token: string) => {
       textRef.current += token
-    }))
+    }, 'content'))
 
     cleanups.push(window.api.generation.onComplete((result) => {
       setGenerationComplete(result)

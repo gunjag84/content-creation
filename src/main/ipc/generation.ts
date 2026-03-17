@@ -122,7 +122,7 @@ async function streamContent(win: BrowserWindow, apiKey: string, prompt: string)
 
     stream.on('text', (text) => {
       partialResponse += text
-      win.webContents.send('generate:token', text)
+      win.webContents.send('generate:token', { token: text, type: 'content' })
     })
 
     const message = await stream.finalMessage()
@@ -161,7 +161,7 @@ async function streamHooks(win: BrowserWindow, apiKey: string, prompt: string) {
 
     stream.on('text', (text) => {
       partialResponse += text
-      win.webContents.send('generate:token', text)
+      win.webContents.send('generate:token', { token: text, type: 'hooks' })
     })
 
     const message = await stream.finalMessage()
@@ -199,7 +199,7 @@ async function streamStories(win: BrowserWindow, apiKey: string, prompt: string)
 
     stream.on('text', (text) => {
       partialResponse += text
-      win.webContents.send('generate:token', text)
+      win.webContents.send('generate:token', { token: text, type: 'stories' })
     })
 
     const message = await stream.finalMessage()
