@@ -219,7 +219,8 @@ Generate the stories now.`
 
       for (let i = 0; i < approvedStories.length; i++) {
         const story = approvedStories[i]
-        const sourceSlide = generatedSlides[story.source_slide_index]
+        const clampedIndex = Math.max(0, Math.min(story.source_slide_index, generatedSlides.length - 1))
+        const sourceSlide = generatedSlides[clampedIndex]
 
         // Build story HTML (simple reformatted version for 9:16)
         const storyHTML = buildStoryHTML(story, sourceSlide)
