@@ -149,7 +149,7 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
                       {hasWarning && ' - overused'}
                     </span>
                     <span className="text-slate-500">
-                      {mechanic.count}x used
+                      {mechanic.count}x used{mechanic.avg_performance !== null && mechanic.avg_performance !== undefined && ` (avg score: ${mechanic.avg_performance.toFixed(1)})`}
                     </span>
                   </div>
                   <div className="relative h-2 w-full bg-slate-700 rounded-full">
@@ -186,7 +186,7 @@ export function BalanceWidget({ onNavigate }: BalanceWidgetProps) {
                       {hasWarning && ' - overused'}
                     </span>
                     <span className="text-slate-500">
-                      {theme.count}x used
+                      {theme.count}x used{theme.avg_performance !== null && theme.avg_performance !== undefined && ` (avg score: ${theme.avg_performance.toFixed(1)})`}
                     </span>
                   </div>
                   <div className="relative h-2 w-full bg-slate-700 rounded-full">
