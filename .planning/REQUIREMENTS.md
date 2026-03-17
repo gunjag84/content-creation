@@ -54,6 +54,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **POST-16**: User can approve and export upload-ready PNGs + caption text file
 - [x] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
 
+### Visual Slide Editor (Inserted - Phase 03.1)
+
+- [ ] **VSED-01**: User can set per-slide zone overrides (position X/Y, width, height, font size, font weight, color) that merge over template zone defaults at render time
+- [ ] **VSED-02**: History system captures current slide state before each mutation for undo support
+- [ ] **VSED-03**: User can undo the last zone override change (restores previous slide state)
+- [ ] **VSED-04**: User can redo an undone change (re-applies the forward state)
+- [ ] **VSED-05**: History stack is capped at 50 entries to prevent unbounded memory growth
+- [ ] **VSED-06**: User can save zone override configurations as named presets and apply them to any slide
+- [ ] **VSED-07**: buildSlideHTML applies zone_overrides over template zones when rendering HTML for both preview and PNG export
+- [ ] **VSED-08**: Presets persist to disk (JSON file) and survive app restart with save/load/delete round-trip
+
 ### Story Generation
 
 - [x] **STORY-01**: System generates story proposals linked to the feed post (2-4 stories per post, configurable)
@@ -179,6 +190,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-15 | Phase 3 | Complete |
 | POST-16 | Phase 3 | Complete |
 | POST-17 | Phase 3 | Complete |
+| VSED-01 | Phase 03.1 | Pending |
+| VSED-02 | Phase 03.1 | Pending |
+| VSED-03 | Phase 03.1 | Pending |
+| VSED-04 | Phase 03.1 | Pending |
+| VSED-05 | Phase 03.1 | Pending |
+| VSED-06 | Phase 03.1 | Pending |
+| VSED-07 | Phase 03.1 | Pending |
+| VSED-08 | Phase 03.1 | Pending |
 | STORY-01 | Phase 3 | Complete |
 | STORY-02 | Phase 3 | Complete |
 | STORY-03 | Phase 3 | Complete |
@@ -210,10 +229,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-07 | Phase 1 | Complete |
 
 **Coverage:**
-- v1 requirements: 55 total
-- Mapped to phases: 55
+- v1 requirements: 63 total
+- Mapped to phases: 63
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after roadmap creation*
+*Last updated: 2026-03-17 after Phase 03.1 planning*

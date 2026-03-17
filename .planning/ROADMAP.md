@@ -94,6 +94,26 @@ Plans:
 - [ ] 03-12-PLAN.md - [GAP CLOSURE] Add avg_performance display to BalanceWidget (LEARN-02)
 - [ ] 03-13-PLAN.md - [GAP CLOSURE] Add ad-hoc post support with theme balance exclusion (LEARN-05)
 
+### Phase 03.1: Visual Slide Editor - per-slide zone positioning, font controls, undo/redo, presets (INSERTED)
+
+**Goal:** Per-slide visual editing in Step 3 with zone position/font overrides, undo/redo history, and reusable presets - all with immediate live preview feedback
+**Requirements**: VSED-01, VSED-02, VSED-03, VSED-04, VSED-05, VSED-06, VSED-07, VSED-08
+**Depends on:** Phase 3
+**Success Criteria** (what must be TRUE):
+  1. User can adjust per-slide zone position (X/Y offset), font size, font weight, and color for each template zone
+  2. Zone overrides merge over template defaults at render time without modifying the template
+  3. Undo/redo restores/re-applies slide state with history capped at 50 entries
+  4. User can save zone override configurations as named presets and apply them to any slide
+  5. LivePreview in Step 3 shows actual template rendering with zone overrides in real-time
+  6. Rendered PNGs in Step 4 reflect all zone overrides from Step 3
+**Plans:** 4 plans
+
+Plans:
+- [ ] 03.1-01-PLAN.md - ZoneOverride types, extract buildSlideHTML to shared utility, extend Zustand store with history/undo/redo/zone overrides (TDD)
+- [ ] 03.1-02-PLAN.md - PresetsService JSON persistence, IPC handlers, preload API, store applyPreset action (TDD)
+- [ ] 03.1-03-PLAN.md - SlideZoneOverrides UI panel, template loading in Step 3, LivePreview upgrade, undo/redo toolbar
+- [ ] 03.1-04-PLAN.md - SlidePresetManager UI, full visual editor human verification checkpoint
+
 ### Phase 4: Production Readiness
 **Goal**: Production-ready app with performance tracking, logging, error handling, and polished UX
 **Depends on**: Phase 3
@@ -113,11 +133,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 03.1 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
 | 2. Settings & Templates | 15/15 | Complete | 2026-03-11 |
 | 3. Content Generation | 13/13 | Complete    | 2026-03-17 |
+| 03.1. Visual Slide Editor | 0/4 | Not started | - |
 | 4. Production Readiness | 0/2 | Not started | - |
