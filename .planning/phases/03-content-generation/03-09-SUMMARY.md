@@ -96,6 +96,16 @@ None - no external service configuration required.
 - Step 2 and Step 3 now behave correctly for both AI and manual modes
 - No blockers for remaining UAT or export work
 
+## Self-Check: PASSED
+
+- FOUND: src/shared/types/generation.ts
+- FOUND: src/renderer/src/components/wizard/Step2Generation.tsx
+- FOUND: src/renderer/src/components/wizard/Step3EditText.tsx
+- FOUND: src/renderer/src/stores/useCreatePostStore.ts
+- FOUND: .planning/phases/03-content-generation/03-09-SUMMARY.md
+- FOUND commit dc1dad0 (Task 1)
+- FOUND commit a898397 (Task 2)
+
 ---
 *Phase: 03-content-generation*
 *Completed: 2026-03-17*

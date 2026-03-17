@@ -38,7 +38,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **POST-01**: System recommends a content pillar, theme, and mechanic based on rotation balance (equal rotation until learning data exists)
 - [x] **POST-02**: User can accept or override the system recommendation (choose pillar, theme/subtopic/key message, content type, mechanic, template)
-- [ ] **POST-03**: User can choose content type: single post or carousel
+- [x] **POST-03**: User can choose content type: single post or carousel
 - [ ] **POST-04**: User can optionally upload a custom background image that overrides the template background for this post
 - [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
 - [x] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
@@ -164,7 +164,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TPL-09 | Phase 2 | Complete |
 | POST-01 | Phase 3 | Complete |
 | POST-02 | Phase 3 | Complete |
-| POST-03 | Phase 3 | Pending |
+| POST-03 | Phase 3 | Complete |
 | POST-04 | Phase 3 | Pending |
 | POST-05 | Phase 3 | Pending |
 | POST-06 | Phase 3 | Complete |
