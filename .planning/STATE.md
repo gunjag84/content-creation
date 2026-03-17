@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-07-PLAN.md (Render, Export, and Stories)
-last_updated: "2026-03-13T08:04:25.122Z"
+stopped_at: Completed 03-10-PLAN.md (Fix Alternative Hooks)
+last_updated: "2026-03-17T10:18:13.516Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 26
-  completed_plans: 25
+  total_plans: 29
+  completed_plans: 26
   percent: 88
 ---
 
@@ -75,6 +75,7 @@ Progress: [█████████░] 88%
 | Phase 03 P03 | 12 | 2 tasks | 10 files |
 | Phase 03 P06 | 5 | 2 tasks | 4 files |
 | Phase 03 P07 | 7 | 2 tasks | 4 files |
+| Phase 03 P10 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,8 @@ Recent decisions affecting current work:
 - [Phase 03-06]: Drag handle + thumbnail click separation - clear affordance for grab to reorder, click to select
 - [Phase 03]: Step 4 manual render trigger - user clicks 'Render & Preview' for control and to prevent unwanted API calls
 - [Phase 03]: Story HTML simple templates for 9:16 - faster for Phase 3, dedicated story templates deferred
+- [Phase 03]: Hooks prompt assembled in IPC handler from currentHook + slideContext - frontend passes empty string as placeholder, keeping API surface stable
+- [Phase 03]: onError listener cleanup calls both onHooksComplete cleanup and itself to prevent listener leaks on either success or error path
 
 ### Pending Todos
 
@@ -158,7 +161,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T08:04:25.118Z
-Stopped at: Completed 03-07-PLAN.md (Render, Export, and Stories)
+Last session: 2026-03-17T10:18:13.513Z
+Stopped at: Completed 03-10-PLAN.md (Fix Alternative Hooks)
 Resume file: None
 
