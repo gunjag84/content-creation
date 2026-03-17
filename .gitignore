@@ -1,0 +1,11 @@
+node_modules/
+dist/
+out/
+data/
+.env
+*.db
+*.db-shm
+*.db-wal
+.gstack/browse-console.log
+.gstack/browse-network.log
+tsconfig.web.tsbuildinfo
