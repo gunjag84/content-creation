@@ -39,9 +39,16 @@ export function registerExportIPC() {
     try {
       const { folderPath, files } = args
 
+      const resolvedFolder = path.resolve(folderPath)
+
       // Write all files concurrently
       await Promise.all(files.map(async (file) => {
-        const filePath = path.join(folderPath, file.name)
+        const filePath = path.resolve(path.join(folderPath, file.name))
+
+        // Prevent path traversal
+        if (!filePath.startsWith(resolvedFolder + path.sep) && filePath !== resolvedFolder) {
+          throw new Error(`Invalid file name: ${file.name}`)
+        }
 
         if (file.name.endsWith('.png')) {
           // Decode base64 data URL
