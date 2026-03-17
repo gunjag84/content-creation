@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 4 of 8 in current phase
 status: executing
-stopped_at: Completed 03-08-PLAN.md (BalanceWidget and Dashboard integration)
-last_updated: "2026-03-17T10:37:22.411Z"
+stopped_at: Completed 03-13-PLAN.md (Ad-hoc post support with theme balance exclusion)
+last_updated: "2026-03-17T11:46:28.682Z"
 last_activity: 2026-03-13 - Completed plan 03-06 (Wizard Steps 2 & 3)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 29
-  completed_plans: 29
+  total_plans: 31
+  completed_plans: 31
   percent: 88
 ---
 
@@ -79,6 +79,8 @@ Progress: [█████████░] 88%
 | Phase 03 P09 | 3 | 2 tasks | 4 files |
 | Phase 03 P11 | 4 | 2 tasks | 2 files |
 | Phase 03 P08 | pre-existing | 1 tasks | 3 files |
+| Phase 03 P13 | 2 | 2 tasks | 3 files |
+| Phase 03 P12 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -159,6 +161,8 @@ Recent decisions affecting current work:
 - [Phase 03]: JS-injected image-load wait replaces fixed 300ms delay in render-service - waits for all img and CSS background-image URLs before capturePage()
 - [Phase 03]: Step 4 auto-renders on mount via useEffect watching settings and generatedSlides - no manual button click required
 - [Phase 03-08]: BalanceWidget onNavigate prop uses 'create'|'dashboard' subset of NavItem, fully compatible without type narrowing
+- [Phase 03-13]: Ad-hoc filtering done on renderer side - balance variable array built conditionally before IPC call, no IPC changes needed
+- [Phase 03-13]: Pillar always updates balance regardless of adHoc flag - preserves pillar distribution tracking for all posts
 
 ### Pending Todos
 
@@ -170,7 +174,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T10:37:15.628Z
-Stopped at: Completed 03-08-PLAN.md (BalanceWidget and Dashboard integration)
+Last session: 2026-03-17T11:46:22.001Z
+Stopped at: Completed 03-13-PLAN.md (Ad-hoc post support with theme balance exclusion)
 Resume file: None
 
