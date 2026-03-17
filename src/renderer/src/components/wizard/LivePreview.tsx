@@ -6,29 +6,25 @@ interface LivePreviewProps {
 }
 
 export function LivePreview({ slide, templateHtml }: LivePreviewProps) {
-  // If template HTML provided, inject slide text into zones
+  // When template HTML is provided, render it in an isolated iframe
   if (templateHtml) {
-    // Parse the template HTML and replace zone content
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(templateHtml, 'text/html')
-
-    // Find zones by data-role attributes
-    const hookZone = doc.querySelector('[data-role="hook"]')
-    const bodyZone = doc.querySelector('[data-role="body"]')
-    const ctaZone = doc.querySelector('[data-role="cta"]')
-
-    // Replace text content
-    if (hookZone) hookZone.textContent = slide.hook_text || ''
-    if (bodyZone) bodyZone.textContent = slide.body_text || ''
-    if (ctaZone) ctaZone.textContent = slide.cta_text || ''
-
-    // Serialize back to HTML
-    const injectedHtml = doc.documentElement.outerHTML
-
     return (
       <div className="flex h-full items-start justify-center overflow-auto bg-slate-950 p-4">
-        <div className="origin-top-left" style={{ transform: 'scale(0.3)' }}>
-          <div dangerouslySetInnerHTML={{ __html: injectedHtml }} />
+        <div
+          className="origin-top"
+          style={{
+            width: 1080,
+            height: 1350,
+            transform: 'scale(0.35)',
+            transformOrigin: 'top center'
+          }}
+        >
+          <iframe
+            srcDoc={templateHtml}
+            style={{ width: 1080, height: 1350, border: 'none' }}
+            sandbox="allow-same-origin"
+            title="Slide preview"
+          />
         </div>
       </div>
     )
