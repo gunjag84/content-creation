@@ -73,8 +73,9 @@ completed: 2026-03-17
 Each task was committed atomically:
 
 1. **Task 1: BalanceWidget component and Dashboard integration** - `a5e16a5` (feat)
-
-**Plan metadata:** TBD after state updates (docs)
+2. **UAT fix: Simplify pillar labels, fix manual mode** - `2fdb77d` (fix)
+3. **UAT fix: Redesign BalanceWidget for clarity** - `d3c5550` (fix)
+4. **Task 2: Full Phase 3 E2E wizard verification** - UAT approved by user
 
 ## Files Created/Modified
 
@@ -90,11 +91,13 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - Task 1 was already committed prior to this execution session. Build verified clean.
+- **Pillar display redesigned during UAT**: Two stacked bars replaced with single bar + target marker line for clarity. Amber dot replaced with amber bar color + "off target" text label. Mechanic/theme numbers changed from bare "(3)" to "3x used".
+- **Manual mode fix added**: Not in original plan scope but discovered during UAT - manual mode jumped to Step 3 with empty slides, causing "No slides to edit" dead end. Fixed by adding `initManualSlides` store action.
 
 ## Issues Encountered
 
-None - BalanceWidget and Dashboard integration were already implemented and committed in a prior session (2026-03-13). Build passes cleanly.
+- UAT found BalanceWidget labels were unclear (pillar count, amber dots, bare numbers). Redesigned for self-documenting display.
+- Manual mode was broken end-to-end. Fixed with empty slide scaffolding.
 
 ## User Setup Required
 
@@ -102,9 +105,9 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Full Phase 3 wizard is complete pending human UAT verification (Task 2 checkpoint)
+- Full Phase 3 wizard verified end-to-end by user (UAT approved)
 - BalanceWidget closes the feedback loop: create post -> update balance -> see balance on dashboard
-- Ready for Phase 3 end-to-end UAT: wizard flow, export, dashboard balance refresh
+- Manual mode works: empty slides created, user fills content, renders, exports
 
 ---
 *Phase: 03-content-generation*
