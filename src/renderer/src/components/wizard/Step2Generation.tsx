@@ -18,8 +18,7 @@ export function Step2Generation() {
     setStep,
     setGenerationComplete,
     setIsGenerating,
-    setGenerationError,
-    reset
+    setGenerationError
   } = useCreatePostStore()
 
   const [displayText, setDisplayText] = useState('')
@@ -134,7 +133,9 @@ export function Step2Generation() {
 
   const handleNewDraft = () => {
     hasStartedRef.current = false
-    reset()
+    // Clear only generation output - NOT Step 1 selections (pillar/theme/mechanic)
+    setGenerationComplete({ slides: [], caption: '' })
+    setGenerationError(null)
     setRetrying(true)
     textRef.current = ''
     setDisplayText('')
