@@ -15,7 +15,7 @@ interface SlideEditorProps {
   activeZoneId: string
   onActiveZoneChange: (zoneId: string) => void
   onZoneOverrideChange: (zoneId: string, override: ZoneOverride) => void
-  onResetZonePosition: (zoneId: string) => void
+  onResetZoneOverrides: (zoneId: string) => void
   onApplyToAll: (zoneId: string, override: ZoneOverride) => void
   onSaveToLibrary?: () => void
   onSelectFromLibrary?: (entry: ImageLibraryEntry) => void
@@ -83,7 +83,7 @@ export function SlideEditor({
   activeZoneId,
   onActiveZoneChange,
   onZoneOverrideChange,
-  onResetZonePosition,
+  onResetZoneOverrides,
   onApplyToAll,
   onSaveToLibrary,
   onSelectFromLibrary,
@@ -189,7 +189,6 @@ export function SlideEditor({
       {zones.filter(z => z.show).map(zone => {
         const textField = textFieldMap[zone.id] as keyof Slide
         const text = (slide[textField] as string) ?? ''
-        const storedOverride = overrides[zone.id] ?? {}
         const zoneValues = resolveZoneValues(zone.id, overrides, settings)
 
         return (
@@ -203,9 +202,9 @@ export function SlideEditor({
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  aria-label="Reset zone position"
-                  onClick={() => onResetZonePosition(zone.id)}
-                  title="Reset position"
+                  aria-label="Reset zone formatting"
+                  onClick={() => onResetZoneOverrides(zone.id)}
+                  title="Reset to brand defaults"
                   className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 text-sm"
                 >
                   ↺
@@ -213,7 +212,7 @@ export function SlideEditor({
                 <button
                   type="button"
                   aria-label="Apply formatting to all slides"
-                  onClick={() => onApplyToAll(zone.id, storedOverride)}
+                  onClick={() => onApplyToAll(zone.id, zoneValues)}
                   title="Apply to all slides"
                   className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 text-sm"
                 >

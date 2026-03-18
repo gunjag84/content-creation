@@ -11,7 +11,8 @@ export function assemblePrompt(
   mechanic: string,
   impulse: string,
   settings: Settings,
-  contentType: 'single' | 'carousel'
+  contentType: 'single' | 'carousel',
+  slideCount?: number
 ): string {
   const sections: string[] = []
 
@@ -45,9 +46,10 @@ export function assemblePrompt(
   }
 
   // Content constraints
+  const carouselCount = slideCount ?? 5
   const slideConstraint = contentType === 'single'
     ? '**Slides:** 1 (SINGLE POST - exactly ONE slide)'
-    : `**Carousel Slides:** ${mech?.slideRange?.min ?? 3}-${mech?.slideRange?.max ?? 10}`
+    : `**Carousel Slides:** EXACTLY ${carouselCount} slides (1 cover + ${carouselCount - 2} content + 1 CTA)`
   sections.push(`## Content Constraints\n${slideConstraint}`)
 
   // Impulse

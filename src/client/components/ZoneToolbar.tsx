@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import type { ZoneOverride, FontLibraryEntry } from '@shared/types'
 import { FONT_OPTIONS } from '@shared/fontOptions'
+import { toHex } from '@shared/colorUtils'
 
 interface ZoneToolbarProps {
   // Fully resolved values (settings defaults + overrides) — never undefined for visual fields
@@ -38,7 +39,7 @@ export function ZoneToolbar({ values, onChange, fontLibrary }: ZoneToolbarProps)
   const isItalic = values.fontStyle === 'italic'
   const fontSize = values.fontSize ?? 56
   const align = values.textAlign ?? 'center'
-  const color = values.color ?? '#000000'
+  const color = toHex(values.color ?? '#000000')
   const lineHeight = values.lineHeight ?? 1.3
   const letterSpacing = values.letterSpacing ?? 0
 

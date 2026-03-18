@@ -2,6 +2,7 @@ import { useEditor, EditorContent, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle, Color, FontFamily, FontSize } from '@tiptap/extension-text-style'
 import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { HexColorPicker } from 'react-colorful'
 import { FONT_OPTIONS } from '@shared/fontOptions'
 import type { FontLibraryEntry } from '@shared/types'
@@ -37,29 +38,42 @@ export function RichTextEditor({
     : []
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null)
+  const [toolbarPinned, setToolbarPinned] = useState(false)
   const colorPickerRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   // Saved selection range — captured on mousedown of selects so we can restore after blur
   const savedSelection = useRef<{ from: number; to: number } | null>(null)
+  // Track what Tiptap last emitted so we can detect external content changes (undo/redo)
+  const lastEmittedHtml = useRef(content)
+  // Guard: suppress onChange during programmatic setContent (undo/redo sync)
+  const suppressOnChange = useRef(false)
 
   const editor = useEditor({
     extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize],
     content,
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML()
+      lastEmittedHtml.current = html
+      if (!suppressOnChange.current) onChange(html)
+    },
     onFocus: () => onFocus?.(),
     editorProps: {
       attributes: { class: 'outline-none min-h-[60px] w-full' },
     },
   })
 
-  // Explicit content reset — only fires when contentVersion changes (e.g. font-family strip).
-  // Does NOT depend on `content` directly, so normal typing never triggers it.
+  // Sync when content changes externally (undo/redo, contentVersion bump).
+  // Skips when the change originated from Tiptap's own onUpdate (prevents loop).
   useEffect(() => {
-    if (!editor || contentVersion === undefined || contentVersion === 0) return
-    editor.commands.setContent(content, false) // false = don't emit onUpdate
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, contentVersion])
+    if (!editor) return
+    if (content !== lastEmittedHtml.current) {
+      lastEmittedHtml.current = content
+      suppressOnChange.current = true
+      editor.commands.setContent(content, false)
+      suppressOnChange.current = false
+    }
+  }, [editor, content, contentVersion])
 
   // Reactive editor state — re-runs on every transaction
   const state = useEditorState({
@@ -77,6 +91,7 @@ export function RichTextEditor({
 
   // Compute floating toolbar position from browser selection rect
   useEffect(() => {
+    if (toolbarPinned) return  // keep toolbar visible while font select is open
     if (!state?.hasSelection || !state?.isFocused) { setToolbarPos(null); return }
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) { setToolbarPos(null); return }
@@ -86,7 +101,7 @@ export function RichTextEditor({
       top: rect.top + window.scrollY - 52,
       left: rect.left + window.scrollX + rect.width / 2,
     })
-  }, [state?.hasSelection, state?.isFocused])
+  }, [state?.hasSelection, state?.isFocused, toolbarPinned])
 
   // Close color picker on outside click
   useEffect(() => {
@@ -94,6 +109,7 @@ export function RichTextEditor({
     function handleDocMouseDown(e: MouseEvent) {
       if (!colorPickerRef.current?.contains(e.target as Node)) {
         setShowColorPicker(false)
+        setToolbarPinned(false)
       }
     }
     document.addEventListener('mousedown', handleDocMouseDown)
@@ -128,7 +144,7 @@ export function RichTextEditor({
   return (
     <div>
       {/* Floating selection toolbar — appears above selected text */}
-      {toolbarPos && state.hasSelection && state.isFocused && (
+      {toolbarPos && (state.hasSelection && state.isFocused || toolbarPinned) && (
         <div
           ref={toolbarRef}
           style={{
@@ -195,9 +211,11 @@ export function RichTextEditor({
             aria-label="Selection font family"
             value={state.fontFamily}
             className="text-xs border border-gray-200 rounded px-1 py-0.5 max-w-[100px]"
-            onMouseDown={e => { e.stopPropagation(); saveSelection() }}
+            onMouseDown={e => { e.stopPropagation(); flushSync(() => setToolbarPinned(true)); saveSelection() }}
+            onBlur={() => setToolbarPinned(false)}
             onChange={e => {
               const val = e.target.value
+              setToolbarPinned(false)
               restoreAndRun(() => {
                 if (val) {
                   editor.chain().setFontFamily(val).run()
@@ -226,7 +244,7 @@ export function RichTextEditor({
             <button
               type="button"
               aria-label="Selection text color"
-              onMouseDown={e => { e.preventDefault(); setShowColorPicker(v => !v) }}
+              onMouseDown={e => { e.preventDefault(); flushSync(() => { setShowColorPicker(v => !v); setToolbarPinned(v => !v) }); saveSelection() }}
               className="w-5 h-5 rounded border border-gray-200"
               style={{ backgroundColor: state.color || '#000000' }}
             />
@@ -234,10 +252,18 @@ export function RichTextEditor({
               <div
                 className="absolute z-50 bottom-7 left-0 bg-white border border-gray-200 rounded-lg shadow-md p-2"
                 onMouseDown={e => e.preventDefault()}
+                onPointerDown={e => e.stopPropagation()}
               >
                 <HexColorPicker
                   color={state.color || '#000000'}
-                  onChange={c => editor.chain().focus().setColor(c).run()}
+                  onChange={c => {
+                    const sel = savedSelection.current
+                    if (sel && sel.from !== sel.to) {
+                      editor.chain().setTextSelection(sel).setColor(c).run()
+                    } else {
+                      editor.chain().focus().setColor(c).run()
+                    }
+                  }}
                 />
               </div>
             )}
@@ -245,13 +271,14 @@ export function RichTextEditor({
         </div>
       )}
 
-      {/* Editor area */}
+      {/* Editor area — font size scaled from render canvas (1080px) to editor width (~350px) */}
       <div
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm relative cursor-text"
+        className="w-full border border-gray-200 rounded-lg px-3 py-2 relative cursor-text"
+        style={{ fontSize: zoneFontSize ? Math.round(zoneFontSize * 0.33) : 14 }}
         onClick={() => editor.commands.focus()}
       >
         {!editor.getText() && placeholder && (
-          <div className="pointer-events-none text-gray-400 text-sm absolute top-2 left-3">{placeholder}</div>
+          <div className="pointer-events-none text-gray-400 absolute top-2 left-3" style={{ fontSize: 14 }}>{placeholder}</div>
         )}
         <EditorContent editor={editor} />
       </div>

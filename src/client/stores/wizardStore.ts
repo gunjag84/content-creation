@@ -17,6 +17,7 @@ interface WizardStore {
   selectedTheme: string
   selectedMechanic: string
   contentType: 'single' | 'carousel'
+  slideCount: number
   impulse: string
   recommendation: BalanceRecommendation | null
   warnings: BalanceWarning[]
@@ -53,6 +54,7 @@ interface WizardStore {
   setZoneOverride: (slideIndex: number, zoneId: string, override: ZoneOverride) => void
   updateZoneOverrideLive: (slideIndex: number, zoneId: string, override: ZoneOverride) => void
   resetZonePosition: (slideIndex: number, zoneId: string) => void
+  clearZoneOverrides: (slideIndex: number, zoneId: string) => void
   applyZoneOverrideToAll: (zoneId: string, override: ZoneOverride) => void
   undo: () => void
   redo: () => void
@@ -64,6 +66,7 @@ const initialState = {
   selectedTheme: '',
   selectedMechanic: '',
   contentType: 'carousel' as const,
+  slideCount: 5,
   impulse: '',
   recommendation: null,
   warnings: [],
@@ -77,6 +80,8 @@ const initialState = {
   history: [] as Slide[][],
   future: [] as Slide[][]
 }
+
+let lastSetSlideTime = 0
 
 function mergeZoneOverride(slides: Slide[], slideIndex: number, zoneId: string, override: ZoneOverride): Slide[] {
   const next = [...slides]
@@ -114,6 +119,15 @@ export const useWizardStore = create<WizardStore>((set) => ({
     if (index >= 0 && index < slides.length) {
       slides[index] = { ...slides[index], [field]: value }
     }
+    // Text fields fire on every keystroke — debounce history pushes.
+    // Push a snapshot only if >500ms elapsed since last setSlide call.
+    const now = Date.now()
+    const elapsed = now - lastSetSlideTime
+    lastSetSlideTime = now
+    if (elapsed > 500) {
+      const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
+      return { slides, history: newHistory, future: [] }
+    }
     return { slides }
   }),
 
@@ -147,7 +161,8 @@ export const useWizardStore = create<WizardStore>((set) => ({
   setPostId: (id) => set({ postId: id }),
 
   initManualSlides: (contentType, defaultCta) => {
-    const count = contentType === 'single' ? 1 : 5
+    set((state) => {
+    const count = contentType === 'single' ? 1 : state.slideCount
     const slides: Slide[] = Array.from({ length: count }, (_, i) => {
       const isLast = i === count - 1
       return {
@@ -160,7 +175,8 @@ export const useWizardStore = create<WizardStore>((set) => ({
         overlay_opacity: 0.5
       }
     })
-    set({ slides, caption: '' })
+    return { slides, caption: '' }
+    })
   },
 
   applyBackgroundToAll: (index) => set((state) => {
@@ -200,6 +216,17 @@ export const useWizardStore = create<WizardStore>((set) => ({
       ...current,
       zone_overrides: { ...(current.zone_overrides ?? {}), [zoneId]: rest }
     }
+    const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
+    return { slides: next, history: newHistory, future: [] }
+  }),
+
+  // Clear all overrides for a zone — reverts to brand defaults
+  clearZoneOverrides: (slideIndex, zoneId) => set((state) => {
+    const next = [...state.slides]
+    if (slideIndex < 0 || slideIndex >= next.length) return {}
+    const current = next[slideIndex]
+    const { [zoneId]: _removed, ...remaining } = current.zone_overrides ?? {}
+    next[slideIndex] = { ...current, zone_overrides: remaining }
     const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
     return { slides: next, history: newHistory, future: [] }
   }),

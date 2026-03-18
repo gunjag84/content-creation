@@ -16,7 +16,7 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
   const {
     slides, caption, setSlide, setCaption, setRenderedImages,
     applyBackgroundToAll, setZoneOverride, updateZoneOverrideLive,
-    resetZonePosition, applyZoneOverrideToAll, undo, redo
+    resetZonePosition, clearZoneOverrides, applyZoneOverrideToAll, undo, redo
   } = useWizardStore()
   const { settings, save: saveSettings } = useSettingsStore()
   const [activeSlide, setActiveSlide] = useState(0)
@@ -94,6 +94,24 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
 
   const handleResetZonePosition = (zoneId: string) => {
     resetZonePosition(activeSlide, zoneId)
+  }
+
+  const handleResetZoneOverrides = (zoneId: string) => {
+    clearZoneOverrides(activeSlide, zoneId)
+    // Also strip inline TipTap marks (color, font-family, font-size) from the HTML
+    // so the zone-level brand defaults fully take over.
+    const textFieldMap: Record<string, keyof typeof slides[number]> = {
+      hook: 'hook_text', body: 'body_text', cta: 'cta_text',
+    }
+    const field = textFieldMap[zoneId]
+    if (field) {
+      const html = (slides[activeSlide]?.[field] as string) ?? ''
+      const stripped = html
+        .replace(/style="[^"]*"/g, '')  // remove all inline style attrs
+      if (stripped !== html) {
+        setSlide(activeSlide, field, stripped)
+      }
+    }
   }
 
   const handleApplyToAll = (zoneId: string, override: ZoneOverride) => {
@@ -240,7 +258,7 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
             activeZoneId={activeZoneId}
             onActiveZoneChange={setActiveZoneId}
             onZoneOverrideChange={handleZoneOverrideChange}
-            onResetZonePosition={handleResetZonePosition}
+            onResetZoneOverrides={handleResetZoneOverrides}
             onApplyToAll={handleApplyToAll}
             onSaveToLibrary={handleSaveToLibrary}
             onSelectFromLibrary={handleSelectFromLibrary}

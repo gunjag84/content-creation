@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
     return
   }
 
-  const { pillar, theme, mechanic, contentType, impulse } = req.body
+  const { pillar, theme, mechanic, contentType, slideCount, impulse } = req.body
   if (!pillar || !theme || !mechanic) {
     res.status(400).json({ error: 'pillar, theme, and mechanic are required' })
     return
@@ -40,7 +40,8 @@ router.post('/', async (req, res) => {
     pillar, theme, mechanic,
     impulse || '',
     settings,
-    contentType || 'carousel'
+    contentType || 'carousel',
+    typeof slideCount === 'number' ? slideCount : undefined
   )
 
   const client = new Anthropic({ apiKey })

@@ -5,15 +5,7 @@ import { ContextEditor } from '../components/ContextEditor'
 import { api } from '../lib/apiClient'
 import type { Settings, FontLibraryEntry } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
-
-function toHex(color: string): string {
-  if (!color) return '#000000'
-  if (/^#[0-9a-f]{6}$/i.test(color)) return color
-  const ctx = document.createElement('canvas').getContext('2d')
-  if (!ctx) return '#000000'
-  ctx.fillStyle = color
-  return ctx.fillStyle // returns '#rrggbb' for any valid CSS color
-}
+import { toHex } from '@shared/colorUtils'
 
 function InfoPopover({ text }: { text: string }) {
   return (

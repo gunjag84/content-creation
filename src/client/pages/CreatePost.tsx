@@ -49,6 +49,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         theme: store.selectedTheme,
         mechanic: store.selectedMechanic,
         contentType: store.contentType,
+        slideCount: store.contentType === 'carousel' ? store.slideCount : undefined,
         impulse: store.impulse
       },
       (text) => store.appendStreamText(text),
@@ -94,7 +95,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       )}
 
       {/* Content type toggle */}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         {(['single', 'carousel'] as const).map((type) => (
           <button
             key={type}
@@ -106,6 +107,26 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             {type === 'single' ? 'Single Post' : 'Carousel'}
           </button>
         ))}
+        {store.contentType === 'carousel' && (
+          <div className="flex items-center gap-2 ml-2">
+            <span className="text-sm text-gray-500">Slides:</span>
+            <button
+              onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
+              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+              disabled={store.slideCount <= 3}
+            >
+              -
+            </button>
+            <span className="w-5 text-center text-sm font-semibold">{store.slideCount}</span>
+            <button
+              onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
+              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+              disabled={store.slideCount >= 7}
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Dropdowns */}
