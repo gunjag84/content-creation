@@ -156,7 +156,7 @@ export function BackgroundPanEditor({
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -198,9 +198,10 @@ export function BackgroundPanEditor({
           tabIndex={0}
           role="img"
           aria-label="Drag to reframe background image. Use arrow keys for fine adjustment, Escape to reset."
-          className="w-full rounded-lg overflow-hidden select-none focus:outline-none focus:ring-2 focus:ring-blue-500 relative"
+          className="rounded-lg overflow-hidden select-none focus:outline-none focus:ring-2 focus:ring-blue-500 relative"
           style={{
             aspectRatio: '1080/1350',
+            width: 'min(100%, calc((100vh - 300px) * 1080 / 1350))',
             cursor: isDragging ? 'grabbing' : 'grab',
           }}
           onMouseDown={handleMouseDown}
