@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2026-03-18
+
+### Added
+- **Content Defaults**: New settings section with configurable caption min/max chars and body max chars per slide (defaults: 50/400/400). Limits are injected into the AI prompt and shown in the caption editor with red indicator when out of range.
+- **Pillar Rules**: Each content pillar now has a rules textarea for content guardrails (e.g., "never mention the product"). Rules are injected into the AI prompt as mandatory constraints.
+- **Carousel Cover Layout**: Carousel first slides now render hook-only, centered in the body zone with headline styling. Single slides unchanged (hook/body/CTA layout). Logo and handle remain on carousel covers.
+- **Generate Spinner**: Loading spinner in the "Generate with Claude" button during AI generation.
+
+### Changed
+- **Prompt Assembler**: Carousel cover instructions tell the LLM to leave body_text and cta_text empty on cover slides. Character limits from content defaults included in every prompt.
+
 ## [2.1.2] - 2026-03-18
 
 ### Fixed
