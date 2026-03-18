@@ -23,15 +23,17 @@ export interface Slide {
   zone_overrides?: Record<string, ZoneOverride>
 }
 
-export interface GenerationResult {
-  slides: Array<{
-    slide_type: 'cover' | 'content' | 'cta'
-    hook_text: string
-    body_text: string
-    cta_text: string
-  }>
-  caption: string
-}
+export const GenerationResultSchema = z.object({
+  slides: z.array(z.object({
+    slide_type: z.enum(['cover', 'content', 'cta']),
+    hook_text: z.string(),
+    body_text: z.string(),
+    cta_text: z.string()
+  })).min(1),
+  caption: z.string()
+})
+
+export type GenerationResult = z.infer<typeof GenerationResultSchema>
 
 // --- Settings ---
 

@@ -14,7 +14,10 @@ export function createSession(): string {
 export function validatePassword(password: string): boolean {
   const expected = process.env.APP_PASSWORD
   if (!expected) return true // No password set = no auth required
-  return password === expected
+  const a = Buffer.from(password)
+  const b = Buffer.from(expected)
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {

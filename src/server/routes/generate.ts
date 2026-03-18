@@ -2,6 +2,7 @@ import { Router } from 'express'
 import Anthropic from '@anthropic-ai/sdk'
 import { assemblePrompt } from '../services/prompt-assembler'
 import { loadSettings } from './settings'
+import { GenerationResultSchema } from '../../shared/types'
 
 const router = Router()
 
@@ -49,6 +50,7 @@ router.post('/', async (req, res) => {
   // SSE disconnect cleanup - abort stream on client disconnect
   req.on('close', () => {
     aborted = true
+    isGenerating = false
   })
 
   try {
@@ -77,7 +79,13 @@ router.post('/', async (req, res) => {
         .replace(/\s*```$/, '')
         .trim()
 
-      const result = JSON.parse(cleaned)
+      const parsed = GenerationResultSchema.safeParse(JSON.parse(cleaned))
+      if (!parsed.success) {
+        res.write(`data: ${JSON.stringify({ type: 'error', message: 'Invalid response shape from AI', partial: partialResponse })}\n\n`)
+        res.write('data: [DONE]\n\n')
+        return
+      }
+      const result = parsed.data
       res.write(`data: ${JSON.stringify({ type: 'complete', result })}\n\n`)
       res.write('data: [DONE]\n\n')
     }
