@@ -48,6 +48,13 @@ router.post('/upload', upload.single('file'), (req, res) => {
   res.json({ path: relativePath, filename: req.file.filename })
 })
 
+// Allow slide iframes (sandboxed, null origin) to load fonts and images
+router.use('/', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET')
+  next()
+})
+
 // Serve uploaded files statically
 router.use('/', express.static(DATA_DIR))
 

@@ -35,11 +35,22 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   const secondaryColor = colors[1] || '#cccccc'
   const bgColor = colors[2] || '#1a1a2e'
 
-  // Font face declarations
+  // Font helpers: if value contains '/' it's an uploaded file path; otherwise treat as a font-family name
+  function isFilePath(val: string): boolean { return val.includes('/') }
+  function fontFaceRule(alias: string, val: string): string {
+    return `@font-face { font-family: '${alias}'; src: url('${fileUrl(val, baseUrl)}'); }`
+  }
+  function resolveFamily(alias: string, val: string | undefined): string {
+    if (!val) return 'sans-serif'
+    if (isFilePath(val)) return `'${alias}', sans-serif`
+    return `'${val}', sans-serif`
+  }
+
+  // Font face declarations (only for uploaded file paths)
   const fontStyles = [
-    v?.fonts?.headline ? `@font-face { font-family: 'CustomHeadline'; src: url('${fileUrl(v.fonts.headline, baseUrl)}'); }` : '',
-    v?.fonts?.body ? `@font-face { font-family: 'CustomBody'; src: url('${fileUrl(v.fonts.body, baseUrl)}'); }` : '',
-    v?.fonts?.cta ? `@font-face { font-family: 'CustomCTA'; src: url('${fileUrl(v.fonts.cta, baseUrl)}'); }` : ''
+    v?.fonts?.headline && isFilePath(v.fonts.headline) ? fontFaceRule('CustomHeadline', v.fonts.headline) : '',
+    v?.fonts?.body && isFilePath(v.fonts.body) ? fontFaceRule('CustomBody', v.fonts.body) : '',
+    v?.fonts?.cta && isFilePath(v.fonts.cta) ? fontFaceRule('CustomCTA', v.fonts.cta) : ''
   ].filter(Boolean).join('\n')
 
   // Background
@@ -49,9 +60,9 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   }
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
-  const headlineFamily = v?.fonts?.headline ? "'CustomHeadline', sans-serif" : 'sans-serif'
-  const bodyFamily = v?.fonts?.body ? "'CustomBody', sans-serif" : 'sans-serif'
-  const ctaFamily = v?.fonts?.cta ? "'CustomCTA', sans-serif" : 'sans-serif'
+  const headlineFamily = resolveFamily('CustomHeadline', v?.fonts?.headline)
+  const bodyFamily = resolveFamily('CustomBody', v?.fonts?.body)
+  const ctaFamily = resolveFamily('CustomCTA', v?.fonts?.cta)
 
   // CTA text: last slide uses standard CTA if available
   const slideIdx = allSlides.findIndex(s => s.uid === slide.uid)

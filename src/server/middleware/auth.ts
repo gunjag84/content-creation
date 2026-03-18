@@ -33,6 +33,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return
   }
 
+  // Allow file reads (fonts/images accessed from sandboxed iframes)
+  if (req.method === 'GET' && req.path.startsWith('/api/files/')) {
+    next()
+    return
+  }
+
   // Allow static assets
   if (!req.path.startsWith('/api/')) {
     next()
