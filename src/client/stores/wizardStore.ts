@@ -37,6 +37,7 @@ interface WizardStore {
   setRenderedImages: (images: Array<{ slide_number: number; dataUrl: string }>) => void
   setPostId: (id: number) => void
   initManualSlides: (contentType: 'single' | 'carousel') => void
+  applyBackgroundToAll: (index: number) => void
   reset: () => void
 }
 
@@ -118,6 +119,19 @@ export const useWizardStore = create<WizardStore>((set) => ({
     }))
     set({ slides, caption: '' })
   },
+
+  applyBackgroundToAll: (index) => set((state) => {
+    const src = state.slides[index]
+    return {
+      slides: state.slides.map((s, i) => (i === index || s.slide_type === 'cover') ? s : {
+        ...s,
+        custom_background_path: src.custom_background_path,
+        background_position_x: src.background_position_x,
+        background_position_y: src.background_position_y,
+        background_scale: src.background_scale,
+      })
+    }
+  }),
 
   reset: () => set({ ...initialState })
 }))

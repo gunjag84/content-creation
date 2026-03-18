@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS slides (
   cta_text TEXT,
   overlay_opacity REAL DEFAULT 0.5,
   custom_background_path TEXT,
+  background_position_x REAL DEFAULT 50,
+  background_position_y REAL DEFAULT 50,
+  background_scale REAL DEFAULT 1.0,
   zone_overrides TEXT,
   created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE

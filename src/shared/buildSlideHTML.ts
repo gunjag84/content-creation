@@ -96,9 +96,12 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     .join('\n')
 
   // Background
-  let backgroundCSS = `background-color: ${bgColor};`
+  const bgX = slide.background_position_x ?? 50
+  const bgY = slide.background_position_y ?? 50
+  const bgScale = slide.background_scale ?? 1.0
+  let bgWrapperHtml = ''
   if (slide.custom_background_path) {
-    backgroundCSS = `background-image: url('${fileUrl(slide.custom_background_path, baseUrl)}'); background-size: cover; background-position: center;`
+    bgWrapperHtml = `<div style="position:absolute;inset:0;overflow:hidden;"><div style="position:absolute;inset:0;background:url('${fileUrl(slide.custom_background_path, baseUrl)}') ${bgX}% ${bgY}% / cover no-repeat;transform:scale(${bgScale});transform-origin:${bgX}% ${bgY}%;"></div></div>`
   }
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
@@ -145,5 +148,5 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${escHtml(v.handle)}</div>`
     : ''
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; ${backgroundCSS} } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body><div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body>${bgWrapperHtml}<div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`
 }

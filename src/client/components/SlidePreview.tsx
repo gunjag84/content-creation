@@ -107,9 +107,9 @@ export function SlidePreview({ slide, allSlides, settings, className }: SlidePre
   const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
 
-  const bgStyle: React.CSSProperties = slide.custom_background_path
-    ? { backgroundImage: `url('${fileUrl(slide.custom_background_path, baseUrl)}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : { backgroundColor: bgColor }
+  const bgX = slide.background_position_x ?? 50
+  const bgY = slide.background_position_y ?? 50
+  const bgScale = slide.background_scale ?? 1.0
 
   return (
     <div
@@ -126,9 +126,23 @@ export function SlidePreview({ slide, allSlides, settings, className }: SlidePre
           height: SLIDE_H,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
-          ...bgStyle,
+          backgroundColor: bgColor,
         }}
       >
+        {/* background image layer with pan/zoom */}
+        {slide.custom_background_path && (
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${fileUrl(slide.custom_background_path, baseUrl)}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: `${bgX}% ${bgY}%`,
+              transform: `scale(${bgScale})`,
+              transformOrigin: `${bgX}% ${bgY}%`,
+            }} />
+          </div>
+        )}
         {/* overlay */}
         <div style={{ position: 'absolute', inset: 0, backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
 

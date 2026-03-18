@@ -20,6 +20,9 @@ export interface Slide {
   cta_text: string
   overlay_opacity: number
   custom_background_path?: string
+  background_position_x?: number  // 0-100 (%), default 50
+  background_position_y?: number  // 0-100 (%), default 50
+  background_scale?: number       // 1.0-3.0 (transform scale), default 1.0
   zone_overrides?: Record<string, ZoneOverride>
 }
 
@@ -159,6 +162,9 @@ export interface SlideRow {
   cta_text: string | null
   overlay_opacity: number
   custom_background_path: string | null
+  background_position_x: number | null
+  background_position_y: number | null
+  background_scale: number | null
   zone_overrides: string | null
   created_at: number
 }

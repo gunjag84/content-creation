@@ -46,6 +46,9 @@ router.post('/', (req, res) => {
           cta_text: slide.cta_text,
           overlay_opacity: slide.overlay_opacity,
           custom_background_path: slide.custom_background_path,
+          background_position_x: slide.background_position_x,
+          background_position_y: slide.background_position_y,
+          background_scale: slide.background_scale,
           zone_overrides: slide.zone_overrides ? JSON.stringify(slide.zone_overrides) : undefined
         })
       }
