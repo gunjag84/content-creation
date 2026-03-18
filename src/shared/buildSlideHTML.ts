@@ -1,4 +1,5 @@
-import type { Slide, Settings, ZoneOverride } from './types'
+import type { Slide, Settings, ZoneOverride, FontLibraryEntry } from './types'
+import { GOOGLE_FONT_NAMES, googleFontImport } from './fonts'
 
 export interface BuildSlideHTMLParams {
   slide: Slide
@@ -21,10 +22,56 @@ function getLogoPositionStyle(position: string): string {
 
 function fileUrl(path: string, baseUrl: string): string {
   if (!path) return ''
-  // Already an HTTP URL
   if (path.startsWith('http')) return path
-  // Convert file path to API URL
   return `${baseUrl}/api/files/${encodeURIComponent(path.replace(/\\/g, '/'))}`
+}
+
+function isFilePath(val: string): boolean { return val.includes('/') }
+
+interface ResolvedFont {
+  importRule: string   // @import or @font-face (may be empty)
+  family: string       // CSS font-family value
+}
+
+function resolveFont(
+  value: string | undefined,
+  alias: string,
+  fontLibrary: FontLibraryEntry[],
+  baseUrl: string
+): ResolvedFont {
+  if (!value) return { importRule: '', family: 'sans-serif' }
+
+  // Custom uploaded font referenced by id (e.g. "custom:uuid-123")
+  if (value.startsWith('custom:')) {
+    const id = value.slice(7)
+    const entry = fontLibrary.find(f => f.id === id)
+    if (entry) {
+      return {
+        importRule: `@font-face { font-family: '${alias}'; src: url('${fileUrl(entry.path, baseUrl)}'); }`,
+        family: `'${alias}', sans-serif`
+      }
+    }
+    return { importRule: '', family: 'sans-serif' }
+  }
+
+  // Legacy: bare file path stored directly (backward compat)
+  if (isFilePath(value)) {
+    return {
+      importRule: `@font-face { font-family: '${alias}'; src: url('${fileUrl(value, baseUrl)}'); }`,
+      family: `'${alias}', sans-serif`
+    }
+  }
+
+  // Google Font preset
+  if (GOOGLE_FONT_NAMES.has(value)) {
+    return {
+      importRule: googleFontImport(value),
+      family: `'${value}', sans-serif`
+    }
+  }
+
+  // System / generic font name
+  return { importRule: '', family: `'${value}', sans-serif` }
 }
 
 export function buildSlideHTML(params: BuildSlideHTMLParams): string {
@@ -34,24 +81,15 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   const primaryColor = colors[0] || '#ffffff'
   const secondaryColor = colors[1] || '#cccccc'
   const bgColor = colors[2] || '#1a1a2e'
+  const fontLibrary = v?.fontLibrary ?? []
 
-  // Font helpers: if value contains '/' it's an uploaded file path; otherwise treat as a font-family name
-  function isFilePath(val: string): boolean { return val.includes('/') }
-  function fontFaceRule(alias: string, val: string): string {
-    return `@font-face { font-family: '${alias}'; src: url('${fileUrl(val, baseUrl)}'); }`
-  }
-  function resolveFamily(alias: string, val: string | undefined): string {
-    if (!val) return 'sans-serif'
-    if (isFilePath(val)) return `'${alias}', sans-serif`
-    return `'${val}', sans-serif`
-  }
+  const headlineFont = resolveFont(v?.fonts?.headline, 'CustomHeadline', fontLibrary, baseUrl)
+  const bodyFont = resolveFont(v?.fonts?.body, 'CustomBody', fontLibrary, baseUrl)
+  const ctaFont = resolveFont(v?.fonts?.cta, 'CustomCTA', fontLibrary, baseUrl)
 
-  // Font face declarations (only for uploaded file paths)
-  const fontStyles = [
-    v?.fonts?.headline && isFilePath(v.fonts.headline) ? fontFaceRule('CustomHeadline', v.fonts.headline) : '',
-    v?.fonts?.body && isFilePath(v.fonts.body) ? fontFaceRule('CustomBody', v.fonts.body) : '',
-    v?.fonts?.cta && isFilePath(v.fonts.cta) ? fontFaceRule('CustomCTA', v.fonts.cta) : ''
-  ].filter(Boolean).join('\n')
+  const fontStyles = [headlineFont.importRule, bodyFont.importRule, ctaFont.importRule]
+    .filter(Boolean)
+    .join('\n')
 
   // Background
   let backgroundCSS = `background-color: ${bgColor};`
@@ -60,9 +98,6 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   }
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
-  const headlineFamily = resolveFamily('CustomHeadline', v?.fonts?.headline)
-  const bodyFamily = resolveFamily('CustomBody', v?.fonts?.body)
-  const ctaFamily = resolveFamily('CustomCTA', v?.fonts?.cta)
 
   // CTA text: last slide uses standard CTA if available
   const slideIdx = allSlides.findIndex(s => s.uid === slide.uid)
@@ -72,9 +107,9 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   // Zone overrides
   const zoneIds = ['hook', 'body', 'cta'] as const
   const zoneDefaults = {
-    hook: { top: 0, height: 340, font: headlineFamily, fontSize: 56, color: primaryColor, weight: 'bold' as const },
-    body: { top: 340, height: 770, font: bodyFamily, fontSize: 38, color: secondaryColor, weight: 'normal' as const },
-    cta: { top: 1110, height: 240, font: ctaFamily, fontSize: 48, color: primaryColor, weight: 'bold' as const }
+    hook: { top: 0, height: 340, font: headlineFont.family, fontSize: 56, color: primaryColor, weight: 'bold' as const },
+    body: { top: 340, height: 770, font: bodyFont.family, fontSize: 38, color: secondaryColor, weight: 'normal' as const },
+    cta: { top: 1110, height: 240, font: ctaFont.family, fontSize: 48, color: primaryColor, weight: 'bold' as const }
   }
 
   const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
@@ -103,7 +138,7 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
 
   // Handle
   const handleHtml = v?.handle
-    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFamily};font-size:20px;color:${secondaryColor};">${v.handle}</div>`
+    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${v.handle}</div>`
     : ''
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; ${backgroundCSS} } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body><div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`

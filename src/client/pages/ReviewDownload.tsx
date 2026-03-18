@@ -4,9 +4,10 @@ import { api } from '../lib/apiClient'
 
 interface ReviewDownloadProps {
   onDone: () => void
+  onBack: () => void
 }
 
-export function ReviewDownload({ onDone }: ReviewDownloadProps) {
+export function ReviewDownload({ onDone, onBack }: ReviewDownloadProps) {
   const { slides, caption, renderedImages, setPostId } = useWizardStore()
   const { selectedPillar, selectedTheme, selectedMechanic, contentType, impulse } = useWizardStore()
   const [saving, setSaving] = useState(false)
@@ -60,22 +61,32 @@ export function ReviewDownload({ onDone }: ReviewDownloadProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Review & Download</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="px-3 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+          >
+            ← Back
+          </button>
+          <h1 className="text-2xl font-bold">Review & Download</h1>
+        </div>
         <div className="flex gap-3">
           {!saved && (
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+              className="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
             >
+              {saving && <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />}
               {saving ? 'Saving...' : 'Approve & Save'}
             </button>
           )}
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
           >
+            {downloading && <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />}
             {downloading ? 'Downloading...' : 'Download ZIP'}
           </button>
           {saved && (
