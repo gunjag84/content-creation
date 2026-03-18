@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-03-19
+
+### Added
+- **Instagram Stats Integration**: Full Meta Graph API v25 integration - OAuth connect, IG post discovery, insights sync (reach, likes, comments, shares, saves), standalone IG posts table
+- **Ad Stats Sync**: Fetches boosted ad data from Meta Ads API, matches to both Content Studio posts and standalone IG posts by caption prefix, stores spend/CPR/link clicks
+- **Instagram Posts View**: New page listing all standalone IG posts with sortable columns (date, reach, likes, comments, ad spend, performance score)
+- **Post History Enhancements**: Inline stats form with performance fields, auto-sync button, score display
+- **Settings: Instagram Connection**: Token management UI with connect/disconnect, status display, token health indicator
+- **Performance Score**: Weighted scoring formula (reach 40%, engagement 40%, ad efficiency 20%) applied to all synced posts
+
+### Fixed
+- **Ad matching scope**: Ads now match against both Content Studio posts AND IG API posts (previously only matched Content Studio posts, silently dropping unmatched ad data)
+
 ## [2.1.3] - 2026-03-18
 
 ### Added
