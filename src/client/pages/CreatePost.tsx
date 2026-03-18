@@ -53,7 +53,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       },
       (text) => store.appendStreamText(text),
       (result) => {
-        store.setGenerationComplete(result as GenerationResult)
+        store.setGenerationComplete(result as GenerationResult, settings?.visual?.cta)
         onGenerated()
       },
       (msg) => store.setGenerationError(msg)
@@ -64,7 +64,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   }
 
   const handleManual = () => {
-    store.initManualSlides(store.contentType)
+    store.initManualSlides(store.contentType, settings?.visual?.cta)
     onGenerated()
   }
 
