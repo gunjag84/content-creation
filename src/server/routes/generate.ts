@@ -48,12 +48,18 @@ router.post('/', async (req, res) => {
   let aborted = false
 
   // SSE disconnect cleanup - abort stream on client disconnect
-  req.on('close', () => {
-    aborted = true
-    isGenerating = false
+  // Use res.on('close') not req.on('close') — in Node 18+, req close fires
+  // when the request body is consumed + response starts, not on client disconnect.
+  res.on('close', () => {
+    console.log('[generate] res close fired, aborted:', aborted)
+    if (!aborted) {
+      aborted = true
+      isGenerating = false
+    }
   })
 
   try {
+    console.log('[generate] starting Anthropic stream')
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4096,
@@ -61,6 +67,7 @@ router.post('/', async (req, res) => {
     })
 
     stream.on('text', (text) => {
+      console.log('[generate] text event, aborted:', aborted, 'length:', text.length)
       if (aborted) {
         stream.abort()
         return
@@ -90,10 +97,12 @@ router.post('/', async (req, res) => {
       res.write('data: [DONE]\n\n')
     }
   } catch (err) {
+    console.log('[generate] catch:', (err as Error).message)
     if (!aborted) {
       res.write(`data: ${JSON.stringify({ type: 'error', message: (err as Error).message, partial: partialResponse || undefined })}\n\n`)
     }
   } finally {
+    console.log('[generate] finally, aborted:', aborted, 'partial length:', partialResponse.length)
     isGenerating = false
     res.end()
   }
