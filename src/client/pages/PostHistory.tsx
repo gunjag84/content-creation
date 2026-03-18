@@ -60,16 +60,17 @@ export function PostHistory() {
     const lastSync = (igStatus.last_sync_at || 0)
     if (Date.now() - lastSync < fifteenMin) return
 
-    // Silent auto-sync - no spinner, no banner
+    // Auto-sync - show results so user doesn't need to click again
     api.post<SyncResult>('/instagram/sync', {}).then((result) => {
       if (result.unlinked.length > 0) {
         setUnlinkedPosts(result.unlinked)
       }
+      setBanner({ type: 'success', message: `Auto-sync: ${result.synced} synced, ${result.unlinked.length} unlinked` })
       // Refresh posts to get updated scores
       api.get<PostWithScore[]>('/posts').then(setPosts)
       setIgStatus(prev => prev ? { ...prev, last_sync_at: Date.now() } : prev)
     }).catch(() => {
-      // Silent failure per D5
+      // Silent failure
     })
   }, [igStatus?.connected]) // eslint-disable-line react-hooks/exhaustive-deps
 
