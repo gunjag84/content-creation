@@ -6,7 +6,7 @@
 import { Router } from 'express'
 import { callGraphApi, discoverIgAccount, refreshToken, ApiError } from '../services/meta-api'
 import { syncIgStats, isSyncOnCooldown, getLastSyncAt, type SyncResult } from '../services/meta-sync'
-import { getMetaToken, saveMetaToken, deleteMetaToken, linkIgPost } from '../db/queries'
+import { getMetaToken, saveMetaToken, deleteMetaToken, linkIgPost, listIgPosts } from '../db/queries'
 
 const router = Router()
 
@@ -131,6 +131,14 @@ router.post('/link', (req, res) => {
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }
+})
+
+/**
+ * GET /api/instagram/posts
+ * List all standalone IG posts (not linked to Content Studio posts).
+ */
+router.get('/posts', (_req, res) => {
+  res.json(listIgPosts())
 })
 
 export default router

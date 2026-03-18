@@ -77,6 +77,26 @@ CREATE TABLE IF NOT EXISTS story_stats (
   recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
+-- standalone IG posts (not created in Content Studio, imported from Instagram)
+CREATE TABLE IF NOT EXISTS ig_posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ig_media_id TEXT NOT NULL UNIQUE,
+  caption TEXT,
+  media_type TEXT,
+  permalink TEXT,
+  timestamp TEXT,
+  reach INTEGER,
+  likes INTEGER,
+  comments INTEGER,
+  shares INTEGER,
+  saves INTEGER,
+  ad_spend REAL,
+  cost_per_result REAL,
+  link_clicks INTEGER,
+  performance_score REAL DEFAULT 0,
+  recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
 -- balance matrix cache
 CREATE TABLE IF NOT EXISTS balance_matrix (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -63,6 +63,27 @@ export function initDatabase(dbPath?: string): Database.Database {
       )`)
     }
 
+    if (!tables.includes('ig_posts')) {
+      db.exec(`CREATE TABLE ig_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ig_media_id TEXT NOT NULL UNIQUE,
+        caption TEXT,
+        media_type TEXT,
+        permalink TEXT,
+        timestamp TEXT,
+        reach INTEGER,
+        likes INTEGER,
+        comments INTEGER,
+        shares INTEGER,
+        saves INTEGER,
+        ad_spend REAL,
+        cost_per_result REAL,
+        link_clicks INTEGER,
+        performance_score REAL DEFAULT 0,
+        recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+      )`)
+    }
+
     // Add performance_score, source, ig_media_id to post_performance
     const perfCols = (db.prepare('PRAGMA table_info(post_performance)').all() as { name: string }[]).map(c => c.name)
     if (!perfCols.includes('performance_score')) db.exec('ALTER TABLE post_performance ADD COLUMN performance_score REAL DEFAULT 0')

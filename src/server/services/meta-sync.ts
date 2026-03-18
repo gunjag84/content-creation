@@ -17,13 +17,14 @@ import {
   saveMetaToken,
   upsertPerformance,
   getPerformance,
+  upsertIgPost,
   listPosts
 } from '../db/queries'
 import { computePerformanceScore } from '../../shared/performanceScore'
 
 // In-memory cooldown (resets on server restart - acceptable per E5)
 let lastSyncAt = 0
-const SYNC_COOLDOWN_MS = 15 * 60 * 1000 // 15 minutes
+const SYNC_COOLDOWN_MS = 60 * 1000 // 1 minute (dev-friendly, increase for prod)
 
 export interface SyncResult {
   synced: number
@@ -82,35 +83,42 @@ export async function syncIgStats(): Promise<SyncResult> {
       // Try to match to a local post
       const localPost = matchCaptionPrefix(igPost, localPosts)
 
-      if (!localPost) {
-        result.unlinked.push({
-          ig_media_id: igPost.id,
-          caption: igPost.caption ?? null,
-          timestamp: igPost.timestamp,
-          permalink: igPost.permalink
-        })
-        return
-      }
-
       // Fetch insights for this post
-      const metrics = igPost.media_type === 'VIDEO'
-        ? 'reach,likes,comments,shares,saved,plays'
-        : 'reach,likes,comments,shares,saved'
+      // v22+: 'plays' deprecated, 'views' replaces it. Use same metrics for all types.
+      const metrics = 'reach,likes,comments,shares,saved'
 
       const insights = await callGraphApi<IgInsightsResponse>(
         `/${igPost.id}/insights?metric=${metrics}`,
         token.access_token
       )
 
-      // Map insights to our performance fields
       const perfData = mapInsightsToPerformance(insights)
 
-      // Upsert with performance score
-      upsertPerformance(localPost.id, {
-        ...perfData,
-        source: 'api',
-        ig_media_id: igPost.id
-      })
+      if (localPost) {
+        // Linked to a Content Studio post - update its performance
+        upsertPerformance(localPost.id, {
+          ...perfData,
+          source: 'api',
+          ig_media_id: igPost.id
+        })
+      } else {
+        // Standalone IG post - store in ig_posts table
+        upsertIgPost({
+          ig_media_id: igPost.id,
+          caption: igPost.caption ?? null,
+          media_type: igPost.media_type,
+          permalink: igPost.permalink ?? null,
+          timestamp: igPost.timestamp,
+          ...perfData,
+          performance_score: computePerformanceScore(perfData)
+        })
+        result.unlinked.push({
+          ig_media_id: igPost.id,
+          caption: igPost.caption ?? null,
+          timestamp: igPost.timestamp,
+          permalink: igPost.permalink
+        })
+      }
 
       result.synced++
     } catch (err) {

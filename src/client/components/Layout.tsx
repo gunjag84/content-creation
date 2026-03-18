@@ -12,6 +12,7 @@ const navItems = [
   { id: 'create', label: 'Create Post', icon: '✦' },
   { id: 'brand', label: 'Brand Config', icon: '◆' },
   { id: 'history', label: 'Post History', icon: '▤' },
+  { id: 'instagram', label: 'Instagram', icon: '📷' },
   { id: 'settings', label: 'Settings', icon: '⚙' }
 ]
 

@@ -230,3 +230,78 @@ export function getAvgPerformanceByDimension(dimension: 'pillar' | 'theme' | 'me
     GROUP BY ${column}
   `).all() as Array<{ name: string; avg_performance: number }>
 }
+
+// --- Standalone IG posts (not created in Content Studio) ---
+
+export interface IgPostRow {
+  id: number
+  ig_media_id: string
+  caption: string | null
+  media_type: string | null
+  permalink: string | null
+  timestamp: string | null
+  reach: number | null
+  likes: number | null
+  comments: number | null
+  shares: number | null
+  saves: number | null
+  ad_spend: number | null
+  cost_per_result: number | null
+  link_clicks: number | null
+  performance_score: number
+  recorded_at: number
+}
+
+export function upsertIgPost(data: {
+  ig_media_id: string
+  caption?: string | null
+  media_type?: string | null
+  permalink?: string | null
+  timestamp?: string | null
+  reach?: number | null
+  likes?: number | null
+  comments?: number | null
+  shares?: number | null
+  saves?: number | null
+  ad_spend?: number | null
+  cost_per_result?: number | null
+  link_clicks?: number | null
+  performance_score?: number
+}): void {
+  const db = getDatabase()
+  db.prepare(`
+    INSERT INTO ig_posts (ig_media_id, caption, media_type, permalink, timestamp, reach, likes, comments, shares, saves, ad_spend, cost_per_result, link_clicks, performance_score)
+    VALUES (@ig_media_id, @caption, @media_type, @permalink, @timestamp, @reach, @likes, @comments, @shares, @saves, @ad_spend, @cost_per_result, @link_clicks, @performance_score)
+    ON CONFLICT(ig_media_id) DO UPDATE SET
+      reach = COALESCE(@reach, ig_posts.reach),
+      likes = COALESCE(@likes, ig_posts.likes),
+      comments = COALESCE(@comments, ig_posts.comments),
+      shares = COALESCE(@shares, ig_posts.shares),
+      saves = COALESCE(@saves, ig_posts.saves),
+      ad_spend = COALESCE(@ad_spend, ig_posts.ad_spend),
+      cost_per_result = COALESCE(@cost_per_result, ig_posts.cost_per_result),
+      link_clicks = COALESCE(@link_clicks, ig_posts.link_clicks),
+      performance_score = COALESCE(@performance_score, ig_posts.performance_score),
+      recorded_at = strftime('%s', 'now')
+  `).run({
+    ig_media_id: data.ig_media_id,
+    caption: data.caption ?? null,
+    media_type: data.media_type ?? null,
+    permalink: data.permalink ?? null,
+    timestamp: data.timestamp ?? null,
+    reach: data.reach ?? null,
+    likes: data.likes ?? null,
+    comments: data.comments ?? null,
+    shares: data.shares ?? null,
+    saves: data.saves ?? null,
+    ad_spend: data.ad_spend ?? null,
+    cost_per_result: data.cost_per_result ?? null,
+    link_clicks: data.link_clicks ?? null,
+    performance_score: data.performance_score ?? 0
+  })
+}
+
+export function listIgPosts(): IgPostRow[] {
+  const db = getDatabase()
+  return db.prepare('SELECT * FROM ig_posts ORDER BY timestamp DESC').all() as IgPostRow[]
+}
