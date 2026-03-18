@@ -47,8 +47,34 @@ CREATE TABLE IF NOT EXISTS post_performance (
   cost_per_result REAL,
   link_clicks INTEGER,
   notes TEXT,
+  performance_score REAL DEFAULT 0,
+  source TEXT DEFAULT 'manual',
+  ig_media_id TEXT,
   recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+-- meta (Instagram) token storage
+CREATE TABLE IF NOT EXISTS meta_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  access_token TEXT NOT NULL,
+  ig_user_id TEXT NOT NULL,
+  ig_username TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+-- story stats (data stored, no UI yet)
+CREATE TABLE IF NOT EXISTS story_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ig_media_id TEXT NOT NULL UNIQUE,
+  impressions INTEGER,
+  reach INTEGER,
+  replies INTEGER,
+  taps_forward INTEGER,
+  taps_back INTEGER,
+  exits INTEGER,
+  recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
 -- balance matrix cache

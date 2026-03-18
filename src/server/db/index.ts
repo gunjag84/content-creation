@@ -36,6 +36,38 @@ export function initDatabase(dbPath?: string): Database.Database {
     if (!slideCols.includes('background_position_x')) db.exec('ALTER TABLE slides ADD COLUMN background_position_x REAL DEFAULT 50')
     if (!slideCols.includes('background_position_y')) db.exec('ALTER TABLE slides ADD COLUMN background_position_y REAL DEFAULT 50')
     if (!slideCols.includes('background_scale')) db.exec('ALTER TABLE slides ADD COLUMN background_scale REAL DEFAULT 1.0')
+
+    // Instagram integration tables
+    const tables = (db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[]).map(t => t.name)
+    if (!tables.includes('meta_tokens')) {
+      db.exec(`CREATE TABLE meta_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        access_token TEXT NOT NULL,
+        ig_user_id TEXT NOT NULL,
+        ig_username TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+      )`)
+    }
+    if (!tables.includes('story_stats')) {
+      db.exec(`CREATE TABLE story_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ig_media_id TEXT NOT NULL UNIQUE,
+        impressions INTEGER,
+        reach INTEGER,
+        replies INTEGER,
+        taps_forward INTEGER,
+        taps_back INTEGER,
+        exits INTEGER,
+        recorded_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+      )`)
+    }
+
+    // Add performance_score, source, ig_media_id to post_performance
+    const perfCols = (db.prepare('PRAGMA table_info(post_performance)').all() as { name: string }[]).map(c => c.name)
+    if (!perfCols.includes('performance_score')) db.exec('ALTER TABLE post_performance ADD COLUMN performance_score REAL DEFAULT 0')
+    if (!perfCols.includes('source')) db.exec("ALTER TABLE post_performance ADD COLUMN source TEXT DEFAULT 'manual'")
+    if (!perfCols.includes('ig_media_id')) db.exec('ALTER TABLE post_performance ADD COLUMN ig_media_id TEXT')
   }
 
   return db

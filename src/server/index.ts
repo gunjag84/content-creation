@@ -10,6 +10,7 @@ import generateRoutes from './routes/generate'
 import renderRoutes from './routes/render'
 import postsRoutes from './routes/posts'
 import filesRoutes from './routes/files'
+import instagramRoutes from './routes/instagram'
 
 config() // Load .env
 
@@ -28,6 +29,7 @@ app.use('/api/generate', generateRoutes)
 app.use('/api/render', renderRoutes)
 app.use('/api/posts', postsRoutes)
 app.use('/api/files', filesRoutes)
+app.use('/api/instagram', instagramRoutes)
 
 // In production, serve the built client
 const clientDist = path.join(__dirname, '..', 'client')

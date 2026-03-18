@@ -11,7 +11,8 @@ interface LayoutProps {
 const navItems = [
   { id: 'create', label: 'Create Post', icon: '✦' },
   { id: 'brand', label: 'Brand Config', icon: '◆' },
-  { id: 'history', label: 'Post History', icon: '▤' }
+  { id: 'history', label: 'Post History', icon: '▤' },
+  { id: 'settings', label: 'Settings', icon: '⚙' }
 ]
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
