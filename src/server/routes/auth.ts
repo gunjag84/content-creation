@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { validatePassword, createSession } from '../middleware/auth'
+import { validatePassword, createSession, isValidSession } from '../middleware/auth'
 
 const router = Router()
 
@@ -30,9 +30,9 @@ router.get('/check', (req, res) => {
     res.json({ authenticated: true, authRequired: false })
     return
   }
-  // This route is exempt from auth - check manually
+  // This route is exempt from auth - check manually against session store
   const token = req.cookies?.session
-  res.json({ authenticated: !!token, authRequired: true })
+  res.json({ authenticated: isValidSession(token), authRequired: true })
 })
 
 export default router

@@ -11,6 +11,16 @@ export function createSession(): string {
   return token
 }
 
+export function isValidSession(token: string | undefined): boolean {
+  if (!token || !sessions.has(token)) return false
+  const session = sessions.get(token)!
+  if (Date.now() - session.createdAt > SESSION_MAX_AGE) {
+    sessions.delete(token)
+    return false
+  }
+  return true
+}
+
 export function validatePassword(password: string): boolean {
   const expected = process.env.APP_PASSWORD
   if (!expected) return true // No password set = no auth required
