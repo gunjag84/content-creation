@@ -6,6 +6,15 @@ import { api } from '../lib/apiClient'
 import type { Settings, FontLibraryEntry } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
 
+function toHex(color: string): string {
+  if (!color) return '#000000'
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color
+  const ctx = document.createElement('canvas').getContext('2d')
+  if (!ctx) return '#000000'
+  ctx.fillStyle = color
+  return ctx.fillStyle // returns '#rrggbb' for any valid CSS color
+}
+
 function InfoPopover({ text }: { text: string }) {
   return (
     <Popover.Root>
@@ -213,7 +222,7 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               <div className="flex gap-2">
                 <input
                   type="color"
-                  value={local.visual.colors[i] || '#000000'}
+                  value={toHex(local.visual.colors[i] || '')}
                   onChange={(e) => updateColor(i, e.target.value)}
                   className="w-10 h-10 rounded cursor-pointer"
                 />
