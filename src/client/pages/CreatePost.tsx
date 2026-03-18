@@ -182,6 +182,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           disabled={!canGenerate || store.isGenerating}
           className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
         >
+          {store.isGenerating && <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-middle" />}
           {store.isGenerating ? 'Generating...' : mode === 'ai' ? 'Generate with Claude' : 'Start Manual'}
         </button>
         <button
