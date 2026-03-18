@@ -304,7 +304,11 @@ export function PostHistory() {
                   <StatsForm
                     postId={post.id}
                     initial={detail.performance}
-                    onSaved={() => toggleExpand(post.id)}
+                    onSaved={async () => {
+                      const refreshed = await api.get<PostWithScore[]>('/posts')
+                      setPosts(refreshed)
+                      toggleExpand(post.id)
+                    }}
                   />
                 </div>
               </div>
