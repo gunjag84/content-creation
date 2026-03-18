@@ -1,9 +1,37 @@
 import { useEffect, useState } from 'react'
+import * as Popover from '@radix-ui/react-popover'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ContextEditor } from '../components/ContextEditor'
 import { api } from '../lib/apiClient'
 import type { Settings, FontLibraryEntry } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
+
+function InfoPopover({ text }: { text: string }) {
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-gray-400 border border-gray-300 hover:text-blue-600 hover:border-blue-400 transition-colors leading-none"
+          aria-label="More information"
+        >
+          i
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          side="right"
+          align="center"
+          sideOffset={8}
+          className="z-50 max-w-xs rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-600 shadow-md"
+        >
+          {text}
+          <Popover.Arrow className="fill-white" />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
 
 const contextDocLabels: Record<string, string> = {
   brandVoice: 'Brand Voice',
@@ -321,7 +349,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
       {/* Pillars */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Content Pillars</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-semibold">Content Pillars</h2>
+            <InfoPopover text="Pillars define the strategic purpose of your posts. Each pillar represents a goal — awareness, conversion, retention, etc. Set a target percentage and the app tracks your actual posting mix, warning you when you drift off balance." />
+          </div>
           <button onClick={addPillar} className="text-sm text-blue-600 hover:underline">+ Add Pillar</button>
         </div>
         {local.pillars.map((p, i) => (
@@ -350,7 +381,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
       {/* Themes */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Themes</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-semibold">Themes</h2>
+            <InfoPopover text="Themes are the topic categories your content covers. The AI picks from this list to keep your feed varied and on-brand. Each post gets tagged with a theme so the app can surface what you've covered recently and suggest what's underrepresented." />
+          </div>
           <button
             onClick={() => setLocal({ ...local, themes: [...local.themes, { id: crypto.randomUUID(), name: '' }] })}
             className="text-sm text-blue-600 hover:underline"
@@ -381,7 +415,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
       {/* Mechanics */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Mechanics</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-semibold">Mechanics</h2>
+            <InfoPopover text="Mechanics are the storytelling formats or structures a post can use — e.g. Before/After, How-to, Myth vs. Reality, Transformation story. They define how you say something, while themes define what you talk about. The AI uses your mechanic library to vary post structure and match the right format to the right goal." />
+          </div>
           <button
             onClick={() => setLocal({ ...local, mechanics: [...local.mechanics, { id: crypto.randomUUID(), name: '', description: '' }] })}
             className="text-sm text-blue-600 hover:underline"
