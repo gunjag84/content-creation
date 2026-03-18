@@ -7,6 +7,8 @@ const mockRefreshToken = vi.fn()
 const mockGetMetaToken = vi.fn()
 const mockSaveMetaToken = vi.fn()
 const mockUpsertPerformance = vi.fn()
+const mockUpsertIgPost = vi.fn()
+const mockGetPerformance = vi.fn(() => null)
 const mockListPosts = vi.fn(() => [])
 
 vi.mock('../../../src/server/services/meta-api', () => ({
@@ -27,6 +29,8 @@ vi.mock('../../../src/server/db/queries', () => ({
   getMetaToken: (...args: any[]) => mockGetMetaToken(...args),
   saveMetaToken: (...args: any[]) => mockSaveMetaToken(...args),
   upsertPerformance: (...args: any[]) => mockUpsertPerformance(...args),
+  upsertIgPost: (...args: any[]) => mockUpsertIgPost(...args),
+  getPerformance: (...args: any[]) => mockGetPerformance(...args),
   listPosts: (...args: any[]) => mockListPosts(...args)
 }))
 
@@ -43,6 +47,8 @@ beforeEach(() => {
   mockGetMetaToken.mockReset()
   mockSaveMetaToken.mockReset()
   mockUpsertPerformance.mockReset()
+  mockUpsertIgPost.mockReset()
+  mockGetPerformance.mockReset().mockReturnValue(null)
   mockListPosts.mockReset().mockReturnValue([])
 })
 
@@ -85,6 +91,7 @@ describe('syncIgStats', () => {
           { name: 'likes', values: [{ value: 25 }] }
         ]
       })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.synced).toBe(1)
@@ -97,13 +104,15 @@ describe('syncIgStats', () => {
     mockGetMetaToken.mockReturnValue({ ...fakeToken })
     mockListPosts.mockReturnValue([])
 
-    mockCallGraphApi.mockResolvedValueOnce({
-      data: [{ id: 'ig_no_match', caption: 'Completely different', timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
-      paging: {}
-    })
+    mockCallGraphApi
+      .mockResolvedValueOnce({
+        data: [{ id: 'ig_no_match', caption: 'Completely different', timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
+        paging: {}
+      })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
-    expect(result.synced).toBe(0)
+    expect(result.synced).toBe(1) // synced = insights fetched (even if unlinked)
     expect(result.unlinked).toHaveLength(1)
   })
 
@@ -111,10 +120,12 @@ describe('syncIgStats', () => {
     mockGetMetaToken.mockReturnValue({ ...fakeToken })
     mockListPosts.mockReturnValue([{ id: 1, caption: 'Some post', status: 'approved' }])
 
-    mockCallGraphApi.mockResolvedValueOnce({
-      data: [{ id: 'ig_null', caption: undefined, timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
-      paging: {}
-    })
+    mockCallGraphApi
+      .mockResolvedValueOnce({
+        data: [{ id: 'ig_null', caption: undefined, timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
+        paging: {}
+      })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.unlinked).toHaveLength(1)
@@ -140,6 +151,7 @@ describe('syncIgStats', () => {
       })
       .mockResolvedValueOnce({ data: [{ name: 'reach', values: [{ value: 100 }] }] })
       .mockRejectedValueOnce(new Error('Deleted post'))
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.synced).toBe(1)
@@ -153,14 +165,16 @@ describe('syncIgStats', () => {
       { id: 1, caption: sharedCaption + ' local', status: 'draft' }
     ])
 
-    mockCallGraphApi.mockResolvedValueOnce({
-      data: [{ id: 'ig_1', caption: sharedCaption + ' ig side', timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
-      paging: {}
-    })
+    mockCallGraphApi
+      .mockResolvedValueOnce({
+        data: [{ id: 'ig_1', caption: sharedCaption + ' ig side', timestamp: '2026-03-01T00:00:00Z', media_type: 'IMAGE' }],
+        paging: {}
+      })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.unlinked).toHaveLength(1)
-    expect(result.synced).toBe(0)
+    expect(result.synced).toBe(1) // synced = insights fetched (draft excluded from matching, stored as standalone)
   })
 
   it('handles short caption matching (< 25 chars)', async () => {
@@ -175,6 +189,7 @@ describe('syncIgStats', () => {
         paging: {}
       })
       .mockResolvedValueOnce({ data: [{ name: 'reach', values: [{ value: 50 }] }] })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.synced).toBe(1)
@@ -194,6 +209,7 @@ describe('syncIgStats', () => {
         paging: {}
       })
       .mockResolvedValueOnce({ data: [{ name: 'reach', values: [{ value: 100 }] }] })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.synced).toBe(1)
@@ -206,7 +222,9 @@ describe('syncIgStats', () => {
     mockRefreshToken.mockResolvedValue({ access_token: 'refreshed', expires_in: 5184000 })
     mockListPosts.mockReturnValue([])
 
-    mockCallGraphApi.mockResolvedValueOnce({ data: [], paging: {} })
+    mockCallGraphApi
+      .mockResolvedValueOnce({ data: [], paging: {} })
+      .mockResolvedValueOnce({ data: [] }) // ads API - no ads
 
     const result = await syncIgStats()
     expect(result.synced).toBe(0)
