@@ -8,6 +8,13 @@ export interface ZoneOverride {
   color?: string
   textAlign?: 'left' | 'center' | 'right'
   fontFamily?: string
+  fontStyle?: 'normal' | 'italic'
+  lineHeight?: number      // unitless, default 1.3
+  letterSpacing?: number   // px, default 0
+  posTop?: number          // px in 1080x1350 canvas
+  posLeft?: number
+  posWidth?: number
+  posHeight?: number
 }
 
 export interface Slide {
@@ -19,6 +26,7 @@ export interface Slide {
   body_text: string
   cta_text: string
   overlay_opacity: number
+  overlay_color?: 'dark' | 'light'  // default 'dark'
   custom_background_path?: string
   background_position_x?: number  // 0-100 (%), default 50
   background_position_y?: number  // 0-100 (%), default 50
@@ -63,10 +71,32 @@ const FontLibraryEntrySchema = z.object({
 
 export type FontLibraryEntry = z.infer<typeof FontLibraryEntrySchema>
 
+const ImageLibraryPresetSchema = z.object({
+  overlay_opacity: z.number().optional(),
+  overlay_color: z.enum(['dark', 'light']).optional(),
+})
+
+const ImageLibraryEntrySchema = z.object({
+  id: z.string(),
+  path: z.string(),
+  name: z.string().optional(),
+  preset: ImageLibraryPresetSchema.optional(),
+})
+
+export type ImageLibraryEntry = z.infer<typeof ImageLibraryEntrySchema>
+
+const FontSizesSchema = z.object({
+  headline: z.number().default(56),
+  body: z.number().default(38),
+  cta: z.number().default(48)
+})
+
 const VisualSchema = z.object({
   colors: z.array(z.string()).default(['#000000', '#666666', '#ffffff']),
   fonts: FontPathSchema.default({ headline: '', body: '', cta: '' }),
+  fontSizes: FontSizesSchema.default({ headline: 56, body: 38, cta: 48 }),
   fontLibrary: z.array(FontLibraryEntrySchema).default([]),
+  imageLibrary: z.array(ImageLibraryEntrySchema).default([]),
   logo: z.string().default(''),
   cta: z.string().default(''),
   handle: z.string().default('')
@@ -75,7 +105,8 @@ const VisualSchema = z.object({
 const PillarSchema = z.object({
   id: z.string(),
   name: z.string(),
-  targetPct: z.number().min(0).max(100)
+  targetPct: z.number().min(0).max(100),
+  rules: z.string().default('')
 })
 
 const ThemeSchema = z.object({
@@ -90,12 +121,19 @@ const MechanicSchema = z.object({
   slideRange: z.object({ min: z.number(), max: z.number() }).optional()
 })
 
+const ContentDefaultsSchema = z.object({
+  captionMinChars: z.number().min(0).default(50),
+  captionMaxChars: z.number().min(1).default(400),
+  bodyMaxChars: z.number().min(1).default(400)
+})
+
 export const SettingsSchema = z.object({
   contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
-  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontLibrary: [], logo: '', cta: '', handle: '' }),
+  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   themes: z.array(ThemeSchema).default([]),
-  mechanics: z.array(MechanicSchema).default([])
+  mechanics: z.array(MechanicSchema).default([]),
+  contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 })
 })
 
 export type Settings = z.infer<typeof SettingsSchema>

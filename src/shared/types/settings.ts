@@ -161,10 +161,10 @@ export const SettingsSchema = z.object({
 export type Settings = z.infer<typeof SettingsSchema>
 
 // Import default data
-import mechanicsData from '../../main/data/mechanics.json'
-import storyToolsData from '../../main/data/story-tools.json'
-import themesData from '../../main/data/themes.json'
-import { DEFAULT_MASTER_PROMPT } from '../../main/data/master-prompt-default'
+import mechanicsData from '../data/mechanics.json'
+import storyToolsData from '../data/story-tools.json'
+import themesData from '../data/themes.json'
+import { DEFAULT_MASTER_PROMPT } from '../data/master-prompt-default'
 
 // Default settings for first launch
 export const DEFAULT_SETTINGS: Settings = {

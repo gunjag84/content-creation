@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { SlideEditor } from '../components/SlideEditor'
 import { SlidePreview } from '../components/SlidePreview'
 import { BackgroundPanEditor } from '../components/BackgroundPanEditor'
 import { api } from '../lib/apiClient'
-import { useState } from 'react'
+import type { ZoneOverride, ImageLibraryEntry } from '@shared/types'
 
 interface EditPreviewProps {
   onRender: () => void
@@ -12,13 +13,44 @@ interface EditPreviewProps {
 }
 
 export function EditPreview({ onRender, onBack }: EditPreviewProps) {
-  const { slides, caption, setSlide, setCaption, setRenderedImages, applyBackgroundToAll } = useWizardStore()
-  const { settings } = useSettingsStore()
+  const {
+    slides, caption, setSlide, setCaption, setRenderedImages,
+    applyBackgroundToAll, setZoneOverride, updateZoneOverrideLive,
+    resetZonePosition, clearZoneOverrides, applyZoneOverrideToAll, undo, redo
+  } = useWizardStore()
+  const { settings, save: saveSettings } = useSettingsStore()
   const [activeSlide, setActiveSlide] = useState(0)
+  const [activeZoneId, setActiveZoneId] = useState('hook')
   const [rendering, setRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imagePanMode, setImagePanMode] = useState(false)
   const [uploadingBg, setUploadingBg] = useState(false)
+
+  // Reset active zone when switching slides
+  function handleSlideChange(i: number) {
+    setActiveSlide(i)
+    setActiveZoneId('hook')
+    setImagePanMode(false)
+  }
+
+  // Ctrl+Z / Ctrl+Y - but only when no Tiptap editor has focus
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!e.ctrlKey && !e.metaKey) return
+      // Don't intercept when a Tiptap (contenteditable) has focus
+      if (document.activeElement?.getAttribute('contenteditable') === 'true') return
+
+      if (e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+        e.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo])
 
   const handleRender = async () => {
     setRendering(true)
@@ -56,6 +88,88 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
     setImagePanMode(false)
   }
 
+  const handleZoneOverrideChange = (zoneId: string, override: ZoneOverride) => {
+    setZoneOverride(activeSlide, zoneId, override)
+  }
+
+  const handleResetZonePosition = (zoneId: string) => {
+    resetZonePosition(activeSlide, zoneId)
+  }
+
+  const handleResetZoneOverrides = (zoneId: string) => {
+    clearZoneOverrides(activeSlide, zoneId)
+    // Also strip inline TipTap marks (color, font-family, font-size) from the HTML
+    // so the zone-level brand defaults fully take over.
+    const textFieldMap: Record<string, keyof typeof slides[number]> = {
+      hook: 'hook_text', body: 'body_text', cta: 'cta_text',
+    }
+    const field = textFieldMap[zoneId]
+    if (field) {
+      const html = (slides[activeSlide]?.[field] as string) ?? ''
+      const stripped = html
+        .replace(/style="[^"]*"/g, '')  // remove all inline style attrs
+      if (stripped !== html) {
+        setSlide(activeSlide, field, stripped)
+      }
+    }
+  }
+
+  const handleApplyToAll = (zoneId: string, override: ZoneOverride) => {
+    applyZoneOverrideToAll(zoneId, override)
+  }
+
+  const handleSaveToLibrary = async () => {
+    const slide = slides[activeSlide]
+    if (!slide.custom_background_path || !settings) return
+    const existingLibrary = settings.visual.imageLibrary ?? []
+    const entry: ImageLibraryEntry = {
+      id: crypto.randomUUID(),
+      path: slide.custom_background_path,
+      name: `Image ${existingLibrary.length + 1}`,
+      preset: {
+        overlay_opacity: slide.overlay_opacity,
+        overlay_color: slide.overlay_color,
+      },
+    }
+    await saveSettings({
+      ...settings,
+      visual: {
+        ...settings.visual,
+        imageLibrary: [...existingLibrary, entry],
+      },
+    })
+  }
+
+  const handleSelectFromLibrary = (entry: ImageLibraryEntry) => {
+    setSlide(activeSlide, 'custom_background_path', entry.path)
+    if (entry.preset?.overlay_opacity !== undefined) {
+      setSlide(activeSlide, 'overlay_opacity', entry.preset.overlay_opacity)
+    }
+    if (entry.preset?.overlay_color) {
+      setSlide(activeSlide, 'overlay_color', entry.preset.overlay_color)
+    }
+    setImagePanMode(true)
+  }
+
+  const handleDeleteFromLibrary = async (id: string) => {
+    if (!settings) return
+    await saveSettings({
+      ...settings,
+      visual: {
+        ...settings.visual,
+        imageLibrary: (settings.visual.imageLibrary ?? []).filter(e => e.id !== id),
+      },
+    })
+  }
+
+  const handleZoneDragLive = (zoneId: string, override: ZoneOverride) => {
+    updateZoneOverrideLive(activeSlide, zoneId, override)
+  }
+
+  const handleZoneDragCommit = (zoneId: string, override: ZoneOverride) => {
+    setZoneOverride(activeSlide, zoneId, override)
+  }
+
   if (slides.length === 0) {
     return (
       <div className="p-4 space-y-3">
@@ -81,16 +195,32 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
           </button>
           <h1 className="text-2xl font-bold">Edit & Preview</h1>
         </div>
-        <button
-          onClick={handleRender}
-          disabled={rendering}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-        >
-          {rendering && (
-            <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-          )}
-          {rendering ? 'Rendering...' : 'Render PNGs'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={undo}
+            title="Undo (Ctrl+Z)"
+            className="px-2 py-2 text-sm text-gray-500 border rounded-lg hover:bg-gray-50"
+          >
+            ↩
+          </button>
+          <button
+            onClick={redo}
+            title="Redo (Ctrl+Y)"
+            className="px-2 py-2 text-sm text-gray-500 border rounded-lg hover:bg-gray-50"
+          >
+            ↪
+          </button>
+          <button
+            onClick={handleRender}
+            disabled={rendering}
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {rendering && (
+              <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+            )}
+            {rendering ? 'Rendering...' : 'Render PNGs'}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -103,7 +233,7 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
           {slides.map((s, i) => (
             <button
               key={s.uid}
-              onClick={() => { setActiveSlide(i); setImagePanMode(false) }}
+              onClick={() => handleSlideChange(i)}
               className={`px-3 py-1.5 rounded text-sm ${
                 i === activeSlide ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
@@ -120,16 +250,25 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
           <SlideEditor
             slide={currentSlide}
             index={activeSlide}
+            settings={settings}
             onChange={setSlide}
             onUploadBackground={handleUploadBackground}
             onEnterPanMode={() => setImagePanMode(true)}
             uploadingBg={uploadingBg}
+            activeZoneId={activeZoneId}
+            onActiveZoneChange={setActiveZoneId}
+            onZoneOverrideChange={handleZoneOverrideChange}
+            onResetZoneOverrides={handleResetZoneOverrides}
+            onApplyToAll={handleApplyToAll}
+            onSaveToLibrary={handleSaveToLibrary}
+            onSelectFromLibrary={handleSelectFromLibrary}
+            onDeleteFromLibrary={handleDeleteFromLibrary}
           />
 
           {/* Caption editor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Caption <span className="text-gray-400 font-normal">({caption.length} chars)</span>
+              Caption <span className={`font-normal ${caption.length < (settings?.contentDefaults?.captionMinChars ?? 50) || caption.length > (settings?.contentDefaults?.captionMaxChars ?? 400) ? 'text-red-500' : 'text-gray-400'}`}>({caption.length} / {settings?.contentDefaults?.captionMinChars ?? 50}-{settings?.contentDefaults?.captionMaxChars ?? 400} chars)</span>
             </label>
             <textarea
               value={caption}
@@ -157,9 +296,12 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
           ) : (
             <SlidePreview
               slide={currentSlide}
-              allSlides={slides}
               settings={settings}
               className="max-w-sm"
+              isCarousel={slides.length > 1}
+              activeZoneId={activeZoneId}
+              onZoneDragLive={handleZoneDragLive}
+              onZoneDragCommit={handleZoneDragCommit}
             />
           )}
         </div>

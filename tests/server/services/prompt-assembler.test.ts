@@ -20,6 +20,7 @@ const baseSettings: Settings = {
   },
   pillars: [],
   themes: [],
+  contentDefaults: { captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 },
   mechanics: [
     {
       id: 'm1',
@@ -79,6 +80,37 @@ describe('assemblePrompt', () => {
     const result = assemblePrompt('P', 'T', 'Educational', 'Focus on beginners', baseSettings, 'single')
     expect(result).toContain('## Additional Guidance')
     expect(result).toContain('Focus on beginners')
+  })
+
+  it('includes pillar rules when pillar has rules defined', () => {
+    const settings = {
+      ...baseSettings,
+      pillars: [{ id: 'p1', name: 'Growth', targetPct: 50, rules: 'Never mention the product' }]
+    }
+    const result = assemblePrompt('Growth', 'Theme X', 'Educational', '', settings, 'single')
+    expect(result).toContain('**Pillar Rules (MUST follow):**')
+    expect(result).toContain('Never mention the product')
+  })
+
+  it('omits pillar rules when pillar has no rules', () => {
+    const settings = {
+      ...baseSettings,
+      pillars: [{ id: 'p1', name: 'Growth', targetPct: 50, rules: '' }]
+    }
+    const result = assemblePrompt('Growth', 'Theme X', 'Educational', '', settings, 'single')
+    expect(result).not.toContain('Pillar Rules')
+  })
+
+  it('carousel prompt instructs cover slide to have hook_text only', () => {
+    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'carousel', 5)
+    expect(result).toContain('ONLY a hook_text')
+    expect(result).toContain('body_text and cta_text must be empty')
+  })
+
+  it('includes caption and body char limits from contentDefaults', () => {
+    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'single')
+    expect(result).toContain('50-400 characters')
+    expect(result).toContain('max 400 characters')
   })
 
   it('truncates prompt when context docs exceed 32000 chars and appends marker', () => {

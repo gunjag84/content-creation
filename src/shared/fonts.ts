@@ -1,15 +1,24 @@
-// 10 preset fonts (all Google Fonts, all available at fonts.google.com)
+// Preset fonts (all Google Fonts, all available at fonts.google.com)
 export const PRESET_FONTS = [
+  // Sans-serif
   'Josefin Sans',
+  'Nunito',
+  'Comfortaa',
+  'Quicksand',
+  // Serif
   'Playfair Display',
-  'Montserrat',
-  'Raleway',
-  'Lato',
-  'Open Sans',
-  'Oswald',
-  'Merriweather',
+  'Cormorant Garamond',
+  // Display
+  'Bebas Neue',
+  'Abril Fatface',
+  'Lobster',
+  // Handwriting / Script
   'Dancing Script',
-  'Bebas Neue'
+  'Pacifico',
+  'Satisfy',
+  'Sacramento',
+  'Caveat',
+  'Kaushan Script',
 ]
 
 // All presets are Google Fonts

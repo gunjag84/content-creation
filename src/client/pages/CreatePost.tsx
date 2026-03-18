@@ -23,6 +23,20 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       .catch(() => {})
   }, [])
 
+  // Auto-select first item in each dropdown when settings load (if nothing selected yet)
+  useEffect(() => {
+    if (!settings) return
+    if (!store.selectedPillar && settings.pillars.length > 0) {
+      store.setField('selectedPillar', settings.pillars[0].name)
+    }
+    if (!store.selectedTheme && settings.themes.length > 0) {
+      store.setField('selectedTheme', settings.themes[0].name)
+    }
+    if (!store.selectedMechanic && settings.mechanics.length > 0) {
+      store.setField('selectedMechanic', settings.mechanics[0].name)
+    }
+  }, [settings])
+
   const canGenerate = store.selectedPillar && store.selectedTheme && store.selectedMechanic
 
   const handleGenerate = () => {
@@ -35,11 +49,12 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         theme: store.selectedTheme,
         mechanic: store.selectedMechanic,
         contentType: store.contentType,
+        slideCount: store.contentType === 'carousel' ? store.slideCount : undefined,
         impulse: store.impulse
       },
       (text) => store.appendStreamText(text),
       (result) => {
-        store.setGenerationComplete(result as GenerationResult)
+        store.setGenerationComplete(result as GenerationResult, settings?.visual?.cta)
         onGenerated()
       },
       (msg) => store.setGenerationError(msg)
@@ -50,7 +65,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   }
 
   const handleManual = () => {
-    store.initManualSlides(store.contentType)
+    store.initManualSlides(store.contentType, settings?.visual?.cta)
     onGenerated()
   }
 
@@ -80,7 +95,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       )}
 
       {/* Content type toggle */}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         {(['single', 'carousel'] as const).map((type) => (
           <button
             key={type}
@@ -92,6 +107,26 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             {type === 'single' ? 'Single Post' : 'Carousel'}
           </button>
         ))}
+        {store.contentType === 'carousel' && (
+          <div className="flex items-center gap-2 ml-2">
+            <span className="text-sm text-gray-500">Slides:</span>
+            <button
+              onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
+              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+              disabled={store.slideCount <= 3}
+            >
+              -
+            </button>
+            <span className="w-5 text-center text-sm font-semibold">{store.slideCount}</span>
+            <button
+              onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
+              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+              disabled={store.slideCount >= 7}
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Dropdowns */}
@@ -103,7 +138,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedPillar', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
           </select>
         </div>
@@ -114,7 +148,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedTheme', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {themes.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
           </select>
         </div>
@@ -125,7 +158,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedMechanic', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {mechanics.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
           </select>
         </div>
@@ -150,6 +182,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           disabled={!canGenerate || store.isGenerating}
           className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
         >
+          {store.isGenerating && <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-middle" />}
           {store.isGenerating ? 'Generating...' : mode === 'ai' ? 'Generate with Claude' : 'Start Manual'}
         </button>
         <button

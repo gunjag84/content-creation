@@ -1,85 +1,19 @@
-import type { Slide, Settings, ZoneOverride, FontLibraryEntry } from './types'
-import { GOOGLE_FONT_NAMES, googleFontImport } from './fonts'
+import type { Slide, Settings, ZoneOverride } from './types'
+import { resolveFont, fileUrl } from './fontResolver'
+import { ZONE_POSITION_DEFAULTS } from './zoneDefaults'
+
+const CANVAS_W = 1080
+const CANVAS_H = 1350
 
 export interface BuildSlideHTMLParams {
   slide: Slide
-  allSlides: Slide[]
+  allSlides?: Slide[] // kept for backwards compat, no longer used
   settings: Settings | null
   baseUrl: string // e.g. 'http://localhost:3001'
 }
 
-function getLogoPositionStyle(position: string): string {
-  switch (position) {
-    case 'top-left': return 'top: 40px; left: 40px;'
-    case 'top-center': return 'top: 40px; left: 50%; transform: translateX(-50%);'
-    case 'top-right': return 'top: 40px; right: 40px;'
-    case 'bottom-left': return 'bottom: 40px; left: 40px;'
-    case 'bottom-center': return 'bottom: 40px; left: 50%; transform: translateX(-50%);'
-    case 'bottom-right': return 'bottom: 40px; right: 40px;'
-    default: return 'bottom: 40px; left: 50%; transform: translateX(-50%);'
-  }
-}
-
-function fileUrl(path: string, baseUrl: string): string {
-  if (!path) return ''
-  if (path.startsWith('http')) return path
-  return `${baseUrl}/api/files/${encodeURIComponent(path.replace(/\\/g, '/'))}`
-}
-
-function isFilePath(val: string): boolean { return val.includes('/') }
-
-function escHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-interface ResolvedFont {
-  importRule: string   // @import or @font-face (may be empty)
-  family: string       // CSS font-family value
-}
-
-function resolveFont(
-  value: string | undefined,
-  alias: string,
-  fontLibrary: FontLibraryEntry[],
-  baseUrl: string
-): ResolvedFont {
-  if (!value) return { importRule: '', family: 'sans-serif' }
-
-  // Custom uploaded font referenced by id (e.g. "custom:uuid-123")
-  if (value.startsWith('custom:')) {
-    const id = value.slice(7)
-    const entry = fontLibrary.find(f => f.id === id)
-    if (entry) {
-      return {
-        importRule: `@font-face { font-family: '${alias}'; src: url('${fileUrl(entry.path, baseUrl)}'); }`,
-        family: `'${alias}', sans-serif`
-      }
-    }
-    return { importRule: '', family: 'sans-serif' }
-  }
-
-  // Legacy: bare file path stored directly (backward compat)
-  if (isFilePath(value)) {
-    return {
-      importRule: `@font-face { font-family: '${alias}'; src: url('${fileUrl(value, baseUrl)}'); }`,
-      family: `'${alias}', sans-serif`
-    }
-  }
-
-  // Google Font preset
-  if (GOOGLE_FONT_NAMES.has(value)) {
-    return {
-      importRule: googleFontImport(value),
-      family: `'${value}', sans-serif`
-    }
-  }
-
-  // System / generic font name
-  return { importRule: '', family: `'${value}', sans-serif` }
-}
-
 export function buildSlideHTML(params: BuildSlideHTMLParams): string {
-  const { slide, allSlides, settings, baseUrl } = params
+  const { slide, settings, baseUrl } = params
   const v = settings?.visual
   const colors = v?.colors ?? ['#ffffff', '#cccccc', '#1a1a2e']
   const primaryColor = colors[0] || '#ffffff'
@@ -91,7 +25,12 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   const bodyFont = resolveFont(v?.fonts?.body, 'CustomBody', fontLibrary, baseUrl)
   const ctaFont = resolveFont(v?.fonts?.cta, 'CustomCTA', fontLibrary, baseUrl)
 
-  const fontStyles = [headlineFont.importRule, bodyFont.importRule, ctaFont.importRule]
+  // Load all custom uploaded fonts by their display name so zone overrides can reference them
+  const customLibraryFontStyles = fontLibrary.map(entry =>
+    `@font-face { font-family: '${entry.name}'; src: url('${fileUrl(entry.path, baseUrl)}'); }`
+  ).join('\n')
+
+  const fontStyles = [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontStyles]
     .filter(Boolean)
     .join('\n')
 
@@ -105,48 +44,70 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   }
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
+  const overlayColor = slide.overlay_color === 'light' ? '255,255,255' : '0,0,0'
 
-  // CTA text: last slide uses standard CTA if available
-  const slideIdx = allSlides.findIndex(s => s.uid === slide.uid)
-  const isLast = slideIdx === allSlides.length - 1
-  const ctaText = (isLast && slide.slide_type === 'cta' && v?.cta) ? v.cta : (slide.cta_text || '')
+  const ctaText = slide.cta_text || ''
 
   // Zone overrides
+  const fontSizes = v?.fontSizes ?? { headline: 56, body: 38, cta: 48 }
   const zoneIds = ['hook', 'body', 'cta'] as const
   const zoneDefaults = {
-    hook: { top: 0, height: 340, font: headlineFont.family, fontSize: 56, color: primaryColor, weight: 'bold' as const },
-    body: { top: 340, height: 770, font: bodyFont.family, fontSize: 38, color: secondaryColor, weight: 'normal' as const },
-    cta: { top: 1110, height: 240, font: ctaFont.family, fontSize: 48, color: primaryColor, weight: 'bold' as const }
+    hook: { ...ZONE_POSITION_DEFAULTS.hook, font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' as const },
+    body: { ...ZONE_POSITION_DEFAULTS.body, font: bodyFont.family, fontSize: fontSizes.body, color: secondaryColor, weight: 'normal' as const },
+    cta:  { ...ZONE_POSITION_DEFAULTS.cta,  font: ctaFont.family,  fontSize: fontSizes.cta,  color: primaryColor, weight: 'bold' as const }
   }
 
-  const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
+  // Carousel cover: hook-only, positioned in body zone (center of slide)
+  const allSlides = params.allSlides ?? []
+  const isCarouselCover = slide.slide_type === 'cover' && allSlides.length > 1
+
+  const textMap = isCarouselCover
+    ? { hook: '', body: slide.hook_text || '', cta: '' }
+    : { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
+
+  // For carousel cover, render hook text in body zone with headline styling
+  const styleOverride: Partial<Record<string, { font: string; fontSize: number; color: string; weight: 'bold' | 'normal' }>> = {}
+  if (isCarouselCover) {
+    styleOverride.body = { font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' }
+  }
 
   const zoneElements = zoneIds.map(zoneId => {
     const text = textMap[zoneId]
     if (!text) return ''
     const def = zoneDefaults[zoneId]
+    const so = styleOverride[zoneId]
     const ov: ZoneOverride = overrides[zoneId] ?? {}
-    const fontSize = ov.fontSize ?? def.fontSize
-    const fontWeight = ov.fontWeight ?? def.weight
-    const color = ov.color ?? def.color
+    const fontSize = ov.fontSize ?? so?.fontSize ?? def.fontSize
+    const fontWeight = ov.fontWeight ?? so?.weight ?? def.weight
+    const fontStyle = ov.fontStyle ?? 'normal'
+    const color = ov.color ?? so?.color ?? def.color
     const textAlign = ov.textAlign ?? 'center'
-    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : def.font
+    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : (so?.font ?? def.font)
+    const lineHeight = ov.lineHeight ?? 1.3
+    const letterSpacing = ov.letterSpacing ?? 0
 
-    return `<div style="position:absolute;top:${def.top}px;left:0;right:0;height:${def.height}px;display:flex;align-items:center;justify-content:center;padding:30px 80px;">
-      <div style="font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};color:${color};text-align:${textAlign};line-height:1.3;word-wrap:break-word;white-space:pre-wrap;">${escHtml(text)}</div>
+    // Position: use overrides if set, otherwise full-width defaults
+    const top = ov.posTop ?? def.top
+    const height = ov.posHeight ?? def.height
+    const positionCss = (ov.posLeft !== undefined || ov.posWidth !== undefined)
+      ? `left:${ov.posLeft ?? 0}px;width:${ov.posWidth ?? CANVAS_W}px;`
+      : `left:0;right:0;`
+
+    return `<div style="position:absolute;top:${top}px;${positionCss}height:${height}px;display:flex;align-items:center;justify-content:center;padding:30px 80px;">
+      <div style="font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};font-style:${fontStyle};color:${color};text-align:${textAlign};line-height:${lineHeight};letter-spacing:${letterSpacing}px;word-wrap:break-word;width:100%;">${text}</div>
     </div>`
   }).filter(Boolean).join('\n')
 
-  // Logo
+  // Logo — always above handle, locked in bottom zone
   const logoHtml = v?.logo
-    ? `<img src="${fileUrl(v.logo, baseUrl)}" style="position:absolute;${getLogoPositionStyle('bottom-center')};width:120px;height:auto;object-fit:contain;" alt="" />`
+    ? `<img src="${fileUrl(v.logo, baseUrl)}" style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);width:400px;height:auto;object-fit:contain;" alt="" />`
     : ''
 
-  // Handle
+  // Handle — bottom of slide, larger
   const handleHtml = v?.handle
-    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${escHtml(v.handle)}</div>`
+    ? `<div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:30px;color:${secondaryColor};white-space:nowrap;">${v.handle}</div>`
     : ''
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body>${bgWrapperHtml}<div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: ${CANVAS_W}px; height: ${CANVAS_H}px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; background-color: rgba(${overlayColor},${overlayOpacity}); }</style></head><body>${bgWrapperHtml}<div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`
 }
