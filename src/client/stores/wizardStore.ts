@@ -123,7 +123,7 @@ export const useWizardStore = create<WizardStore>((set) => ({
   applyBackgroundToAll: (index) => set((state) => {
     const src = state.slides[index]
     return {
-      slides: state.slides.map((s, i) => (i === index || s.slide_type === 'cover') ? s : {
+      slides: state.slides.map((s, i) => i === index ? s : {
         ...s,
         custom_background_path: src.custom_background_path,
         background_position_x: src.background_position_x,
