@@ -75,6 +75,42 @@ describe('buildSlideHTML - font resolution', () => {
   })
 })
 
+describe('buildSlideHTML - background transform', () => {
+  it('omits background wrapper when no custom_background_path', () => {
+    const html = buildSlideHTML({ slide: baseSlide, allSlides: [baseSlide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).not.toContain('transform:scale')
+    expect(html).not.toContain('background:url')
+  })
+
+  it('renders transform wrapper with default position 50% 50% scale 1', () => {
+    const slide = { ...baseSlide, custom_background_path: 'uploads/photo.jpg' }
+    const html = buildSlideHTML({ slide, allSlides: [slide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).toContain('transform:scale(1)')
+    expect(html).toContain('50% 50%')
+    expect(html).toContain('transform-origin:50% 50%')
+    expect(html).toContain('overflow:hidden')
+  })
+
+  it('reflects custom x/y position in background-position and transform-origin', () => {
+    const slide = { ...baseSlide, custom_background_path: 'uploads/photo.jpg', background_position_x: 30, background_position_y: 70 }
+    const html = buildSlideHTML({ slide, allSlides: [slide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).toContain('30% 70%')
+    expect(html).toContain('transform-origin:30% 70%')
+  })
+
+  it('reflects custom scale in transform', () => {
+    const slide = { ...baseSlide, custom_background_path: 'uploads/photo.jpg', background_scale: 1.5 }
+    const html = buildSlideHTML({ slide, allSlides: [slide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).toContain('transform:scale(1.5)')
+  })
+
+  it('encodes file path in background url', () => {
+    const slide = { ...baseSlide, custom_background_path: 'uploads/my photo.jpg' }
+    const html = buildSlideHTML({ slide, allSlides: [slide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).toContain('my%20photo.jpg')
+  })
+})
+
 describe('buildSlideHTML - HTML escaping', () => {
   it('escapes < and > in slide text to prevent layout breakage', () => {
     const slide = { ...baseSlide, hook_text: 'AI: 1 < 2 & 3 > 0' }
