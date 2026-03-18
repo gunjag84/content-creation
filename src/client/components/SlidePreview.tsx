@@ -107,12 +107,27 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
     .join('\n')
 
   useEffect(() => {
-    const css = [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontCss, zoneFontCss].filter(Boolean).join('\n')
-    if (!css) return
-    const style = document.createElement('style')
-    style.textContent = css
-    document.head.appendChild(style)
-    return () => style.remove()
+    // @import rules must come before @font-face in CSS. Split into two style blocks:
+    // 1) @import rules (Google Fonts) first, 2) @font-face rules (custom fonts) second.
+    const allCss = [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontCss, zoneFontCss].filter(Boolean)
+    const importCss = allCss.filter(s => s.trimStart().startsWith('@import')).join('\n')
+    const fontFaceCss = allCss.filter(s => !s.trimStart().startsWith('@import')).join('\n')
+
+    const nodes: HTMLElement[] = []
+    if (importCss) {
+      const s = document.createElement('style')
+      s.textContent = importCss
+      document.head.appendChild(s)
+      nodes.push(s)
+    }
+    if (fontFaceCss) {
+      const s = document.createElement('style')
+      s.textContent = fontFaceCss
+      document.head.appendChild(s)
+      nodes.push(s)
+    }
+    if (!nodes.length) return
+    return () => nodes.forEach(n => n.remove())
   }, [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontCss, zoneFontCss])
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
