@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express'
-import { callGraphApi, refreshToken, ApiError, type IgUser } from '../services/meta-api'
+import { callGraphApi, discoverIgAccount, refreshToken, ApiError } from '../services/meta-api'
 import { syncIgStats, isSyncOnCooldown, getLastSyncAt, type SyncResult } from '../services/meta-sync'
 import { getMetaToken, saveMetaToken, deleteMetaToken, linkIgPost } from '../db/queries'
 
@@ -22,36 +22,31 @@ router.post('/connect', async (req, res) => {
       return
     }
 
-    // Validate token by fetching user profile
-    const user = await callGraphApi<IgUser>('/me?fields=id,username', access_token)
+    // Discover IG business account via Facebook Page
+    const account = await discoverIgAccount(access_token)
 
-    if (!user.id || !user.username) {
-      res.status(400).json({ error: 'No Instagram business account linked to this token' })
-      return
-    }
-
-    // Refresh token to get a known expiry (fixes hardcoded 60-day guess)
+    // Try to exchange for long-lived token
     let finalToken = access_token
-    let expiresAt = Math.floor(Date.now() / 1000) + 60 * 24 * 60 * 60 // fallback
+    let expiresAt = Math.floor(Date.now() / 1000) + 60 * 24 * 60 * 60 // fallback: 60 days
 
     try {
       const refreshed = await refreshToken(access_token)
       finalToken = refreshed.access_token
       expiresAt = Math.floor(Date.now() / 1000) + refreshed.expires_in
     } catch {
-      // Refresh failed (e.g., short-lived token) - use fallback expiry
+      // Exchange failed (token may already be long-lived) - use fallback expiry
     }
 
     saveMetaToken({
       access_token: finalToken,
-      ig_user_id: user.id,
-      ig_username: user.username,
+      ig_user_id: account.ig_user_id,
+      ig_username: account.username,
       expires_at: expiresAt
     })
 
     res.json({
       connected: true,
-      username: user.username,
+      username: account.username,
       expires_at: expiresAt
     })
   } catch (err) {

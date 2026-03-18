@@ -2,7 +2,8 @@
  * Instagram Graph API client + token refresh.
  */
 
-const GRAPH_BASE = 'https://graph.instagram.com'
+const META_API_VERSION = process.env.META_API_VERSION || 'v25.0'
+const GRAPH_BASE = `https://graph.facebook.com/${META_API_VERSION}`
 const GRAPH_TIMEOUT = 15_000
 
 export class ApiError extends Error {
@@ -60,7 +61,7 @@ export function tokenNeedsRefresh(expiresAt: number): boolean {
  * Refresh a long-lived token. Returns new token + expiry.
  */
 export async function refreshToken(currentToken: string): Promise<{ access_token: string; expires_in: number }> {
-  const url = `${GRAPH_BASE}/refresh_access_token?grant_type=ig_refresh_token&access_token=${currentToken}`
+  const url = `${GRAPH_BASE}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&fb_exchange_token=${currentToken}`
   const res = await fetch(url)
 
   if (!res.ok) {
@@ -69,6 +70,37 @@ export async function refreshToken(currentToken: string): Promise<{ access_token
   }
 
   return res.json() as Promise<{ access_token: string; expires_in: number }>
+}
+
+/**
+ * Discover IG business account from a Facebook user token.
+ * Flow: /me/accounts -> Page -> instagram_business_account
+ */
+export async function discoverIgAccount(token: string): Promise<{ ig_user_id: string; username: string; page_id: string }> {
+  // Find Facebook Pages
+  const pages = await callGraphApi<{ data: Array<{ id: string; name: string; access_token: string }> }>(
+    '/me/accounts?fields=id,name,access_token', token
+  )
+  if (!pages.data?.length) {
+    throw new ApiError('No Facebook Pages found on this account', 400)
+  }
+
+  // Get IG business account from first page
+  const page = pages.data[0]
+  const pageData = await callGraphApi<{ instagram_business_account?: { id: string } }>(
+    `/${page.id}?fields=instagram_business_account`, token
+  )
+  const igId = pageData.instagram_business_account?.id
+  if (!igId) {
+    throw new ApiError('No Instagram Business Account linked to this Facebook Page', 400)
+  }
+
+  // Get IG username
+  const igUser = await callGraphApi<{ id: string; username: string }>(
+    `/${igId}?fields=id,username`, token
+  )
+
+  return { ig_user_id: igId, username: igUser.username, page_id: page.id }
 }
 
 // --- Graph API response types ---

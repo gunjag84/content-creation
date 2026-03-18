@@ -5,6 +5,8 @@ import request from 'supertest'
 // Mock dependencies
 vi.mock('../../../src/server/services/meta-api', () => ({
   callGraphApi: vi.fn(),
+  discoverIgAccount: vi.fn(),
+  refreshToken: vi.fn(),
   ApiError: class ApiError extends Error {
     status: number
     constructor(msg: string, status: number) {
@@ -29,7 +31,7 @@ vi.mock('../../../src/server/db/queries', () => ({
 }))
 
 import instagramRoutes from '../../../src/server/routes/instagram'
-import { callGraphApi } from '../../../src/server/services/meta-api'
+import { discoverIgAccount } from '../../../src/server/services/meta-api'
 import { syncIgStats, isSyncOnCooldown } from '../../../src/server/services/meta-sync'
 import { linkIgPost } from '../../../src/server/db/queries'
 
@@ -41,7 +43,7 @@ beforeEach(() => { vi.clearAllMocks() })
 
 describe('POST /api/instagram/connect', () => {
   it('connects with valid token', async () => {
-    vi.mocked(callGraphApi).mockResolvedValue({ id: '123', username: 'testuser' })
+    vi.mocked(discoverIgAccount).mockResolvedValue({ ig_user_id: '123', username: 'testuser', page_id: 'page_1' })
 
     const res = await request(app)
       .post('/api/instagram/connect')
@@ -62,14 +64,15 @@ describe('POST /api/instagram/connect', () => {
   })
 
   it('handles invalid token (no IG account)', async () => {
-    vi.mocked(callGraphApi).mockResolvedValue({ id: '', username: '' })
+    const { ApiError } = await import('../../../src/server/services/meta-api')
+    vi.mocked(discoverIgAccount).mockRejectedValue(new ApiError('No Instagram Business Account linked to this Facebook Page', 400))
 
     const res = await request(app)
       .post('/api/instagram/connect')
       .send({ access_token: 'invalid' })
 
     expect(res.status).toBe(400)
-    expect(res.body.error).toContain('No Instagram business account')
+    expect(res.body.error).toContain('No Instagram Business Account')
   })
 })
 

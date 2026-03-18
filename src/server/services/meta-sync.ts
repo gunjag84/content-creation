@@ -16,6 +16,7 @@ import {
   getMetaToken,
   saveMetaToken,
   upsertPerformance,
+  getPerformance,
   listPosts
 } from '../db/queries'
 import { computePerformanceScore } from '../../shared/performanceScore'
@@ -64,9 +65,9 @@ export async function syncIgStats(): Promise<SyncResult> {
     }
   }
 
-  // Fetch recent IG media (last 50)
+  // Fetch recent IG media (last 50) using stored IG user ID
   const media = await callGraphApi<IgMediaPage>(
-    `/me/media?fields=id,caption,timestamp,media_type,permalink&limit=50`,
+    `/${token.ig_user_id}/media?fields=id,caption,timestamp,media_type,permalink&limit=50`,
     token.access_token
   )
 
@@ -117,6 +118,9 @@ export async function syncIgStats(): Promise<SyncResult> {
       console.error(`[meta-sync] Error syncing IG post ${igPost.id}:`, (err as Error).message)
     }
   }, 5)
+
+  // Fetch ad stats and merge spend/cost data into matched posts
+  await syncAdStats(token.access_token, localPosts, result)
 
   lastSyncAt = Date.now()
   return result
@@ -181,6 +185,103 @@ function mapInsightsToPerformance(insights: IgInsightsResponse): Record<string, 
   }
 
   return map
+}
+
+interface AdData {
+  ad_spend: number | null
+  cost_per_result: number | null
+  link_clicks: number | null
+}
+
+/**
+ * Fetch ad insights from Meta Ads API and merge spend data into matched local posts.
+ * Uses META_AD_ACCOUNT_ID from .env, or auto-detects from /me/adaccounts.
+ */
+async function syncAdStats(
+  accessToken: string,
+  localPosts: Array<{ id: number; caption: string | null }>,
+  result: SyncResult
+): Promise<void> {
+  try {
+    // Find ad account
+    let adAccountId = process.env.META_AD_ACCOUNT_ID
+    if (!adAccountId) {
+      const accounts = await callGraphApi<{ data: Array<{ id: string; name: string }> }>(
+        '/me/adaccounts?fields=id,name&limit=10', accessToken
+      )
+      if (!accounts.data?.length) return // No ad accounts - skip silently
+      adAccountId = accounts.data[0].id
+    }
+
+    // Fetch ads with inline lifetime insights
+    const fields = [
+      'id', 'name',
+      'creative{effective_object_story_id}',
+      'insights.date_preset(maximum){impressions,reach,spend,clicks,cpm,frequency,actions}'
+    ].join(',')
+
+    const adsData = await callGraphApi<{ data: Array<Record<string, unknown>> }>(
+      `/${adAccountId}/ads?fields=${fields}&effective_status[]=ACTIVE&effective_status[]=PAUSED&effective_status[]=ARCHIVED&limit=100`,
+      accessToken
+    )
+
+    if (!adsData.data?.length) return
+
+    // Build caption-to-ad-data map
+    for (const ad of adsData.data) {
+      const ins = (ad.insights as { data?: Array<Record<string, unknown>> })?.data?.[0]
+      if (!ins) continue
+
+      // Extract caption from ad name
+      const name = (ad.name as string) || ''
+      const caption = name.replace(/^(Instagram-Beitrag|Instagram-Story|Hervorgehobene Website):\s*/i, '').trim()
+      if (!caption) continue
+
+      // Match to local post by caption prefix
+      const clean = caption.replace(/\.{2,}$/, '').trim()
+      const key = clean.slice(0, 25).toLowerCase().trim()
+      if (key.length < 10) continue
+
+      const localPost = localPosts.find(p => {
+        if (!p.caption) return false
+        return p.caption.trim().substring(0, 25).toLowerCase().startsWith(key)
+      })
+
+      if (!localPost) continue
+
+      const findAction = (type: string): number | null => {
+        const actions = (ins.actions as Array<{ action_type: string; value: string }>) || []
+        const match = actions.find(a => a.action_type === type)
+        return match ? parseInt(match.value) : null
+      }
+
+      const spend = ins.spend ? parseFloat(ins.spend as string) : null
+      const reach = ins.reach ? parseInt(ins.reach as string) : null
+
+      const adData: AdData = {
+        ad_spend: spend,
+        cost_per_result: spend && reach ? parseFloat((spend / reach * 1000).toFixed(2)) : null,
+        link_clicks: findAction('link_click')
+      }
+
+      // Merge ad data with existing performance record (preserve IG insights)
+      const existing = getPerformance(localPost.id)
+      upsertPerformance(localPost.id, {
+        reach: existing?.reach ?? null,
+        likes: existing?.likes ?? null,
+        comments: existing?.comments ?? null,
+        shares: existing?.shares ?? null,
+        saves: existing?.saves ?? null,
+        notes: existing?.notes ?? null,
+        ig_media_id: existing?.ig_media_id ?? null,
+        ...adData,
+        source: 'api'
+      })
+    }
+  } catch (err) {
+    // Ad fetch failure is non-fatal - log and continue
+    console.error('[meta-sync] Ad stats fetch failed:', (err as Error).message)
+  }
 }
 
 async function batchParallel<T>(items: T[], fn: (item: T) => Promise<void>, concurrency = 5): Promise<void> {
