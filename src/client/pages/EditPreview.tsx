@@ -268,7 +268,7 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
           {/* Caption editor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Caption <span className="text-gray-400 font-normal">({caption.length} chars)</span>
+              Caption <span className={`font-normal ${caption.length < (settings?.contentDefaults?.captionMinChars ?? 50) || caption.length > (settings?.contentDefaults?.captionMaxChars ?? 400) ? 'text-red-500' : 'text-gray-400'}`}>({caption.length} / {settings?.contentDefaults?.captionMinChars ?? 50}-{settings?.contentDefaults?.captionMaxChars ?? 400} chars)</span>
             </label>
             <textarea
               value={caption}
@@ -298,6 +298,7 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
               slide={currentSlide}
               settings={settings}
               className="max-w-sm"
+              isCarousel={slides.length > 1}
               activeZoneId={activeZoneId}
               onZoneDragLive={handleZoneDragLive}
               onZoneDragCommit={handleZoneDragCommit}

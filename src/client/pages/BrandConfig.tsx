@@ -375,6 +375,46 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         </div>
       </section>
 
+      {/* Content Defaults */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-lg font-semibold">Content Defaults</h2>
+          <InfoPopover text="Character limits for AI-generated content. Caption limits apply to the Instagram caption below the post. Body max applies to the text on each individual slide (single or carousel)." />
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Caption Min Chars</label>
+            <input
+              type="number"
+              value={local.contentDefaults.captionMinChars}
+              min={0}
+              onChange={(e) => setLocal({ ...local, contentDefaults: { ...local.contentDefaults, captionMinChars: parseInt(e.target.value) || 0 } })}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Caption Max Chars</label>
+            <input
+              type="number"
+              value={local.contentDefaults.captionMaxChars}
+              min={1}
+              onChange={(e) => setLocal({ ...local, contentDefaults: { ...local.contentDefaults, captionMaxChars: parseInt(e.target.value) || 1 } })}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Body Max Chars (per slide)</label>
+            <input
+              type="number"
+              value={local.contentDefaults.bodyMaxChars}
+              min={1}
+              onChange={(e) => setLocal({ ...local, contentDefaults: { ...local.contentDefaults, bodyMaxChars: parseInt(e.target.value) || 1 } })}
+              className="w-full border rounded px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Pillars */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -385,24 +425,33 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
           <button onClick={addPillar} className="text-sm text-blue-600 hover:underline">+ Add Pillar</button>
         </div>
         {local.pillars.map((p, i) => (
-          <div key={p.id} className="flex gap-3 items-center">
-            <input
-              type="text"
-              value={p.name}
-              onChange={(e) => updatePillar(i, 'name', e.target.value)}
-              className="flex-1 border rounded px-3 py-2 text-sm"
-              placeholder="Pillar name"
+          <div key={p.id} className="space-y-2">
+            <div className="flex gap-3 items-center">
+              <input
+                type="text"
+                value={p.name}
+                onChange={(e) => updatePillar(i, 'name', e.target.value)}
+                className="flex-1 border rounded px-3 py-2 text-sm"
+                placeholder="Pillar name"
+              />
+              <input
+                type="number"
+                value={p.targetPct}
+                onChange={(e) => updatePillar(i, 'targetPct', parseInt(e.target.value) || 0)}
+                className="w-20 border rounded px-2 py-2 text-sm text-center"
+                min={0}
+                max={100}
+              />
+              <span className="text-xs text-gray-400">%</span>
+              <button onClick={() => removePillar(i)} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
+            </div>
+            <textarea
+              value={p.rules ?? ''}
+              onChange={(e) => updatePillar(i, 'rules', e.target.value)}
+              rows={2}
+              className="w-full border rounded px-3 py-2 text-sm resize-none text-gray-600"
+              placeholder="Content rules for this pillar (what to include, what to avoid...)"
             />
-            <input
-              type="number"
-              value={p.targetPct}
-              onChange={(e) => updatePillar(i, 'targetPct', parseInt(e.target.value) || 0)}
-              className="w-20 border rounded px-2 py-2 text-sm text-center"
-              min={0}
-              max={100}
-            />
-            <span className="text-xs text-gray-400">%</span>
-            <button onClick={() => removePillar(i)} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
           </div>
         ))}
       </section>

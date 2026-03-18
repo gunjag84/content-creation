@@ -33,8 +33,14 @@ export function assemblePrompt(
     }
   }
 
-  // Content focus
-  sections.push(`## Content Focus\n**Pillar:** ${pillar}\n**Theme:** ${theme}`)
+  // Content focus + pillar rules
+  const pillarEntry = settings.pillars.find(p => p.name === pillar)
+  const pillarRules = pillarEntry?.rules?.trim()
+  const focusLines = [`**Pillar:** ${pillar}`, `**Theme:** ${theme}`]
+  if (pillarRules) {
+    focusLines.push(`\n**Pillar Rules (MUST follow):**\n${pillarRules}`)
+  }
+  sections.push(`## Content Focus\n${focusLines.join('\n')}`)
 
   // Mechanic details
   const mech = settings.mechanics.find(m => m.name === mechanic)
@@ -48,9 +54,14 @@ export function assemblePrompt(
   // Content constraints
   const carouselCount = slideCount ?? 5
   const slideConstraint = contentType === 'single'
-    ? '**Slides:** 1 (SINGLE POST - exactly ONE slide)'
-    : `**Carousel Slides:** EXACTLY ${carouselCount} slides (1 cover + ${carouselCount - 2} content + 1 CTA)`
-  sections.push(`## Content Constraints\n${slideConstraint}`)
+    ? '**Slides:** 1 (SINGLE POST - exactly ONE slide with hook at top, body in middle, CTA at bottom)'
+    : `**Carousel Slides:** EXACTLY ${carouselCount} slides (1 cover + ${carouselCount - 2} content + 1 CTA)\n**Cover slide (slide 1):** ONLY a hook_text (displayed centered on the slide). Leave body_text and cta_text EMPTY for the cover slide.`
+  const defaults = settings.contentDefaults
+  const charLimits = [
+    `**Caption:** ${defaults.captionMinChars}-${defaults.captionMaxChars} characters`,
+    `**Body text per slide:** max ${defaults.bodyMaxChars} characters`
+  ]
+  sections.push(`## Content Constraints\n${slideConstraint}\n${charLimits.join('\n')}`)
 
   // Impulse
   if (impulse && impulse.trim()) {
@@ -70,8 +81,8 @@ export function assemblePrompt(
       'Rules: EXACTLY 1 slide. slide_type must be "cover".'
   } else {
     prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No markdown code blocks.\n' +
-      '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":""},{"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
-      'Rules: slide_type "cover" for first, "cta" for last, "content" for middle slides.'
+      '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"","cta_text":""},{"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
+      'Rules: slide_type "cover" for first (hook_text only, body_text and cta_text must be empty), "cta" for last, "content" for middle slides.'
   }
 
   return prompt

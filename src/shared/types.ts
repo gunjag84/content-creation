@@ -105,7 +105,8 @@ const VisualSchema = z.object({
 const PillarSchema = z.object({
   id: z.string(),
   name: z.string(),
-  targetPct: z.number().min(0).max(100)
+  targetPct: z.number().min(0).max(100),
+  rules: z.string().default('')
 })
 
 const ThemeSchema = z.object({
@@ -120,12 +121,19 @@ const MechanicSchema = z.object({
   slideRange: z.object({ min: z.number(), max: z.number() }).optional()
 })
 
+const ContentDefaultsSchema = z.object({
+  captionMinChars: z.number().min(0).default(50),
+  captionMaxChars: z.number().min(1).default(400),
+  bodyMaxChars: z.number().min(1).default(400)
+})
+
 export const SettingsSchema = z.object({
   contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
   visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   themes: z.array(ThemeSchema).default([]),
-  mechanics: z.array(MechanicSchema).default([])
+  mechanics: z.array(MechanicSchema).default([]),
+  contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 })
 })
 
 export type Settings = z.infer<typeof SettingsSchema>
