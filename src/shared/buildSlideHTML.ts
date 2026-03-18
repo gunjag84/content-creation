@@ -28,6 +28,10 @@ function fileUrl(path: string, baseUrl: string): string {
 
 function isFilePath(val: string): boolean { return val.includes('/') }
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 interface ResolvedFont {
   importRule: string   // @import or @font-face (may be empty)
   family: string       // CSS font-family value
@@ -127,7 +131,7 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : def.font
 
     return `<div style="position:absolute;top:${def.top}px;left:0;right:0;height:${def.height}px;display:flex;align-items:center;justify-content:center;padding:30px 80px;">
-      <div style="font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};color:${color};text-align:${textAlign};line-height:1.3;word-wrap:break-word;white-space:pre-wrap;">${text}</div>
+      <div style="font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};color:${color};text-align:${textAlign};line-height:1.3;word-wrap:break-word;white-space:pre-wrap;">${escHtml(text)}</div>
     </div>`
   }).filter(Boolean).join('\n')
 
@@ -138,7 +142,7 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
 
   // Handle
   const handleHtml = v?.handle
-    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${v.handle}</div>`
+    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${escHtml(v.handle)}</div>`
     : ''
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; ${backgroundCSS} } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body><div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`

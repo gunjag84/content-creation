@@ -64,13 +64,16 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         const result = await api.upload(file)
         const fontName = file.name.replace(/\.[^.]+$/, '') // strip extension
         const newEntry: FontLibraryEntry = { id: crypto.randomUUID(), name: fontName, path: result.path }
-        const newLibrary = [...(local.visual.fontLibrary ?? []), newEntry]
-        setLocal({
-          ...local,
-          visual: {
-            ...local.visual,
-            fontLibrary: newLibrary,
-            fonts: { ...local.visual.fonts, [role]: `custom:${newEntry.id}` }
+        // Functional updater avoids stale closure over `local` during async file picker
+        setLocal(prev => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            visual: {
+              ...prev.visual,
+              fontLibrary: [...(prev.visual.fontLibrary ?? []), newEntry],
+              fonts: { ...prev.visual.fonts, [role]: `custom:${newEntry.id}` }
+            }
           }
         })
         setSaved(false)
@@ -208,13 +211,7 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
 
                   <select
                     value={currentValue}
-                    onChange={(e) => {
-                      if (e.target.value === '__upload__') {
-                        handleUploadFont(role)
-                      } else {
-                        handleFontSelect(role, e.target.value)
-                      }
-                    }}
+                    onChange={(e) => handleFontSelect(role, e.target.value)}
                     disabled={isUploading}
                     className="w-full border rounded px-2 py-2 text-sm bg-white disabled:opacity-50"
                   >
@@ -233,16 +230,18 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
                         ))}
                       </optgroup>
                     )}
-
-                    <option value="__upload__">+ Upload TTF / OTF / WOFF...</option>
                   </select>
 
-                  {isUploading && (
-                    <p className="text-xs text-blue-500 mt-1 flex items-center gap-1">
-                      <span className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin" />
-                      Uploading...
-                    </p>
-                  )}
+                  <button
+                    onClick={() => handleUploadFont(role)}
+                    disabled={isUploading}
+                    className="mt-1.5 text-xs text-blue-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {isUploading
+                      ? <><span className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin" /> Uploading...</>
+                      : '+ Upload custom font...'
+                    }
+                  </button>
 
                   {currentValue && (
                     <p className="text-xs text-gray-400 mt-1 truncate">
