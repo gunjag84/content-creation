@@ -30,6 +30,17 @@ export function StatsForm({ postId, initial, onSaved }: StatsFormProps) {
     return v
   })
   const [saving, setSaving] = useState(false)
+  const [source, setSource] = useState<string | null>(initial?.source ?? null)
+  const [dirty, setDirty] = useState(false)
+
+  const handleChange = (key: string, value: string) => {
+    setValues({ ...values, [key]: value })
+    // D8: any manual edit flips source to manual
+    if (source === 'api' && !dirty) {
+      setSource('manual')
+      setDirty(true)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -39,13 +50,26 @@ export function StatsForm({ postId, initial, onSaved }: StatsFormProps) {
       if (v === '') { data[f.key] = null; continue }
       data[f.key] = f.type === 'number' ? parseFloat(v) : v
     }
+    // Source flips to manual on any edit
+    data.source = dirty ? 'manual' : (source ?? 'manual')
     await api.put(`/posts/${postId}/stats`, data)
     setSaving(false)
     onSaved?.()
   }
 
+  const syncedAt = initial?.recorded_at && source === 'api'
+    ? formatTimeSince(initial.recorded_at * 1000)
+    : null
+
   return (
     <div className="space-y-3">
+      {/* D8: Source badge */}
+      {syncedAt && !dirty && (
+        <span className="inline-block bg-blue-50 text-blue-600 text-xs rounded px-1.5 py-0.5">
+          Synced - {syncedAt}
+        </span>
+      )}
+
       <div className="grid grid-cols-4 gap-3">
         {fields.filter(f => f.type === 'number').map((f) => (
           <div key={f.key}>
@@ -53,7 +77,7 @@ export function StatsForm({ postId, initial, onSaved }: StatsFormProps) {
             <input
               type="number"
               value={values[f.key]}
-              onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+              onChange={(e) => handleChange(f.key, e.target.value)}
               className="w-full border rounded px-2 py-1.5 text-sm"
             />
           </div>
@@ -63,7 +87,7 @@ export function StatsForm({ postId, initial, onSaved }: StatsFormProps) {
         <label className="block text-xs text-gray-500 mb-1">Notes</label>
         <textarea
           value={values.notes}
-          onChange={(e) => setValues({ ...values, notes: e.target.value })}
+          onChange={(e) => handleChange('notes', e.target.value)}
           rows={2}
           className="w-full border rounded px-2 py-1.5 text-sm resize-none"
         />
@@ -77,4 +101,14 @@ export function StatsForm({ postId, initial, onSaved }: StatsFormProps) {
       </button>
     </div>
   )
+}
+
+function formatTimeSince(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes} min ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }

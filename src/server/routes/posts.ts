@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import {
-  insertPost, getPost, listPosts, updatePostStatus,
+  insertPost, getPost, listPosts, listPostsWithScores, updatePostStatus,
   insertSlide, getSlidesByPost,
   upsertPerformance, getPerformance,
   updateBalanceMatrix, getBalanceMatrix,
@@ -11,11 +11,11 @@ import { loadSettings } from './settings'
 
 const router = Router()
 
-// List posts with pagination
+// List posts with pagination (includes performance_score via JOIN)
 router.get('/', (req, res) => {
   const limit = parseInt(req.query.limit as string) || 50
   const offset = parseInt(req.query.offset as string) || 0
-  const posts = listPosts(limit, offset)
+  const posts = listPostsWithScores(limit, offset)
   res.json(posts)
 })
 

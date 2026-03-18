@@ -6,9 +6,11 @@ import { EditPreview } from './pages/EditPreview'
 import { ReviewDownload } from './pages/ReviewDownload'
 import { PostHistory } from './pages/PostHistory'
 import { Login } from './pages/Login'
+import { Settings } from './pages/Settings'
+import { InstagramPosts } from './pages/InstagramPosts'
 import { useWizardStore } from './stores/wizardStore'
 
-type Page = 'brand' | 'create' | 'edit' | 'review' | 'history' | 'login'
+type Page = 'brand' | 'create' | 'edit' | 'review' | 'history' | 'instagram' | 'settings' | 'login'
 
 export function App() {
   const [page, setPage] = useState<Page>('create')
@@ -62,6 +64,10 @@ export function App() {
         return <ReviewDownload onDone={() => navigate('history')} onBack={goBack} />
       case 'history':
         return <PostHistory />
+      case 'instagram':
+        return <InstagramPosts />
+      case 'settings':
+        return <Settings />
       default:
         return <CreatePost onGenerated={() => { setPageHistory(h => [...h, page]); setPage('edit') }} />
     }

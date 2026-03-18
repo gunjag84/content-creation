@@ -219,5 +219,27 @@ export interface PostPerformance {
   cost_per_result: number | null
   link_clicks: number | null
   notes: string | null
+  performance_score: number | null
+  source: 'manual' | 'api' | null
+  ig_media_id: string | null
   recorded_at: number
+}
+
+export interface MetaToken {
+  id: number
+  access_token: string
+  ig_user_id: string
+  ig_username: string
+  expires_at: number
+  created_at: number
+}
+
+export interface IgConnectionStatus {
+  connected: boolean
+  username?: string
+  expires_at?: number
+  days_until_expiry?: number
+  expired?: boolean
+  near_expiry?: boolean
+  last_sync_at?: number
 }
