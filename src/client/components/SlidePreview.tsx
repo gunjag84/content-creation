@@ -13,6 +13,7 @@ interface SlidePreviewProps {
   slide: Slide
   settings: Settings | null
   className?: string
+  isCarousel?: boolean
   // Drag mode (edit context)
   activeZoneId?: string
   onZoneDragLive?: (zoneId: string, override: ZoneOverride) => void
@@ -45,7 +46,7 @@ function getZoneRect(def: { top: number; height: number }, ov: ZoneOverride) {
   }
 }
 
-export function SlidePreview({ slide, settings, className, activeZoneId, onZoneDragLive, onZoneDragCommit }: SlidePreviewProps) {
+export function SlidePreview({ slide, settings, className, isCarousel, activeZoneId, onZoneDragLive, onZoneDragCommit }: SlidePreviewProps) {
   const baseUrl = window.location.origin
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -142,8 +143,18 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
     cta:  { ...ZONE_POSITION_DEFAULTS.cta,  font: ctaFont.family,  fontSize: fontSizes.cta,  color: primaryColor, weight: 'bold' as const },
   }
 
-  const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
+  // Carousel cover: hook-only, positioned in body zone (center of slide)
+  const isCarouselCover = slide.slide_type === 'cover' && !!isCarousel
+
+  const textMap = isCarouselCover
+    ? { hook: '', body: slide.hook_text || '', cta: '' }
+    : { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
+
+  // For carousel cover, render hook text in body zone with headline styling
+  const coverStyleOverride = isCarouselCover
+    ? { body: { font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' as const } }
+    : {} as Record<string, never>
 
   const bgX = slide.background_position_x ?? 50
   const bgY = slide.background_position_y ?? 50
@@ -287,12 +298,13 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
             ...(isDraggable ? { cursor: showHandles ? 'grab' : 'pointer' } : {}),
           }
 
+          const so = coverStyleOverride[zoneId as keyof typeof coverStyleOverride]
           const textStyle: React.CSSProperties = {
-            fontFamily: ov.fontFamily ? `'${ov.fontFamily}'` : def.font,
-            fontSize: ov.fontSize ?? def.fontSize,
-            fontWeight: ov.fontWeight ?? def.weight,
+            fontFamily: ov.fontFamily ? `'${ov.fontFamily}'` : (so?.font ?? def.font),
+            fontSize: ov.fontSize ?? so?.fontSize ?? def.fontSize,
+            fontWeight: ov.fontWeight ?? so?.weight ?? def.weight,
             fontStyle: ov.fontStyle ?? 'normal',
-            color: ov.color ?? def.color,
+            color: ov.color ?? so?.color ?? def.color,
             textAlign: ov.textAlign ?? 'center',
             lineHeight: ov.lineHeight ?? 1.3,
             letterSpacing: ov.letterSpacing ? `${ov.letterSpacing}px` : undefined,

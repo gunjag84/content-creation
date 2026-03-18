@@ -57,20 +57,33 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     cta:  { ...ZONE_POSITION_DEFAULTS.cta,  font: ctaFont.family,  fontSize: fontSizes.cta,  color: primaryColor, weight: 'bold' as const }
   }
 
-  const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
+  // Carousel cover: hook-only, positioned in body zone (center of slide)
+  const allSlides = params.allSlides ?? []
+  const isCarouselCover = slide.slide_type === 'cover' && allSlides.length > 1
+
+  const textMap = isCarouselCover
+    ? { hook: '', body: slide.hook_text || '', cta: '' }
+    : { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
+
+  // For carousel cover, render hook text in body zone with headline styling
+  const styleOverride: Partial<Record<string, { font: string; fontSize: number; color: string; weight: 'bold' | 'normal' }>> = {}
+  if (isCarouselCover) {
+    styleOverride.body = { font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' }
+  }
 
   const zoneElements = zoneIds.map(zoneId => {
     const text = textMap[zoneId]
     if (!text) return ''
     const def = zoneDefaults[zoneId]
+    const so = styleOverride[zoneId]
     const ov: ZoneOverride = overrides[zoneId] ?? {}
-    const fontSize = ov.fontSize ?? def.fontSize
-    const fontWeight = ov.fontWeight ?? def.weight
+    const fontSize = ov.fontSize ?? so?.fontSize ?? def.fontSize
+    const fontWeight = ov.fontWeight ?? so?.weight ?? def.weight
     const fontStyle = ov.fontStyle ?? 'normal'
-    const color = ov.color ?? def.color
+    const color = ov.color ?? so?.color ?? def.color
     const textAlign = ov.textAlign ?? 'center'
-    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : def.font
+    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : (so?.font ?? def.font)
     const lineHeight = ov.lineHeight ?? 1.3
     const letterSpacing = ov.letterSpacing ?? 0
 

@@ -24,7 +24,8 @@ const baseSettings: Settings = {
   },
   pillars: [],
   themes: [],
-  mechanics: []
+  mechanics: [],
+  contentDefaults: { captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 }
 }
 
 describe('buildSlideHTML - font resolution', () => {
@@ -158,5 +159,39 @@ describe('buildSlideHTML - zone position overrides', () => {
     expect(html).toContain('font-style:italic')
     expect(html).toContain('line-height:1.8')
     expect(html).toContain('letter-spacing:3px')
+  })
+})
+
+describe('buildSlideHTML - carousel cover slide', () => {
+  const contentSlide: Slide = { uid: 'content-uid', slide_number: 2, slide_type: 'content', hook_text: '', body_text: 'Content body', cta_text: '', overlay_opacity: 0.5 }
+
+  it('renders hook text in body zone position for carousel cover', () => {
+    const cover = { ...baseSlide, hook_text: 'Big Hook', body_text: 'Should be hidden', cta_text: 'Should be hidden' }
+    const html = buildSlideHTML({ slide: cover, allSlides: [cover, contentSlide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    // Hook text should appear in the body zone (top:280)
+    expect(html).toContain('Big Hook')
+    expect(html).toContain('top:280px')
+    // Body and CTA text should NOT appear
+    expect(html).not.toContain('Should be hidden')
+  })
+
+  it('uses headline styling for hook text in body zone on carousel cover', () => {
+    const cover = { ...baseSlide, hook_text: 'Styled Hook', body_text: '', cta_text: '' }
+    const html = buildSlideHTML({ slide: cover, allSlides: [cover, contentSlide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    // Should use headline font size (56 default) and bold weight in the body zone
+    expect(html).toContain('font-size:56px')
+    expect(html).toContain('font-weight:bold')
+  })
+
+  it('renders all three zones normally for a single slide (not carousel)', () => {
+    const single = { ...baseSlide, hook_text: 'Hook', body_text: 'Body', cta_text: 'CTA' }
+    const html = buildSlideHTML({ slide: single, allSlides: [single], settings: baseSettings, baseUrl: 'http://localhost:3001' })
+    expect(html).toContain('Hook')
+    expect(html).toContain('Body')
+    expect(html).toContain('CTA')
+    // Hook at top (0px), body at 280, cta at 920
+    expect(html).toContain('top:0px')
+    expect(html).toContain('top:280px')
+    expect(html).toContain('top:920px')
   })
 })
