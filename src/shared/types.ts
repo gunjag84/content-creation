@@ -132,6 +132,8 @@ export interface PostRow {
   slide_count: number | null
   impulse: string | null
   background_path: string | null
+  template_id: number | null
+  ad_hoc: number
   status: 'draft' | 'approved' | 'exported'
   created_at: number
 }

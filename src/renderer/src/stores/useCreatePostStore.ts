@@ -23,6 +23,7 @@ interface CreatePostState {
   contentType: 'single' | 'carousel'
   impulse: string
   customBackgroundPath: string | null
+  selectedTemplateId: number | null
   adHoc: boolean
 
   // Step 2/3 - Generation & Editing
@@ -46,6 +47,7 @@ interface CreatePostState {
 
   // Actions
   setStep: (step: 1 | 2 | 3 | 4 | 5) => void
+  setSelectedTemplateId: (id: number | null) => void
   setMode: (mode: 'ai' | 'manual') => void
   setRecommendation: (rec: BalanceRecommendation, warnings: BalanceWarning[]) => void
   setAdHoc: (value: boolean) => void
@@ -86,6 +88,7 @@ const initialState = {
   contentType: 'carousel' as const,
   impulse: '',
   customBackgroundPath: null,
+  selectedTemplateId: null,
   adHoc: false,
 
   // Step 2/3
@@ -112,6 +115,8 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
   ...initialState,
 
   setStep: (step) => set({ currentStep: step }),
+
+  setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
 
   setMode: (mode) => set({ mode }),
 
@@ -258,7 +263,7 @@ export const useCreatePostStore = create<CreatePostState>((set) => ({
 
   setIsGenerating: (value) => set({ isGenerating: value }),
 
-  setGenerationError: (error) => set({ generationError: error, isGenerating: false }),
+  setGenerationError: (error) => set(error ? { generationError: error, isGenerating: false } : { generationError: null }),
 
   initManualSlides: (contentType) => {
     const slideCount = contentType === 'single' ? 1 : 5

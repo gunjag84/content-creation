@@ -84,6 +84,7 @@ export function Step2Generation() {
     }
 
     return () => {
+      hasStartedRef.current = false
       if (cleanupRef.current) {
         cleanupRef.current()
         cleanupRef.current = null

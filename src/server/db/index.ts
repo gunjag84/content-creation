@@ -26,6 +26,11 @@ export function initDatabase(dbPath?: string): Database.Database {
       ? fs.readFileSync(schemaPath, 'utf-8')
       : fs.readFileSync(fallback, 'utf-8')
     db.exec(sql)
+  } else {
+    // Migrate existing DBs
+    const cols = (db.prepare('PRAGMA table_info(posts)').all() as { name: string }[]).map(c => c.name)
+    if (!cols.includes('template_id')) db.exec('ALTER TABLE posts ADD COLUMN template_id INTEGER')
+    if (!cols.includes('ad_hoc')) db.exec('ALTER TABLE posts ADD COLUMN ad_hoc INTEGER NOT NULL DEFAULT 0')
   }
 
   return db

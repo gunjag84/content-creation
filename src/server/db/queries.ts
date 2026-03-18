@@ -12,14 +12,16 @@ export interface PostInsert {
   slide_count?: number
   impulse?: string
   background_path?: string
+  template_id?: number
+  ad_hoc?: number
   status?: 'draft' | 'approved' | 'exported'
 }
 
 export function insertPost(data: PostInsert): number {
   const db = getDatabase()
   const stmt = db.prepare(`
-    INSERT INTO posts (pillar, theme, mechanic, content_type, caption, slide_count, impulse, background_path, status)
-    VALUES (@pillar, @theme, @mechanic, @content_type, @caption, @slide_count, @impulse, @background_path, @status)
+    INSERT INTO posts (pillar, theme, mechanic, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status)
+    VALUES (@pillar, @theme, @mechanic, @content_type, @caption, @slide_count, @impulse, @background_path, @template_id, @ad_hoc, @status)
   `)
   const result = stmt.run({
     pillar: data.pillar,
@@ -30,6 +32,8 @@ export function insertPost(data: PostInsert): number {
     slide_count: data.slide_count ?? null,
     impulse: data.impulse ?? null,
     background_path: data.background_path ?? null,
+    template_id: data.template_id ?? null,
+    ad_hoc: data.ad_hoc ?? 0,
     status: data.status ?? 'draft'
   })
   return result.lastInsertRowid as number

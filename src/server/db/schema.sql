@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS posts (
   slide_count INTEGER DEFAULT 1,
   impulse TEXT,
   background_path TEXT,
+  template_id INTEGER,
+  ad_hoc INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'approved', 'exported')),
   created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );

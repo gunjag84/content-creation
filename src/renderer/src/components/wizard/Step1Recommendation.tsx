@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select'
-import { AlertCircle, Upload } from 'lucide-react'
+import { AlertCircle, Upload, LayoutTemplate, Check } from 'lucide-react'
 import type { Settings } from '../../../../shared/types/settings'
+import type { Template } from '../../../../preload/types'
 
 function BackgroundPreview({ path }: { path: string | null }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null)
@@ -34,6 +35,51 @@ function BackgroundPreview({ path }: { path: string | null }) {
   )
 }
 
+function TemplateMiniCard({ template, selected, onSelect }: { template: Template; selected: boolean; onSelect: () => void }) {
+  const [bgDataUrl, setBgDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (template.background_type === 'image' && template.background_value) {
+      window.api.readFileAsDataUrl(template.background_value).then(setBgDataUrl).catch(() => setBgDataUrl(null))
+    }
+  }, [template.background_type, template.background_value])
+
+  const bgStyle: React.CSSProperties = template.background_type === 'image' && bgDataUrl
+    ? { backgroundImage: `url(${bgDataUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : template.background_type === 'solid_color'
+      ? { backgroundColor: template.background_value }
+      : template.background_type === 'gradient'
+        ? { background: `linear-gradient(180deg, ${template.background_value.split(',')[0] || '#000'}, ${template.background_value.split(',')[1] || '#fff'})` }
+        : { backgroundColor: '#1e293b' }
+
+  return (
+    <button
+      onClick={onSelect}
+      className={`relative flex flex-col overflow-hidden rounded-lg border text-left transition-all ${
+        selected
+          ? 'border-blue-500 ring-2 ring-blue-500/40'
+          : 'border-slate-600 hover:border-slate-500'
+      }`}
+    >
+      <div className="h-20 w-full" style={bgStyle}>
+        {selected && (
+          <div className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+            <Check size={12} className="text-white" />
+          </div>
+        )}
+        {!bgDataUrl && template.background_type === 'image' && (
+          <div className="flex h-full items-center justify-center">
+            <LayoutTemplate size={20} className="text-slate-500" />
+          </div>
+        )}
+      </div>
+      <div className="bg-slate-800 px-2 py-1.5">
+        <p className="truncate text-xs font-medium text-slate-200">{template.name}</p>
+      </div>
+    </button>
+  )
+}
+
 interface Step1RecommendationProps {
   onRequestTemplateBuilder?: (imagePath: string) => void
 }
@@ -49,7 +95,9 @@ export function Step1Recommendation({ onRequestTemplateBuilder }: Step1Recommend
     contentType,
     impulse,
     customBackgroundPath,
+    selectedTemplateId,
     adHoc,
+    setSelectedTemplateId,
     setMode,
     setRecommendation,
     setSelection,
@@ -59,21 +107,26 @@ export function Step1Recommendation({ onRequestTemplateBuilder }: Step1Recommend
   } = useCreatePostStore()
 
   const [settings, setSettings] = useState<Settings | null>(null)
+  const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
 
   // Load recommendation and settings on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [recData, settingsData] = await Promise.all([
+        const [recData, settingsData, templateList] = await Promise.all([
           window.api.posts.getRecommendationData(1, {}),
-          window.api.loadSettings()
+          window.api.loadSettings(),
+          window.api.templates.list()
         ])
 
         if (recData.data?.recommendation) {
           setRecommendation(recData.data.recommendation, recData.data.warnings || [])
         }
         setSettings(settingsData)
+        if (Array.isArray(templateList)) {
+          setTemplates(templateList)
+        }
       } catch (error) {
         console.error('Failed to load recommendation data:', error)
       } finally {
@@ -275,6 +328,23 @@ export function Step1Recommendation({ onRequestTemplateBuilder }: Step1Recommend
               </Button>
             </div>
           </div>
+
+          {/* Template Selection */}
+          {templates.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-slate-300">Template</Label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                {templates.filter(t => t.format === 'feed').map((t) => (
+                  <TemplateMiniCard
+                    key={t.id}
+                    template={t}
+                    selected={selectedTemplateId === t.id}
+                    onSelect={() => setSelectedTemplateId(selectedTemplateId === t.id ? null : t.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Impulse */}
           <div className="space-y-2">

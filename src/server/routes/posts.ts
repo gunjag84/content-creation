@@ -87,11 +87,31 @@ router.put('/:id/stats', (req, res) => {
 router.get('/meta/recommendation', (_req, res) => {
   try {
     const entries = getBalanceMatrix()
-    if (entries.length === 0) {
+    const settings = loadSettings()
+
+    // Filter to only values present in current settings - prevents stale entries from being recommended
+    const validPillars = new Set(settings.pillars.map(p => p.name))
+    const validThemes = new Set(settings.themes.map(t => t.name))
+    const validMechanics = new Set(settings.mechanics.map(m => m.name))
+
+    const filtered = entries.filter(e => {
+      if (e.variable_type === 'pillar') return validPillars.has(e.variable_value)
+      if (e.variable_type === 'theme') return validThemes.has(e.variable_value)
+      if (e.variable_type === 'mechanic') return validMechanics.has(e.variable_value)
+      return false
+    })
+
+    // Need at least one entry per dimension to recommend
+    const hasPillar = filtered.some(e => e.variable_type === 'pillar')
+    const hasTheme = filtered.some(e => e.variable_type === 'theme')
+    const hasMechanic = filtered.some(e => e.variable_type === 'mechanic')
+
+    if (!hasPillar || !hasTheme || !hasMechanic) {
       res.json({ recommendation: null, warnings: [] })
       return
     }
-    const recommendation = recommendContent(entries)
+
+    const recommendation = recommendContent(filtered)
     const warnings = generateWarnings(entries)
     res.json({ recommendation, warnings })
   } catch (err) {

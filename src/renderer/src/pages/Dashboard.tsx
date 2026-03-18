@@ -89,14 +89,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </div>
 
-      <div className="mt-8 bg-blue-950/30 border border-blue-900/50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-2 text-blue-300">Phase 1 Complete!</h3>
-        <p className="text-slate-300 text-sm">
-          Foundation is ready: Database, settings, security, and rendering pipeline are all operational.
-          Navigate to Test Render to see the HTML-to-PNG rendering in action.
-        </p>
-      </div>
-
       {/* Balance Widget */}
       <div className="mt-8">
         <BalanceWidget onNavigate={onNavigate} />

@@ -9,3 +9,4 @@ data/
 .gstack/browse-console.log
 .gstack/browse-network.log
 tsconfig.web.tsbuildinfo
+.gstack/

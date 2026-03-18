@@ -22,6 +22,7 @@ export function Step4RenderReview() {
     selectedMechanic,
     contentType,
     customBackgroundPath,
+    selectedTemplateId,
     adHoc,
     setRenderedPNGs,
     setPostId,
@@ -37,6 +38,13 @@ export function Step4RenderReview() {
   const [isExporting, setIsExporting] = useState(false)
   const [previewPNGs, setPreviewPNGs] = useState<string[]>([])
   const [zoomIndex, setZoomIndex] = useState<number | null>(null)
+  const [bgDataUrl, setBgDataUrl] = useState<string | null>(null)
+
+  // Load custom background as data URL (file:// blocked in renderer)
+  useEffect(() => {
+    if (!customBackgroundPath) { setBgDataUrl(null); return }
+    window.api.readFileAsDataUrl(customBackgroundPath).then(setBgDataUrl).catch(() => setBgDataUrl(null))
+  }, [customBackgroundPath])
 
   useEffect(() => {
     const loadData = async () => {
@@ -80,6 +88,7 @@ export function Step4RenderReview() {
       overlayColor: template?.overlay_color || '#000000',
       overlayEnabled: template?.overlay_enabled ?? true,
       customBackgroundPath,
+      customBackgroundDataUrl: bgDataUrl ?? undefined,
       opacityOverride
     })
   }
@@ -112,13 +121,14 @@ export function Step4RenderReview() {
     }
   }
 
-  // Auto-render when settings and slides are ready
+  // Auto-render when settings, slides, and background data URL are ready
+  const bgReady = !customBackgroundPath || bgDataUrl !== null
   useEffect(() => {
-    if (settings && generatedSlides.length > 0 && previewPNGs.length === 0 && !isRendering) {
+    if (settings && bgReady && generatedSlides.length > 0 && previewPNGs.length === 0 && !isRendering) {
       handleRenderPreviews()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings, generatedSlides.length])
+  }, [settings, generatedSlides.length, bgReady])
 
   const handleOpacityChange = async (slideIndex: number, value: number[]) => {
     const newOpacity = value[0] / 100
@@ -187,6 +197,7 @@ export function Step4RenderReview() {
           pillar: selectedPillar,
           theme: selectedTheme,
           mechanic: selectedMechanic,
+          template_id: selectedTemplateId ?? undefined,
           content_type: contentType,
           caption: caption,
           status: 'approved' as const,
