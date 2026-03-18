@@ -67,7 +67,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
           <span className="font-medium text-blue-700">Recommendation:</span>{' '}
           {store.recommendation.pillar} / {store.recommendation.theme} / {store.recommendation.mechanic}
-          <span className="text-gray-500 ml-2">({store.recommendation.reasoning.replace('_', ' ')})</span>
         </div>
       )}
 
