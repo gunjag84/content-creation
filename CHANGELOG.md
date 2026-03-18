@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.2] - 2026-03-18
+
+### Fixed
+- **RichTextEditor**: Floating toolbar color picker now stays open while dragging - toolbar is pinned and selection preserved so color changes apply correctly
+- **EditPreview**: "Reset to brand defaults" now strips inline TipTap marks (color, font-family, font-size) from zone HTML in addition to clearing zone overrides
+
 ## [2.1.1] - 2026-03-18
 
 ### Added
