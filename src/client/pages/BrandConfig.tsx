@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ContextEditor } from '../components/ContextEditor'
@@ -54,20 +54,38 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
   const [local, setLocal] = useState<Settings | null>(null)
   const [saved, setSaved] = useState(false)
   const [uploadingFont, setUploadingFont] = useState<FontRole | null>(null)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const localRef = useRef<Settings | null>(null)
+  localRef.current = local
 
   useEffect(() => { load() }, [])
-  useEffect(() => { if (settings) setLocal(structuredClone(settings)) }, [settings])
+  // Only sync from server on initial load (when local is null), not after saves
+  useEffect(() => {
+    if (settings && local === null) setLocal(structuredClone(settings))
+  }, [settings])
+
+  // Debounced auto-save: 1s after any local change
+  useEffect(() => {
+    if (!local) return
+    setSaved(false)
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(async () => {
+      if (localRef.current) {
+        await save(localRef.current)
+        setSaved(true)
+      }
+    }, 1000)
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current) }
+  }, [local])
 
   if (loading || !local) return <div className="p-4 text-gray-500">Loading...</div>
 
   const updateContextDoc = (key: string, value: string) => {
     setLocal({ ...local, contextDocs: { ...local.contextDocs, [key]: value } })
-    setSaved(false)
   }
 
   const updateVisual = (key: string, value: unknown) => {
     setLocal({ ...local, visual: { ...local.visual, [key]: value } })
-    setSaved(false)
   }
 
   const updateColor = (index: number, value: string) => {
@@ -104,7 +122,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
             }
           }
         })
-        setSaved(false)
       } finally {
         setUploadingFont(null)
       }
@@ -128,17 +145,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
   const handleSave = async () => {
     await save(local)
     setSaved(true)
-  }
-
-  // Display name for a font value
-  const fontDisplayName = (value: string): string => {
-    if (!value) return 'Default'
-    if (value.startsWith('custom:')) {
-      const id = value.slice(7)
-      const entry = (local.visual.fontLibrary ?? []).find(f => f.id === id)
-      return entry ? entry.name : 'Custom'
-    }
-    return value
   }
 
   const addPillar = () => {
@@ -230,6 +236,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               const currentValue = local.visual.fonts[role] ?? ''
               const fontLibrary = local.visual.fontLibrary ?? []
               const isUploading = uploadingFont === role
+              const isCustomSelected = currentValue.startsWith('custom:')
+              const selectedCustomId = isCustomSelected ? currentValue.slice(7) : null
+              const fontSizeKey = role === 'headline' ? 'headline' : role === 'body' ? 'body' : 'cta'
+              const fontSize = local.visual.fontSizes?.[fontSizeKey] ?? (role === 'headline' ? 56 : role === 'body' ? 38 : 48)
 
               return (
                 <div key={role}>
@@ -237,28 +247,66 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
                     {role.charAt(0).toUpperCase() + role.slice(1)} Font
                   </label>
 
-                  <select
-                    value={currentValue}
-                    onChange={(e) => handleFontSelect(role, e.target.value)}
-                    disabled={isUploading}
-                    className="w-full border rounded px-2 py-2 text-sm bg-white disabled:opacity-50"
-                  >
-                    <option value="">Default (sans-serif)</option>
+                  <div className="flex gap-1.5 items-center">
+                    <select
+                      value={currentValue}
+                      onChange={(e) => handleFontSelect(role, e.target.value)}
+                      disabled={isUploading}
+                      className="flex-1 border rounded px-2 py-2 text-sm bg-white disabled:opacity-50"
+                    >
+                      <option value="">Default (sans-serif)</option>
 
-                    <optgroup label="Preset Fonts">
-                      {PRESET_FONTS.map((f) => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </optgroup>
-
-                    {fontLibrary.length > 0 && (
-                      <optgroup label="Custom Fonts">
-                        {fontLibrary.map((f) => (
-                          <option key={f.id} value={`custom:${f.id}`}>{f.name}</option>
+                      <optgroup label="Preset Fonts">
+                        {PRESET_FONTS.map((f) => (
+                          <option key={f} value={f}>{f}</option>
                         ))}
                       </optgroup>
+
+                      {fontLibrary.length > 0 && (
+                        <optgroup label="Custom Fonts">
+                          {fontLibrary.map((f) => (
+                            <option key={f.id} value={`custom:${f.id}`}>{f.name}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
+
+                    {isCustomSelected && selectedCustomId && (
+                      <button
+                        title="Remove this custom font"
+                        onClick={() => {
+                          const newLibrary = fontLibrary.filter(e => e.id !== selectedCustomId)
+                          const customId = `custom:${selectedCustomId}`
+                          const newFonts = { ...local.visual.fonts }
+                          for (const r of FONT_ROLES) {
+                            if (newFonts[r] === customId) newFonts[r] = ''
+                          }
+                          setLocal({ ...local, visual: { ...local.visual, fontLibrary: newLibrary, fonts: newFonts } })
+                          setSaved(false)
+                        }}
+                        className="p-1.5 text-red-400 hover:text-red-600 border border-red-200 rounded hover:bg-red-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      </button>
                     )}
-                  </select>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <label className="text-xs text-gray-400 whitespace-nowrap">Size (px)</label>
+                    <input
+                      type="number"
+                      value={fontSize}
+                      min={8}
+                      max={200}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0
+                        updateVisual('fontSizes', { ...(local.visual.fontSizes ?? { headline: 56, body: 38, cta: 48 }), [fontSizeKey]: val })
+                      }}
+                      className="w-16 border rounded px-2 py-1 text-sm text-center"
+                    />
+                  </div>
 
                   <button
                     onClick={() => handleUploadFont(role)}
@@ -270,58 +318,38 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
                       : '+ Upload custom font...'
                     }
                   </button>
-
-                  {currentValue && (
-                    <p className="text-xs text-gray-400 mt-1 truncate">
-                      {fontDisplayName(currentValue)}
-                    </p>
-                  )}
                 </div>
               )
             })}
           </div>
-
-          {/* Custom font library list */}
-          {(local.visual.fontLibrary ?? []).length > 0 && (
-            <div className="mt-3 border rounded-lg p-3 bg-gray-50">
-              <p className="text-xs font-medium text-gray-500 mb-2">Uploaded custom fonts</p>
-              <div className="space-y-1">
-                {(local.visual.fontLibrary ?? []).map((f) => (
-                  <div key={f.id} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700">{f.name}</span>
-                    <button
-                      onClick={() => {
-                        const newLibrary = (local.visual.fontLibrary ?? []).filter(e => e.id !== f.id)
-                        // Reset any font role using this entry
-                        const customId = `custom:${f.id}`
-                        const newFonts = { ...local.visual.fonts }
-                        for (const role of FONT_ROLES) {
-                          if (newFonts[role] === customId) newFonts[role] = ''
-                        }
-                        setLocal({ ...local, visual: { ...local.visual, fontLibrary: newLibrary, fonts: newFonts } })
-                        setSaved(false)
-                      }}
-                      className="text-xs text-red-400 hover:text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Logo, CTA, Handle */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Logo</label>
-            <button
-              onClick={handleUploadLogo}
-              className="w-full border border-dashed rounded py-2 text-sm text-gray-500 hover:bg-gray-50"
-            >
-              {local.visual.logo ? '✓ Uploaded' : 'Upload logo...'}
-            </button>
+            {local.visual.logo ? (
+              <div className="border rounded p-2 bg-gray-50 space-y-2">
+                <img
+                  src={`/api/files/${local.visual.logo}`}
+                  alt="Logo"
+                  className="max-h-16 max-w-full object-contain mx-auto block"
+                />
+                <button
+                  onClick={handleUploadLogo}
+                  className="w-full text-xs text-blue-600 hover:underline"
+                >
+                  Replace logo...
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleUploadLogo}
+                className="w-full border border-dashed rounded py-2 text-sm text-gray-500 hover:bg-gray-50"
+              >
+                Upload logo...
+              </button>
+            )}
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Standard CTA</label>

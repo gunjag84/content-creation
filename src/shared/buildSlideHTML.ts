@@ -112,11 +112,12 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
   const ctaText = (isLast && slide.slide_type === 'cta' && v?.cta) ? v.cta : (slide.cta_text || '')
 
   // Zone overrides
+  const fontSizes = v?.fontSizes ?? { headline: 56, body: 38, cta: 48 }
   const zoneIds = ['hook', 'body', 'cta'] as const
   const zoneDefaults = {
-    hook: { top: 0, height: 340, font: headlineFont.family, fontSize: 56, color: primaryColor, weight: 'bold' as const },
-    body: { top: 340, height: 770, font: bodyFont.family, fontSize: 38, color: secondaryColor, weight: 'normal' as const },
-    cta: { top: 1110, height: 240, font: ctaFont.family, fontSize: 48, color: primaryColor, weight: 'bold' as const }
+    hook: { top: 0, height: 280, font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' as const },
+    body: { top: 280, height: 640, font: bodyFont.family, fontSize: fontSizes.body, color: secondaryColor, weight: 'normal' as const },
+    cta: { top: 920, height: 190, font: ctaFont.family, fontSize: fontSizes.cta, color: primaryColor, weight: 'bold' as const }
   }
 
   const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
@@ -138,14 +139,14 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     </div>`
   }).filter(Boolean).join('\n')
 
-  // Logo
+  // Logo — always above handle, locked in bottom zone
   const logoHtml = v?.logo
-    ? `<img src="${fileUrl(v.logo, baseUrl)}" style="position:absolute;${getLogoPositionStyle('bottom-center')};width:120px;height:auto;object-fit:contain;" alt="" />`
+    ? `<img src="${fileUrl(v.logo, baseUrl)}" style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);width:400px;height:auto;object-fit:contain;" alt="" />`
     : ''
 
-  // Handle
+  // Handle — bottom of slide, larger
   const handleHtml = v?.handle
-    ? `<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:20px;color:${secondaryColor};">${escHtml(v.handle)}</div>`
+    ? `<div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:30px;color:${secondaryColor};white-space:nowrap;">${escHtml(v.handle)}</div>`
     : ''
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: 1080px; height: 1350px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,${overlayOpacity}); }</style></head><body>${bgWrapperHtml}<div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`

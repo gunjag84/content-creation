@@ -23,6 +23,20 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       .catch(() => {})
   }, [])
 
+  // Auto-select first item in each dropdown when settings load (if nothing selected yet)
+  useEffect(() => {
+    if (!settings) return
+    if (!store.selectedPillar && settings.pillars.length > 0) {
+      store.setField('selectedPillar', settings.pillars[0].name)
+    }
+    if (!store.selectedTheme && settings.themes.length > 0) {
+      store.setField('selectedTheme', settings.themes[0].name)
+    }
+    if (!store.selectedMechanic && settings.mechanics.length > 0) {
+      store.setField('selectedMechanic', settings.mechanics[0].name)
+    }
+  }, [settings])
+
   const canGenerate = store.selectedPillar && store.selectedTheme && store.selectedMechanic
 
   const handleGenerate = () => {
@@ -103,7 +117,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedPillar', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
           </select>
         </div>
@@ -114,7 +127,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedTheme', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {themes.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
           </select>
         </div>
@@ -125,7 +137,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             onChange={(e) => store.setField('selectedMechanic', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">Select...</option>
             {mechanics.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
           </select>
         </div>

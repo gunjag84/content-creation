@@ -63,9 +63,16 @@ const FontLibraryEntrySchema = z.object({
 
 export type FontLibraryEntry = z.infer<typeof FontLibraryEntrySchema>
 
+const FontSizesSchema = z.object({
+  headline: z.number().default(56),
+  body: z.number().default(38),
+  cta: z.number().default(48)
+})
+
 const VisualSchema = z.object({
   colors: z.array(z.string()).default(['#000000', '#666666', '#ffffff']),
   fonts: FontPathSchema.default({ headline: '', body: '', cta: '' }),
+  fontSizes: FontSizesSchema.default({ headline: 56, body: 38, cta: 48 }),
   fontLibrary: z.array(FontLibraryEntrySchema).default([]),
   logo: z.string().default(''),
   cta: z.string().default(''),
@@ -92,7 +99,7 @@ const MechanicSchema = z.object({
 
 export const SettingsSchema = z.object({
   contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
-  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontLibrary: [], logo: '', cta: '', handle: '' }),
+  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   themes: z.array(ThemeSchema).default([]),
   mechanics: z.array(MechanicSchema).default([])

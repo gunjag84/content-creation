@@ -98,10 +98,11 @@ export function SlidePreview({ slide, allSlides, settings, className }: SlidePre
   const isLast = slideIdx === allSlides.length - 1
   const ctaText = (isLast && slide.slide_type === 'cta' && v?.cta) ? v.cta : (slide.cta_text || '')
 
+  const fontSizes = v?.fontSizes ?? { headline: 56, body: 38, cta: 48 }
   const zoneDefaults = {
-    hook: { top: 0, height: 340, font: headlineFont.family, fontSize: 56, color: primaryColor, weight: 'bold' as const },
-    body: { top: 340, height: 770, font: bodyFont.family, fontSize: 38, color: secondaryColor, weight: 'normal' as const },
-    cta:  { top: 1110, height: 240, font: ctaFont.family, fontSize: 48, color: primaryColor, weight: 'bold' as const },
+    hook: { top: 0, height: 280, font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' as const },
+    body: { top: 280, height: 640, font: bodyFont.family, fontSize: fontSizes.body, color: secondaryColor, weight: 'normal' as const },
+    cta:  { top: 920, height: 190, font: ctaFont.family, fontSize: fontSizes.cta, color: primaryColor, weight: 'bold' as const },
   }
 
   const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
@@ -186,33 +187,33 @@ export function SlidePreview({ slide, allSlides, settings, className }: SlidePre
           )
         })}
 
-        {/* logo */}
+        {/* logo — above handle, locked in bottom zone */}
         {v?.logo && (
           <img
             src={fileUrl(v.logo, baseUrl)}
             alt=""
             style={{
               position: 'absolute',
-              bottom: 40,
+              bottom: 90,
               left: '50%',
               transform: 'translateX(-50%)',
-              width: 120,
+              width: 400,
               height: 'auto',
               objectFit: 'contain',
             }}
           />
         )}
 
-        {/* handle */}
+        {/* handle — larger, bottom of slide */}
         {v?.handle && (
           <div
             style={{
               position: 'absolute',
-              bottom: 30,
+              bottom: 24,
               left: '50%',
               transform: 'translateX(-50%)',
               fontFamily: bodyFont.family,
-              fontSize: 20,
+              fontSize: 30,
               color: secondaryColor,
               whiteSpace: 'nowrap',
             }}
