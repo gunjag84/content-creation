@@ -20,6 +20,9 @@ export interface Slide {
   cta_text: string
   overlay_opacity: number
   custom_background_path?: string
+  background_position_x?: number  // 0-100 (%), default 50
+  background_position_y?: number  // 0-100 (%), default 50
+  background_scale?: number       // 1.0-3.0 (transform scale), default 1.0
   zone_overrides?: Record<string, ZoneOverride>
 }
 
@@ -52,9 +55,18 @@ const FontPathSchema = z.object({
   cta: z.string().default('')
 })
 
+const FontLibraryEntrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  path: z.string()
+})
+
+export type FontLibraryEntry = z.infer<typeof FontLibraryEntrySchema>
+
 const VisualSchema = z.object({
   colors: z.array(z.string()).default(['#000000', '#666666', '#ffffff']),
   fonts: FontPathSchema.default({ headline: '', body: '', cta: '' }),
+  fontLibrary: z.array(FontLibraryEntrySchema).default([]),
   logo: z.string().default(''),
   cta: z.string().default(''),
   handle: z.string().default('')
@@ -80,7 +92,7 @@ const MechanicSchema = z.object({
 
 export const SettingsSchema = z.object({
   contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
-  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, logo: '', cta: '', handle: '' }),
+  visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   themes: z.array(ThemeSchema).default([]),
   mechanics: z.array(MechanicSchema).default([])
@@ -150,6 +162,9 @@ export interface SlideRow {
   cta_text: string | null
   overlay_opacity: number
   custom_background_path: string | null
+  background_position_x: number | null
+  background_position_y: number | null
+  background_scale: number | null
   zone_overrides: string | null
   created_at: number
 }

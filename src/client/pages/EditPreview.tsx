@@ -2,20 +2,23 @@ import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { SlideEditor } from '../components/SlideEditor'
 import { SlidePreview } from '../components/SlidePreview'
+import { BackgroundPanEditor } from '../components/BackgroundPanEditor'
 import { api } from '../lib/apiClient'
 import { useState } from 'react'
-import type { Slide } from '@shared/types'
 
 interface EditPreviewProps {
   onRender: () => void
+  onBack: () => void
 }
 
-export function EditPreview({ onRender }: EditPreviewProps) {
-  const { slides, caption, setSlide, setCaption, setRenderedImages } = useWizardStore()
+export function EditPreview({ onRender, onBack }: EditPreviewProps) {
+  const { slides, caption, setSlide, setCaption, setRenderedImages, applyBackgroundToAll } = useWizardStore()
   const { settings } = useSettingsStore()
   const [activeSlide, setActiveSlide] = useState(0)
   const [rendering, setRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imagePanMode, setImagePanMode] = useState(false)
+  const [uploadingBg, setUploadingBg] = useState(false)
 
   const handleRender = async () => {
     setRendering(true)
@@ -34,21 +37,58 @@ export function EditPreview({ onRender }: EditPreviewProps) {
     }
   }
 
+  const handleUploadBackground = async (file: File) => {
+    setUploadingBg(true)
+    try {
+      const result = await api.upload(file)
+      setSlide(activeSlide, 'custom_background_path', result.path)
+      setImagePanMode(true)
+    } finally {
+      setUploadingBg(false)
+    }
+  }
+
+  const handleRemoveBackground = () => {
+    setSlide(activeSlide, 'custom_background_path', '')
+    setSlide(activeSlide, 'background_position_x', 50)
+    setSlide(activeSlide, 'background_position_y', 50)
+    setSlide(activeSlide, 'background_scale', 1.0)
+    setImagePanMode(false)
+  }
+
   if (slides.length === 0) {
-    return <div className="p-4 text-gray-500">No slides to edit. Go back to Create Post.</div>
+    return (
+      <div className="p-4 space-y-3">
+        <p className="text-gray-500">No slides to edit.</p>
+        <button onClick={onBack} className="text-sm text-blue-600 hover:underline">Back</button>
+      </div>
+    )
   }
 
   const currentSlide = slides[activeSlide]
+  const baseUrl = window.location.origin
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Edit & Preview</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="px-3 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+          >
+            Back
+          </button>
+          <h1 className="text-2xl font-bold">Edit & Preview</h1>
+        </div>
         <button
           onClick={handleRender}
           disabled={rendering}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
+          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
         >
+          {rendering && (
+            <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+          )}
           {rendering ? 'Rendering...' : 'Render PNGs'}
         </button>
       </div>
@@ -63,24 +103,27 @@ export function EditPreview({ onRender }: EditPreviewProps) {
           {slides.map((s, i) => (
             <button
               key={s.uid}
-              onClick={() => setActiveSlide(i)}
+              onClick={() => { setActiveSlide(i); setImagePanMode(false) }}
               className={`px-3 py-1.5 rounded text-sm ${
                 i === activeSlide ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {i + 1}. {s.slide_type}
+              Slide {i + 1}.
             </button>
           ))}
         </div>
       )}
 
-      {/* Editor + Preview side by side */}
-      <div className="grid grid-cols-2 gap-6">
+      {/* Editor + Preview/Pan side by side */}
+      <div className="grid grid-cols-2 gap-6 items-start">
         <div className="space-y-4">
           <SlideEditor
             slide={currentSlide}
             index={activeSlide}
             onChange={setSlide}
+            onUploadBackground={handleUploadBackground}
+            onEnterPanMode={() => setImagePanMode(true)}
+            uploadingBg={uploadingBg}
           />
 
           {/* Caption editor */}
@@ -99,12 +142,26 @@ export function EditPreview({ onRender }: EditPreviewProps) {
         </div>
 
         <div>
-          <SlidePreview
-            slide={currentSlide}
-            allSlides={slides}
-            settings={settings}
-            className="max-w-sm"
-          />
+          {imagePanMode ? (
+            <BackgroundPanEditor
+              slide={currentSlide}
+              slideIndex={activeSlide}
+              totalSlides={slides.length}
+              onChange={setSlide}
+              onApplyToAll={() => applyBackgroundToAll(activeSlide)}
+              onDone={() => setImagePanMode(false)}
+              onUpload={handleUploadBackground}
+              onRemove={handleRemoveBackground}
+              baseUrl={baseUrl}
+            />
+          ) : (
+            <SlidePreview
+              slide={currentSlide}
+              allSlides={slides}
+              settings={settings}
+              className="max-w-sm"
+            />
+          )}
         </div>
       </div>
     </div>

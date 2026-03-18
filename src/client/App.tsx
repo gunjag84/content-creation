@@ -12,8 +12,8 @@ type Page = 'brand' | 'create' | 'edit' | 'review' | 'history' | 'login'
 
 export function App() {
   const [page, setPage] = useState<Page>('create')
+  const [pageHistory, setPageHistory] = useState<Page[]>([])
   const [authChecked, setAuthChecked] = useState(false)
-  const wizardStep = useWizardStore((s) => s.step)
 
   useEffect(() => {
     fetch('/api/auth/check')
@@ -33,20 +33,37 @@ export function App() {
     return <Login onSuccess={() => setPage('create')} />
   }
 
-  // Auto-navigate based on wizard step
+  // Navigate forward - resets wizard only when going to 'create' via sidebar
   const navigate = (p: Page) => {
     if (p === 'create') useWizardStore.getState().reset()
+    setPageHistory(h => [...h, page])
     setPage(p)
   }
 
+  // Go back one step without resetting wizard state
+  const goBack = () => {
+    if (pageHistory.length === 0) return
+    const prev = pageHistory[pageHistory.length - 1]
+    setPageHistory(h => h.slice(0, -1))
+    setPage(prev)
+  }
+
+  const hasBack = pageHistory.length > 0
+
   const renderPage = () => {
     switch (page) {
-      case 'brand': return <BrandConfig />
-      case 'create': return <CreatePost onGenerated={() => setPage('edit')} />
-      case 'edit': return <EditPreview onRender={() => setPage('review')} />
-      case 'review': return <ReviewDownload onDone={() => navigate('history')} />
-      case 'history': return <PostHistory />
-      default: return <CreatePost onGenerated={() => setPage('edit')} />
+      case 'brand':
+        return <BrandConfig onBack={hasBack ? goBack : undefined} />
+      case 'create':
+        return <CreatePost onGenerated={() => { setPageHistory(h => [...h, page]); setPage('edit') }} />
+      case 'edit':
+        return <EditPreview onRender={() => { setPageHistory(h => [...h, page]); setPage('review') }} onBack={goBack} />
+      case 'review':
+        return <ReviewDownload onDone={() => navigate('history')} onBack={goBack} />
+      case 'history':
+        return <PostHistory />
+      default:
+        return <CreatePost onGenerated={() => { setPageHistory(h => [...h, page]); setPage('edit') }} />
     }
   }
 

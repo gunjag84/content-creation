@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ContextEditor } from '../components/ContextEditor'
 import { api } from '../lib/apiClient'
-import type { Settings } from '@shared/types'
+import type { Settings, FontLibraryEntry } from '@shared/types'
+import { PRESET_FONTS } from '@shared/fonts'
 
 const contextDocLabels: Record<string, string> = {
   brandVoice: 'Brand Voice',
@@ -13,15 +14,23 @@ const contextDocLabels: Record<string, string> = {
   pov: 'Point of View'
 }
 
-export function BrandConfig() {
+const FONT_ROLES = ['headline', 'body', 'cta'] as const
+type FontRole = typeof FONT_ROLES[number]
+
+interface BrandConfigProps {
+  onBack?: () => void
+}
+
+export function BrandConfig({ onBack }: BrandConfigProps) {
   const { settings, loading, load, save } = useSettingsStore()
   const [local, setLocal] = useState<Settings | null>(null)
   const [saved, setSaved] = useState(false)
+  const [uploadingFont, setUploadingFont] = useState<FontRole | null>(null)
 
   useEffect(() => { load() }, [])
   useEffect(() => { if (settings) setLocal(structuredClone(settings)) }, [settings])
 
-  if (loading || !local) return <div className="p-4">Loading...</div>
+  if (loading || !local) return <div className="p-4 text-gray-500">Loading...</div>
 
   const updateContextDoc = (key: string, value: string) => {
     setLocal({ ...local, contextDocs: { ...local.contextDocs, [key]: value } })
@@ -39,20 +48,51 @@ export function BrandConfig() {
     updateVisual('colors', colors)
   }
 
-  const handleUpload = async (field: string) => {
+  const handleFontSelect = (role: FontRole, value: string) => {
+    updateVisual('fonts', { ...local.visual.fonts, [role]: value })
+  }
+
+  const handleUploadFont = (role: FontRole) => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = field === 'logo' ? 'image/*' : '.ttf,.otf,.woff,.woff2'
+    input.accept = '.ttf,.otf,.woff,.woff2'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      setUploadingFont(role)
+      try {
+        const result = await api.upload(file)
+        const fontName = file.name.replace(/\.[^.]+$/, '') // strip extension
+        const newEntry: FontLibraryEntry = { id: crypto.randomUUID(), name: fontName, path: result.path }
+        // Functional updater avoids stale closure over `local` during async file picker
+        setLocal(prev => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            visual: {
+              ...prev.visual,
+              fontLibrary: [...(prev.visual.fontLibrary ?? []), newEntry],
+              fonts: { ...prev.visual.fonts, [role]: `custom:${newEntry.id}` }
+            }
+          }
+        })
+        setSaved(false)
+      } finally {
+        setUploadingFont(null)
+      }
+    }
+    input.click()
+  }
+
+  const handleUploadLogo = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
     input.onchange = async () => {
       const file = input.files?.[0]
       if (!file) return
       const result = await api.upload(file)
-      if (field.startsWith('fonts.')) {
-        const fontKey = field.split('.')[1]
-        updateVisual('fonts', { ...local.visual.fonts, [fontKey]: result.path })
-      } else {
-        updateVisual(field, result.path)
-      }
+      updateVisual('logo', result.path)
     }
     input.click()
   }
@@ -62,12 +102,19 @@ export function BrandConfig() {
     setSaved(true)
   }
 
-  // Pillars list editor
+  // Display name for a font value
+  const fontDisplayName = (value: string): string => {
+    if (!value) return 'Default'
+    if (value.startsWith('custom:')) {
+      const id = value.slice(7)
+      const entry = (local.visual.fontLibrary ?? []).find(f => f.id === id)
+      return entry ? entry.name : 'Custom'
+    }
+    return value
+  }
+
   const addPillar = () => {
-    setLocal({
-      ...local,
-      pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0 }]
-    })
+    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0 }] })
   }
 
   const updatePillar = (index: number, field: string, value: string | number) => {
@@ -85,7 +132,17 @@ export function BrandConfig() {
   return (
     <div className="max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Brand Configuration</h1>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="px-3 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+            >
+              ← Back
+            </button>
+          )}
+          <h1 className="text-2xl font-bold">Brand Configuration</h1>
+        </div>
         <button
           onClick={handleSave}
           className={`px-5 py-2 rounded-lg text-sm font-medium ${
@@ -113,6 +170,8 @@ export function BrandConfig() {
       {/* Visual Identity */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Visual Identity</h2>
+
+        {/* Colors */}
         <div className="grid grid-cols-3 gap-4">
           {['Primary', 'Secondary', 'Background'].map((label, i) => (
             <div key={i}>
@@ -135,28 +194,105 @@ export function BrandConfig() {
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          {['headline', 'body', 'cta'].map((font) => (
-            <div key={font}>
-              <label className="block text-xs text-gray-500 mb-1">{font.charAt(0).toUpperCase() + font.slice(1)} Font</label>
-              <button
-                onClick={() => handleUpload(`fonts.${font}`)}
-                className="w-full border border-dashed rounded py-2 text-sm text-gray-500 hover:bg-gray-50"
-              >
-                {local.visual.fonts[font as keyof typeof local.visual.fonts] || 'Upload font...'}
-              </button>
+        {/* Fonts */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Fonts</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {FONT_ROLES.map((role) => {
+              const currentValue = local.visual.fonts[role] ?? ''
+              const fontLibrary = local.visual.fontLibrary ?? []
+              const isUploading = uploadingFont === role
+
+              return (
+                <div key={role}>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    {role.charAt(0).toUpperCase() + role.slice(1)} Font
+                  </label>
+
+                  <select
+                    value={currentValue}
+                    onChange={(e) => handleFontSelect(role, e.target.value)}
+                    disabled={isUploading}
+                    className="w-full border rounded px-2 py-2 text-sm bg-white disabled:opacity-50"
+                  >
+                    <option value="">Default (sans-serif)</option>
+
+                    <optgroup label="Preset Fonts">
+                      {PRESET_FONTS.map((f) => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </optgroup>
+
+                    {fontLibrary.length > 0 && (
+                      <optgroup label="Custom Fonts">
+                        {fontLibrary.map((f) => (
+                          <option key={f.id} value={`custom:${f.id}`}>{f.name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+
+                  <button
+                    onClick={() => handleUploadFont(role)}
+                    disabled={isUploading}
+                    className="mt-1.5 text-xs text-blue-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {isUploading
+                      ? <><span className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin" /> Uploading...</>
+                      : '+ Upload custom font...'
+                    }
+                  </button>
+
+                  {currentValue && (
+                    <p className="text-xs text-gray-400 mt-1 truncate">
+                      {fontDisplayName(currentValue)}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Custom font library list */}
+          {(local.visual.fontLibrary ?? []).length > 0 && (
+            <div className="mt-3 border rounded-lg p-3 bg-gray-50">
+              <p className="text-xs font-medium text-gray-500 mb-2">Uploaded custom fonts</p>
+              <div className="space-y-1">
+                {(local.visual.fontLibrary ?? []).map((f) => (
+                  <div key={f.id} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-700">{f.name}</span>
+                    <button
+                      onClick={() => {
+                        const newLibrary = (local.visual.fontLibrary ?? []).filter(e => e.id !== f.id)
+                        // Reset any font role using this entry
+                        const customId = `custom:${f.id}`
+                        const newFonts = { ...local.visual.fonts }
+                        for (const role of FONT_ROLES) {
+                          if (newFonts[role] === customId) newFonts[role] = ''
+                        }
+                        setLocal({ ...local, visual: { ...local.visual, fontLibrary: newLibrary, fonts: newFonts } })
+                        setSaved(false)
+                      }}
+                      className="text-xs text-red-400 hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
+        {/* Logo, CTA, Handle */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Logo</label>
             <button
-              onClick={() => handleUpload('logo')}
+              onClick={handleUploadLogo}
               className="w-full border border-dashed rounded py-2 text-sm text-gray-500 hover:bg-gray-50"
             >
-              {local.visual.logo || 'Upload logo...'}
+              {local.visual.logo ? '✓ Uploaded' : 'Upload logo...'}
             </button>
           </div>
           <div>

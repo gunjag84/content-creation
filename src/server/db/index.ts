@@ -31,6 +31,11 @@ export function initDatabase(dbPath?: string): Database.Database {
     const cols = (db.prepare('PRAGMA table_info(posts)').all() as { name: string }[]).map(c => c.name)
     if (!cols.includes('template_id')) db.exec('ALTER TABLE posts ADD COLUMN template_id INTEGER')
     if (!cols.includes('ad_hoc')) db.exec('ALTER TABLE posts ADD COLUMN ad_hoc INTEGER NOT NULL DEFAULT 0')
+
+    const slideCols = (db.prepare('PRAGMA table_info(slides)').all() as { name: string }[]).map(c => c.name)
+    if (!slideCols.includes('background_position_x')) db.exec('ALTER TABLE slides ADD COLUMN background_position_x REAL DEFAULT 50')
+    if (!slideCols.includes('background_position_y')) db.exec('ALTER TABLE slides ADD COLUMN background_position_y REAL DEFAULT 50')
+    if (!slideCols.includes('background_scale')) db.exec('ALTER TABLE slides ADD COLUMN background_scale REAL DEFAULT 1.0')
   }
 
   return db

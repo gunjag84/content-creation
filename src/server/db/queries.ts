@@ -65,14 +65,17 @@ export interface SlideInsert {
   cta_text?: string
   overlay_opacity?: number
   custom_background_path?: string
+  background_position_x?: number
+  background_position_y?: number
+  background_scale?: number
   zone_overrides?: string
 }
 
 export function insertSlide(data: SlideInsert): number {
   const db = getDatabase()
   const stmt = db.prepare(`
-    INSERT INTO slides (post_id, slide_number, slide_type, hook_text, body_text, cta_text, overlay_opacity, custom_background_path, zone_overrides)
-    VALUES (@post_id, @slide_number, @slide_type, @hook_text, @body_text, @cta_text, @overlay_opacity, @custom_background_path, @zone_overrides)
+    INSERT INTO slides (post_id, slide_number, slide_type, hook_text, body_text, cta_text, overlay_opacity, custom_background_path, background_position_x, background_position_y, background_scale, zone_overrides)
+    VALUES (@post_id, @slide_number, @slide_type, @hook_text, @body_text, @cta_text, @overlay_opacity, @custom_background_path, @background_position_x, @background_position_y, @background_scale, @zone_overrides)
   `)
   const result = stmt.run({
     post_id: data.post_id,
@@ -83,6 +86,9 @@ export function insertSlide(data: SlideInsert): number {
     cta_text: data.cta_text ?? null,
     overlay_opacity: data.overlay_opacity ?? 0.5,
     custom_background_path: data.custom_background_path ?? null,
+    background_position_x: data.background_position_x ?? 50,
+    background_position_y: data.background_position_y ?? 50,
+    background_scale: data.background_scale ?? 1.0,
     zone_overrides: data.zone_overrides ?? null
   })
   return result.lastInsertRowid as number
