@@ -102,14 +102,14 @@ export const methodStructures: Record<string, { core: string; carousel: string; 
   },
   'M8 Liste': {
     core: 'Listicle format. High save value. Each item must deliver standalone value.',
-    carousel: `- [S1] Hook: Promise of the list. Number + what they'll get.
-- [S2-N] One item per slide. Each with: headline + short explanation + emotional punch
+    carousel: `- [S1] Hook: Curiosity-Gap Hook bevorzugt. Der Hook soll Neugier wecken, nicht die Liste ankuendigen.
+- [S2-N] One item per slide. Each with: headline + short explanation + emotional punch. Wiederkehrender Phrasen-Anker: Jeder Content-Slide beginnt mit dem gleichen Satzanfang, der die Slides rhythmisch verbindet (z.B. "Seitdem mein Handy in der Kueche schlaeft:").
 - [Last] Summary CTA or "Welcher Punkt trifft Dich am meisten?"`,
     single: `- Hook: The list promise
 - Body: Items with brief explanations. Breathing room between items.
 - CTA: "Speicher Dir das" (lists have high save rates)`,
-    arc: 'Promise -> Surprise on each item -> Save value',
-    keyRule: 'Each item must hit differently. Not 5 variations of the same point. Surprise on at least 2 of 5.'
+    arc: 'Curiosity -> Surprise on each item -> Save value',
+    keyRule: 'Each item must hit differently. Not 5 variations of the same point. Surprise on at least 2 of 5. Der wiederkehrende Phrasen-Anker auf jedem Slide erzeugt Rhythmus und macht die Slides als Serie erkennbar.'
   },
   'M9 Mythos vs. Realitaet': {
     core: 'Debunk a common belief. The surprise creates engagement, the truth creates value.',
@@ -183,7 +183,7 @@ export const hookFormulas: Record<string, string> = {
   'M5 Testimonial': 'One powerful sentence from the testimonial in quotes.\nBeispiele: "\'Seit 3 Wochen schlafe ich anders ein. Besser.\'" / "\'Ich dachte, Dankbarkeit ist was fuer Esoteriker. Dann hab ich es ausprobiert.\'"',
   'M6 Zitat & Kommentar': 'The quote. Attributed. Punchy.\nBeispiele: "\'40% deines Gluecks kannst Du selbst beeinflussen.\' - Sonja Lyubomirsky"',
   'M7 Faktencheck': 'Number + surprising claim.\nBeispiele: "40% Deines Gluecks haengen von einer einzigen Sache ab." / "25% gluecklicher in 3 Wochen. So geht\'s."',
-  'M8 Liste': 'Number + what they\'ll get.\nBeispiele: "5 Dinge, die berufstaetige Muetter nicht mehr tun sollten." / "3 Abendrituale, die in unter 5 Minuten alles veraendern."',
+  'M8 Liste': 'Curiosity Gap bevorzugt - die Liste als Nebeneffekt, nicht als Versprechen.\nBeispiele: "Wir haben jetzt getrennte Schlafzimmer. Und es tut mir so gut!" (Bait-and-Switch) / "5 Dinge, die berufstaetige Muetter nicht mehr tun sollten." (klassisch)',
   'M9 Mythos vs. Realitaet': 'The myth stated as if true.\nBeispiele: "\'Dankbarkeitstagebuecher sind was fuer Esoteriker.\'" / "\'Wenn die Kinder groesser sind, wird es einfacher.\'"',
   'M10 Anleitung': 'Problem + promise of solution.\nBeispiele: "Du willst abends abschalten, aber Dein Kopf hoert nicht auf?" / "3 Schritte, die Deinen Abend veraendern."',
   'M11 Call to Action': 'The need/desire the product fulfills - NOT the product name.\nBeispiele: "Der letzte Gedanke am Tag sollte etwas Schoenes sein." / "3 Minuten. Ein Buch. Eine Frage."',
@@ -239,4 +239,8 @@ export const antiPatterns = `## Verboten - NIEMALS verwenden
 - Nicht Instagram-Guru. Kein "Ich zeige dir, wie du..." Kein "Hier sind meine Top-Tipps..."
 - Nicht Corporate-warm. Kein "Wir bei LEBEN.LIEBEN glauben..."
 - Kein perfektes Leben. Jules Leben ist chaotisch. Kein "Seit ich das Journal nutze, ist alles perfekt."
-- Maximal 1 Ausrufezeichen pro Post.`
+- Maximal 1 Ausrufezeichen pro Post.
+- Keine abstrakten Emotionswoerter wenn konkrete Alltagssprache moeglich ist. "Erschoepfung" -> "Dauer-Stress". "Zu leer sein" -> "Nur noch funktionieren". Immer die Version waehlen, die man beim Kaffee sagen wuerde.
+- Keine karrierefokussierten Details. "Meetings, Projekte, Praesentationen" -> "Kita, Schule, Brotdose, Waesche". Die Zielgruppe denkt in Kinderalltag, nicht Bueroalltag.
+- Keine Opfer-Sprache. "Ich habe wegen einer Brotdose geweint" -> "Ich bin an die Decke gegangen". Jule ist stark, nicht hilflos.
+- Keine Hedging-CTAs bei Convert Demand. "Falls das etwas fuer Dich sein koennte" -> "Wann legst Du Dir deins auf deinen Nachttisch?"`

@@ -53,6 +53,10 @@ Du schreibst einen ${method} Post ueber ${area}${approach ? ' durch ' + approach
 
 DEINE STIMME: Wie eine Freundin beim Kaffee. Warm, persoenlich, ehrlich, ermutigend. Aus eigener Erfahrung, nie aus der Theorie. Konkrete Alltagsszenen statt Abstraktion. "Du" (grossgeschrieben: Du, Dir, Dich, Dein).
 
+SPRACHE: Immer konkret und umgangssprachlich, nie abstrakt. "Dauer-Stress" statt "Erschoepfung". "Nur noch funktionieren" statt "zu leer sein". "An die Decke gehen" statt "weinen". Woerter benutzen, die eine Mutter beim Kaffee sagen wuerde, nicht Woerter aus einem Psychologie-Ratgeber.
+
+ALLTAGSDETAILS: Kita, Schule, Brotdose, Waesche, Abendbrot - die Welt der Zielgruppe. Nicht: Meetings, Projekte, Praesentationen (zu karrierefokussiert). Die Spannung der Zielgruppe ist Kinder + Job, nicht Job allein.
+
 DEIN PRODUKT: LEBEN.LIEBEN Dankbarkeitstagebuch. 100 Eintraege, ein Jahr. WEIL3-Methode: bei einem Grund bleiben, dreimal tiefer fragen. Letzter Gedanke am Tag. Analog, 3 Minuten, radikal einfach.
 
 WICHTIGE PRODUKTREGELN:
@@ -87,6 +91,9 @@ Was in den ersten 3 Sekunden passieren muss:
 - ODER eine Spannung (ungeloeste Frage, Widerspruch)
 - ODER Wiedererkennung ("Das bin ich!")
 - ODER Ueberraschung (etwas Unerwartetes)
+- ODER eine Curiosity Gap / Bait-and-Switch: Der Hook klingt nach etwas voellig anderem als der Post tatsaechlich behandelt. Beispiel: "Wir haben jetzt getrennte Schlafzimmer. Und es tut mir so gut!" - klingt nach Beziehungskrise, handelt aber davon, dass das Handy in der Kueche schlaeft. Dieser Typ erzeugt die staerkste Neugier.
+
+Die beste Hook-Strategie: Der Leser MUSS wischen/weiterlesen, weil der Hook allein nicht aufloesbar ist.
 
 Hook-Formel fuer ${method}:
 ${hookFormulaText}
@@ -151,10 +158,10 @@ Die Caption ist ein eigenstaendiges Stueck Content, NICHT eine Zusammenfassung d
 - hook_text: Der Hook (oben auf dem Slide)
 - body_text: Der Haupttext (Mitte)
 - cta_text: CTA (unten)`
-    : `GENAU ${carouselCount} Slides:
-- Slide 1 (cover): NUR hook_text. body_text und cta_text LEER.
-- Slides 2-${carouselCount - 1} (content): body_text ist der Hauptinhalt. hook_text und cta_text LEER.
-- Slide ${carouselCount} (cta): cta_text + optional body_text. hook_text LEER.`
+    : `GENAU ${carouselCount} Slides. JEDER Slide hat ALLE 3 Textfelder (hook_text, body_text, cta_text):
+- Slide 1 (cover): hook_text = starker Hook. body_text = Kontext oder Einstieg. cta_text = Neugier-Trigger oder Swipe-Aufforderung.
+- Slides 2-${carouselCount - 1} (content): hook_text = Slide-Ueberschrift. body_text = Hauptinhalt. cta_text = Ueberleitung oder Mini-CTA.
+- Slide ${carouselCount} (cta): hook_text = zusammenfassende Ueberschrift. body_text = Kernbotschaft. cta_text = klarer Call-to-Action.`
 
   sections.push(`## Format-Vorgaben
 
@@ -179,18 +186,25 @@ Antworte NUR mit validem JSON. Kein Markdown, keine Code-Bloecke.
 
 ${contentType === 'single'
     ? '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'
-    : '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"","cta_text":""},{"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}'}
+    : '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"content","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"cta","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'}
 
 Regeln:
-- slide_type "cover" fuer Slide 1${contentType === 'carousel' ? ' (nur hook_text, body_text und cta_text muessen leer sein)' : ''}
-- ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides\n- ' : ''}Alle Felder muessen vorhanden sein (auch wenn leer: "")`)
+- JEDER Slide hat ALLE 3 Textfelder befuellt (hook_text, body_text, cta_text). KEIN Feld darf leer sein.
+- slide_type "cover" fuer Slide 1
+- ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides' : 'Alle Felder muessen vorhanden sein'}`)
 
   // --- Section 11: Performance Learnings (empty for now) ---
   // Will be populated by the learning system (PQFL) once performance data flows back.
 
-  // --- Section 12: Impulse ---
+  // --- Section 12: Real Life Situation ---
   if (impulse && impulse.trim()) {
-    sections.push(`## Zusaetzliche Anweisung\n\n${impulse.trim()}`)
+    sections.push(`## Reale Situation (Impulse)
+
+Dieser Post basiert auf einer echten Situation. Verwende diese Details als Ausgangspunkt - erfinde KEINE andere Szene:
+
+${impulse.trim()}
+
+Baue den Post um diese Situation herum. Du darfst Details leicht anpassen fuer den Lesefluss, aber die Kernsituation muss erkennbar bleiben.`)
   }
 
   // Token budget check
@@ -217,10 +231,12 @@ Ziel: Reichweite, Saves, Shares. Wert liefern, nichts verkaufen.`
   if (pillarLower.includes('convert')) {
     return `## CTA-Kalibrierung: ${pillar}
 
-Produkt erwaehnen, aber als Einladung, nie als Pitch.
-Formulierung: "Wenn Du magst..." / "Falls das etwas fuer Dich sein koennte..."
+Produkt erwaehnen, aber als selbstverstaendlichen Teil von Jules Leben, nicht als Pitch.
+Das Produkt gehoert zu Jules Abend wie der Nachttisch zum Schlafzimmer. Nicht anbieten, sondern zeigen dass es da ist.
+Formulierung: "Mein LEBEN.LIEBEN Journal liegt auf meinem Nachttisch." / "Ich greife nach meinem Journal."
 Produkt fruehestens auf Slide ${Math.max(slideCount - 2, 4)} bei Carousel, nie auf Slide 1-3.
-CTA: "Link in Bio" / "Schau mal im Shop vorbei, wenn Du magst"`
+CTA: Nimm an, dass die Leserin es will. Frage WANN, nicht OB. "Wann legst Du Dir deins auf deinen Nachttisch?" statt "Link in Bio, falls das etwas fuer Dich sein koennte."
+NICHT: hedging CTAs wie "falls", "wenn Du magst", "koennte". Die Leserin ist hier, weil sie sich angesprochen fuehlt.`
   }
 
   // Nurture Loyalty

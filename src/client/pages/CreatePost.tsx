@@ -273,13 +273,13 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       <div className="space-y-3">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Optional</p>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Impulse</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Real Life Situation</label>
           <textarea
             value={store.impulse}
             onChange={(e) => store.setField('impulse', e.target.value)}
             rows={3}
             className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-            placeholder="Additional guidance for this post..."
+            placeholder="Describe a real situation from Jule's life that anchors this post..."
           />
         </div>
       </div>
