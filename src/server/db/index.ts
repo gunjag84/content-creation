@@ -32,6 +32,96 @@ export function initDatabase(dbPath?: string): Database.Database {
     if (!cols.includes('template_id')) db.exec('ALTER TABLE posts ADD COLUMN template_id INTEGER')
     if (!cols.includes('ad_hoc')) db.exec('ALTER TABLE posts ADD COLUMN ad_hoc INTEGER NOT NULL DEFAULT 0')
 
+    // MECE dimension migration: theme+mechanic -> area+approach+method+tonality
+    if (!cols.includes('area')) {
+      db.exec('ALTER TABLE posts ADD COLUMN area TEXT')
+      db.exec('ALTER TABLE posts ADD COLUMN approach TEXT')
+      db.exec('ALTER TABLE posts ADD COLUMN method TEXT')
+      db.exec('ALTER TABLE posts ADD COLUMN tonality TEXT')
+
+      // Migrate existing data with hardcoded mappings
+      const themeMigrationMap: Record<string, { area: string | null, approach: string | null }> = {
+        'Alltag berufstaetiger Muetter':               { area: 'L3 Alltagslogistik',           approach: null },
+        'Alltag berufstätiger Mütter':                 { area: 'L3 Alltagslogistik',           approach: null },
+        'Wissenschaft des Glücks und der Dankbarkeit': { area: 'L2 Innere Welt',               approach: 'A1 Dankbarkeit & WEIL3' },
+        'Wissenschaft des Gluecks und der Dankbarkeit':{ area: 'L2 Innere Welt',               approach: 'A1 Dankbarkeit & WEIL3' },
+        'Analoge Rituale als Gegenbewegung':           { area: 'L5 Produkt & Angebot',         approach: 'A2 Achtsamkeit & Rituale' },
+        'Produkt und Erlebnis':                        { area: 'L5 Produkt & Angebot',         approach: null },
+        'Marke und Community':                         { area: 'L6 Marke & Gründerin',         approach: null },
+      }
+      const mechanicMigrationMap: Record<string, string> = {
+        'Provokative Frage':         'M1 Provokante These',
+        'Polarisierende Aussage':    'M1 Provokante These',
+        'Storytelling':              'M3 Persönliche Geschichte',
+        'Listicle / How-To':         'M8 Liste',
+        'Myth-Busting':              'M9 Mythos vs. Realität',
+        'Social Proof / Testimonial':'M5 Testimonial',
+        'Behind the Scenes':         'M12 Behind the Scenes',
+      }
+
+      // Apply mappings to existing rows
+      if (cols.includes('theme')) {
+        const rows = db.prepare('SELECT id, theme, mechanic FROM posts').all() as Array<{ id: number; theme: string; mechanic: string }>
+        const updateStmt = db.prepare('UPDATE posts SET area = ?, approach = ?, method = ? WHERE id = ?')
+        for (const row of rows) {
+          const themeMap = themeMigrationMap[row.theme]
+          const methodVal = mechanicMigrationMap[row.mechanic] || null
+          updateStmt.run(
+            themeMap?.area ?? null,
+            themeMap?.approach ?? null,
+            methodVal,
+            row.id
+          )
+        }
+      }
+
+      // Rebuild posts table without theme/mechanic columns
+      db.exec(`
+        CREATE TABLE posts_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          pillar TEXT NOT NULL,
+          area TEXT,
+          approach TEXT,
+          method TEXT,
+          tonality TEXT,
+          content_type TEXT NOT NULL DEFAULT 'carousel' CHECK(content_type IN ('single', 'carousel')),
+          caption TEXT,
+          slide_count INTEGER DEFAULT 1,
+          impulse TEXT,
+          background_path TEXT,
+          template_id INTEGER,
+          ad_hoc INTEGER NOT NULL DEFAULT 0,
+          status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'approved', 'exported')),
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+      `)
+      db.exec(`
+        INSERT INTO posts_new (id, pillar, area, approach, method, tonality, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status, created_at)
+        SELECT id, pillar, area, approach, method, tonality, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status, created_at
+        FROM posts
+      `)
+      db.exec('DROP TABLE posts')
+      db.exec('ALTER TABLE posts_new RENAME TO posts')
+
+      // Clean stale balance entries and rebuild from migrated posts
+      db.exec("DELETE FROM balance_matrix WHERE variable_type IN ('theme', 'mechanic')")
+
+      // Recalculate balance for new dimensions from existing posts
+      const migrated = db.prepare('SELECT area, approach, method, tonality FROM posts').all() as Array<{ area: string | null; approach: string | null; method: string | null; tonality: string | null }>
+      const upsertBalance = db.prepare(`
+        INSERT INTO balance_matrix (variable_type, variable_value, usage_count, last_used)
+        VALUES (?, ?, 1, strftime('%s', 'now'))
+        ON CONFLICT(variable_type, variable_value)
+        DO UPDATE SET usage_count = usage_count + 1, last_used = strftime('%s', 'now')
+      `)
+      for (const row of migrated) {
+        if (row.area) upsertBalance.run('area', row.area)
+        if (row.approach) upsertBalance.run('approach', row.approach)
+        if (row.method) upsertBalance.run('method', row.method)
+        if (row.tonality) upsertBalance.run('tonality', row.tonality)
+      }
+    }
+
     const slideCols = (db.prepare('PRAGMA table_info(slides)').all() as { name: string }[]).map(c => c.name)
     if (!slideCols.includes('background_position_x')) db.exec('ALTER TABLE slides ADD COLUMN background_position_x REAL DEFAULT 50')
     if (!slideCols.includes('background_position_y')) db.exec('ALTER TABLE slides ADD COLUMN background_position_y REAL DEFAULT 50')

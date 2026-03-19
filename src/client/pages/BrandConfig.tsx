@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ContextEditor } from '../components/ContextEditor'
+import { DimensionListEditor } from '../components/DimensionListEditor'
 import { api } from '../lib/apiClient'
 import type { Settings, FontLibraryEntry } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
@@ -39,7 +40,7 @@ const contextDocLabels: Record<string, string> = {
   targetPersona: 'Target Persona',
   productUVP: 'Product & UVP',
   competitive: 'Competitive Landscape',
-  contentStrategy: 'Content Strategy',
+  hooks: 'Hooks',
   pov: 'Point of View'
 }
 
@@ -456,86 +457,220 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         ))}
       </section>
 
-      {/* Themes */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-lg font-semibold">Themes</h2>
-            <InfoPopover text="Themes are the topic categories your content covers. The AI picks from this list to keep your feed varied and on-brand. Each post gets tagged with a theme so the app can surface what you've covered recently and suggest what's underrepresented." />
+      {/* Areas */}
+      <DimensionListEditor
+        title="Areas"
+        infoText="Life areas your content covers - the 'what' of each post. Each post is tagged with one area so the app can track coverage and suggest underrepresented topics."
+        emptyMessage="No areas configured yet."
+        items={local.areas}
+        onAdd={() => { setLocal({ ...local, areas: [...local.areas, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
+        onRemove={(id) => {
+          setLocal({
+            ...local,
+            areas: local.areas.filter(a => a.id !== id),
+            blacklist: local.blacklist.filter(b => !(b.dimension1 === 'area' && b.value1 === local.areas.find(a => a.id === id)?.name) && !(b.dimension2 === 'area' && b.value2 === local.areas.find(a => a.id === id)?.name))
+          })
+          setSaved(false)
+        }}
+        onUpdate={(id, updates) => {
+          setLocal({ ...local, areas: local.areas.map(a => a.id === id ? { ...a, ...updates } : a) })
+          setSaved(false)
+        }}
+        renderFields={(item, onUpdate) => (
+          <div className="space-y-2">
+            <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Area name (e.g. L1 Familienleben)" />
+            <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
           </div>
-          <button
-            onClick={() => setLocal({ ...local, themes: [...local.themes, { id: crypto.randomUUID(), name: '' }] })}
-            className="text-sm text-blue-600 hover:underline"
-          >+ Add Theme</button>
-        </div>
-        {local.themes.map((t, i) => (
-          <div key={t.id} className="flex gap-3 items-center">
-            <input
-              type="text"
-              value={t.name}
-              onChange={(e) => {
-                const themes = [...local.themes]
-                themes[i] = { ...themes[i], name: e.target.value }
-                setLocal({ ...local, themes })
-                setSaved(false)
-              }}
-              className="flex-1 border rounded px-3 py-2 text-sm"
-              placeholder="Theme name"
-            />
-            <button
-              onClick={() => { setLocal({ ...local, themes: local.themes.filter((_, idx) => idx !== i) }); setSaved(false) }}
-              className="text-red-400 hover:text-red-600 text-sm"
-            >Remove</button>
-          </div>
-        ))}
-      </section>
+        )}
+      />
 
-      {/* Mechanics */}
+      {/* Approaches */}
+      <DimensionListEditor
+        title="Approaches"
+        infoText="Solution approaches - the 'how to solve it' angle. Optional per post. Examples: gratitude, journaling, mindfulness, digital detox."
+        emptyMessage="No approaches configured yet."
+        items={local.approaches}
+        onAdd={() => { setLocal({ ...local, approaches: [...local.approaches, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
+        onRemove={(id) => {
+          setLocal({
+            ...local,
+            approaches: local.approaches.filter(a => a.id !== id),
+            blacklist: local.blacklist.filter(b => !(b.dimension1 === 'approach' && b.value1 === local.approaches.find(a => a.id === id)?.name) && !(b.dimension2 === 'approach' && b.value2 === local.approaches.find(a => a.id === id)?.name))
+          })
+          setSaved(false)
+        }}
+        onUpdate={(id, updates) => {
+          setLocal({ ...local, approaches: local.approaches.map(a => a.id === id ? { ...a, ...updates } : a) })
+          setSaved(false)
+        }}
+        renderFields={(item, onUpdate) => (
+          <div className="space-y-2">
+            <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Approach name (e.g. A1 Dankbarkeit)" />
+            <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
+          </div>
+        )}
+      />
+
+      {/* Methods */}
+      <DimensionListEditor
+        title="Methods"
+        infoText="Storytelling methods - how the post is structured. Examples: provocative thesis, Q&A, personal story, listicle, myth-busting. Some methods have format constraints (single-only or carousel-only)."
+        emptyMessage="No methods configured yet."
+        items={local.methods}
+        onAdd={() => { setLocal({ ...local, methods: [...local.methods, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
+        onRemove={(id) => {
+          setLocal({
+            ...local,
+            methods: local.methods.filter(m => m.id !== id),
+            blacklist: local.blacklist.filter(b => !(b.dimension1 === 'method' && b.value1 === local.methods.find(m => m.id === id)?.name) && !(b.dimension2 === 'method' && b.value2 === local.methods.find(m => m.id === id)?.name))
+          })
+          setSaved(false)
+        }}
+        onUpdate={(id, updates) => {
+          setLocal({ ...local, methods: local.methods.map(m => m.id === id ? { ...m, ...updates } : m) })
+          setSaved(false)
+        }}
+        renderFields={(item, onUpdate) => (
+          <div className="space-y-2">
+            <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Method name (e.g. M1 Provokante These)" />
+            <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span>Format:</span>
+              <label className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={!item.formatConstraints || item.formatConstraints.length === 0 || item.formatConstraints.includes('single')}
+                  onChange={(e) => {
+                    const current = item.formatConstraints ?? []
+                    let next: string[]
+                    if (e.target.checked) {
+                      next = current.length === 0 ? [] : [...current, 'single']
+                    } else {
+                      next = current.filter(f => f !== 'single')
+                      if (next.length === 0) next = ['carousel']
+                    }
+                    onUpdate({ formatConstraints: next.length === 0 || next.length === 2 ? undefined : next } as any)
+                  }}
+                />
+                Single
+              </label>
+              <label className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={!item.formatConstraints || item.formatConstraints.length === 0 || item.formatConstraints.includes('carousel')}
+                  onChange={(e) => {
+                    const current = item.formatConstraints ?? []
+                    let next: string[]
+                    if (e.target.checked) {
+                      next = current.length === 0 ? [] : [...current, 'carousel']
+                    } else {
+                      next = current.filter(f => f !== 'carousel')
+                      if (next.length === 0) next = ['single']
+                    }
+                    onUpdate({ formatConstraints: next.length === 0 || next.length === 2 ? undefined : next } as any)
+                  }}
+                />
+                Carousel
+              </label>
+            </div>
+          </div>
+        )}
+      />
+
+      {/* Tonalities */}
+      <DimensionListEditor
+        title="Tonalities"
+        infoText="Tone of voice for each post - emotional, humorous, matter-of-fact, or provocative. Tracked for variety across your feed."
+        emptyMessage="No tonalities configured yet."
+        items={local.tonalities}
+        onAdd={() => { setLocal({ ...local, tonalities: [...local.tonalities, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
+        onRemove={(id) => {
+          setLocal({
+            ...local,
+            tonalities: local.tonalities.filter(t => t.id !== id),
+            blacklist: local.blacklist.filter(b => !(b.dimension1 === 'tonality' && b.value1 === local.tonalities.find(t => t.id === id)?.name) && !(b.dimension2 === 'tonality' && b.value2 === local.tonalities.find(t => t.id === id)?.name))
+          })
+          setSaved(false)
+        }}
+        onUpdate={(id, updates) => {
+          setLocal({ ...local, tonalities: local.tonalities.map(t => t.id === id ? { ...t, ...updates } : t) })
+          setSaved(false)
+        }}
+        renderFields={(item, onUpdate) => (
+          <div className="space-y-2">
+            <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Tonality name (e.g. T1 Emotional)" />
+            <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
+          </div>
+        )}
+      />
+
+      {/* Blacklist */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <h2 className="text-lg font-semibold">Mechanics</h2>
-            <InfoPopover text="Mechanics are the storytelling formats or structures a post can use — e.g. Before/After, How-to, Myth vs. Reality, Transformation story. They define how you say something, while themes define what you talk about. The AI uses your mechanic library to vary post structure and match the right format to the right goal." />
+            <h2 className="text-lg font-semibold">Blacklist</h2>
+            <InfoPopover text="Forbidden or discouraged dimension combinations. Hard = blocked in the wizard. Soft = shows a warning but allows selection." />
           </div>
           <button
-            onClick={() => setLocal({ ...local, mechanics: [...local.mechanics, { id: crypto.randomUUID(), name: '', description: '' }] })}
+            onClick={() => {
+              setLocal({
+                ...local,
+                blacklist: [...local.blacklist, { dimension1: 'method', value1: '', dimension2: 'tonality', value2: '', severity: 'hard' }]
+              })
+              setSaved(false)
+            }}
             className="text-sm text-blue-600 hover:underline"
-          >+ Add Mechanic</button>
+          >+ Add Rule</button>
         </div>
-        {local.mechanics.map((m, i) => (
-          <div key={m.id} className="flex gap-3 items-start">
-            <div className="flex-1 space-y-2">
-              <input
-                type="text"
-                value={m.name}
-                onChange={(e) => {
-                  const mechanics = [...local.mechanics]
-                  mechanics[i] = { ...mechanics[i], name: e.target.value }
-                  setLocal({ ...local, mechanics })
-                  setSaved(false)
-                }}
-                className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Mechanic name"
-              />
-              <textarea
-                value={m.description}
-                onChange={(e) => {
-                  const mechanics = [...local.mechanics]
-                  mechanics[i] = { ...mechanics[i], description: e.target.value }
-                  setLocal({ ...local, mechanics })
-                  setSaved(false)
-                }}
-                rows={2}
-                className="w-full border rounded px-3 py-2 text-sm resize-none"
-                placeholder="Description"
-              />
+        {local.blacklist.length === 0 && (
+          <p className="text-sm text-gray-400">No blacklist rules configured.</p>
+        )}
+        {local.blacklist.map((entry, i) => {
+          const dims = ['area', 'approach', 'method', 'tonality', 'pillar'] as const
+          const getValues = (dim: string) => {
+            if (dim === 'area') return local.areas.map(a => a.name)
+            if (dim === 'approach') return local.approaches.map(a => a.name)
+            if (dim === 'method') return local.methods.map(m => m.name)
+            if (dim === 'tonality') return local.tonalities.map(t => t.name)
+            if (dim === 'pillar') return local.pillars.map(p => p.name)
+            return []
+          }
+
+          return (
+            <div key={i} className="flex gap-2 items-center flex-wrap">
+              <select value={entry.dimension1} onChange={(e) => {
+                const bl = [...local.blacklist]; bl[i] = { ...bl[i], dimension1: e.target.value, value1: '' }; setLocal({ ...local, blacklist: bl }); setSaved(false)
+              }} className="border rounded px-2 py-1 text-sm">
+                {dims.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select value={entry.value1} onChange={(e) => {
+                const bl = [...local.blacklist]; bl[i] = { ...bl[i], value1: e.target.value }; setLocal({ ...local, blacklist: bl }); setSaved(false)
+              }} className="border rounded px-2 py-1 text-sm">
+                <option value="">Select...</option>
+                {getValues(entry.dimension1).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+              <span className="text-xs text-gray-400">+</span>
+              <select value={entry.dimension2} onChange={(e) => {
+                const bl = [...local.blacklist]; bl[i] = { ...bl[i], dimension2: e.target.value, value2: '' }; setLocal({ ...local, blacklist: bl }); setSaved(false)
+              }} className="border rounded px-2 py-1 text-sm">
+                {dims.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select value={entry.value2} onChange={(e) => {
+                const bl = [...local.blacklist]; bl[i] = { ...bl[i], value2: e.target.value }; setLocal({ ...local, blacklist: bl }); setSaved(false)
+              }} className="border rounded px-2 py-1 text-sm">
+                <option value="">Select...</option>
+                {getValues(entry.dimension2).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+              <select value={entry.severity} onChange={(e) => {
+                const bl = [...local.blacklist]; bl[i] = { ...bl[i], severity: e.target.value as 'hard' | 'soft' }; setLocal({ ...local, blacklist: bl }); setSaved(false)
+              }} className="border rounded px-2 py-1 text-sm">
+                <option value="hard">Hard</option>
+                <option value="soft">Soft</option>
+              </select>
+              <button onClick={() => { setLocal({ ...local, blacklist: local.blacklist.filter((_, idx) => idx !== i) }); setSaved(false) }} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
             </div>
-            <button
-              onClick={() => { setLocal({ ...local, mechanics: local.mechanics.filter((_, idx) => idx !== i) }); setSaved(false) }}
-              className="text-red-400 hover:text-red-600 text-sm mt-2"
-            >Remove</button>
-          </div>
-        ))}
+          )
+        })}
       </section>
     </div>
   )

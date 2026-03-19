@@ -6,8 +6,10 @@ import { computePerformanceScore } from '../../shared/performanceScore'
 
 export interface PostInsert {
   pillar: string
-  theme: string
-  mechanic: string
+  area: string
+  approach?: string | null
+  method: string
+  tonality: string
   content_type: 'single' | 'carousel'
   caption?: string
   slide_count?: number
@@ -21,13 +23,15 @@ export interface PostInsert {
 export function insertPost(data: PostInsert): number {
   const db = getDatabase()
   const stmt = db.prepare(`
-    INSERT INTO posts (pillar, theme, mechanic, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status)
-    VALUES (@pillar, @theme, @mechanic, @content_type, @caption, @slide_count, @impulse, @background_path, @template_id, @ad_hoc, @status)
+    INSERT INTO posts (pillar, area, approach, method, tonality, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status)
+    VALUES (@pillar, @area, @approach, @method, @tonality, @content_type, @caption, @slide_count, @impulse, @background_path, @template_id, @ad_hoc, @status)
   `)
   const result = stmt.run({
     pillar: data.pillar,
-    theme: data.theme,
-    mechanic: data.mechanic,
+    area: data.area,
+    approach: data.approach ?? null,
+    method: data.method,
+    tonality: data.tonality,
     content_type: data.content_type,
     caption: data.caption ?? null,
     slide_count: data.slide_count ?? null,
@@ -218,9 +222,13 @@ export function linkIgPost(igMediaId: string, postId: number): void {
 
 // --- Stats aggregation ---
 
-export function getAvgPerformanceByDimension(dimension: 'pillar' | 'theme' | 'mechanic'): Array<{ name: string; avg_performance: number }> {
+export function getAvgPerformanceByDimension(dimension: 'pillar' | 'area' | 'approach' | 'method' | 'tonality'): Array<{ name: string; avg_performance: number }> {
   const db = getDatabase()
-  const column = dimension === 'pillar' ? 'p.pillar' : dimension === 'theme' ? 'p.theme' : 'p.mechanic'
+  const columnMap: Record<string, string> = {
+    pillar: 'p.pillar', area: 'p.area', approach: 'p.approach',
+    method: 'p.method', tonality: 'p.tonality'
+  }
+  const column = columnMap[dimension]
   return db.prepare(`
     SELECT ${column} as name, AVG(
       COALESCE(pp.reach, 0) + COALESCE(pp.likes, 0) * 2 + COALESCE(pp.comments, 0) * 3 + COALESCE(pp.shares, 0) * 4 + COALESCE(pp.saves, 0) * 3

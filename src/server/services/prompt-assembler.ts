@@ -1,89 +1,248 @@
 import type { Settings } from '../../shared/types'
+import {
+  methodStructures,
+  hookFormulas,
+  hookTonalityModifiers,
+  tonalityWritingRules,
+  antiPatterns
+} from './prompt-references'
 
 /**
- * Assembles a prompt for Claude from the hybrid settings schema.
- * Context docs are raw text blobs - included with headers when non-empty.
- * Structured data (pillar, theme, mechanic) injected as content focus.
+ * Assembles a structured prompt for Claude following the 12-section template
+ * from the create-content skill. Each section serves a specific purpose in
+ * guiding content generation quality.
+ *
+ * Source of truth: ~/.claude/skills/.on-demand/create-content/SKILL.md
+ * Reference data: ./prompt-references.ts (ported from skill reference files)
  */
 export function assemblePrompt(
   pillar: string,
-  theme: string,
-  mechanic: string,
+  area: string,
+  approach: string | null,
+  method: string,
+  tonality: string,
   impulse: string,
   settings: Settings,
   contentType: 'single' | 'carousel',
   slideCount?: number
 ): string {
   const sections: string[] = []
-
-  // Context docs - each non-empty doc gets a header
-  const docHeaders: Record<string, string> = {
-    brandVoice: 'Brand Voice',
-    targetPersona: 'Target Persona',
-    productUVP: 'Product & UVP',
-    competitive: 'Competitive Landscape',
-    contentStrategy: 'Content Strategy',
-    pov: 'Point of View'
-  }
-
-  for (const [key, header] of Object.entries(docHeaders)) {
-    const text = settings.contextDocs[key as keyof typeof settings.contextDocs]
-    if (text && text.trim()) {
-      sections.push(`## ${header}\n${text.trim()}`)
-    }
-  }
-
-  // Content focus + pillar rules
-  const pillarEntry = settings.pillars.find(p => p.name === pillar)
-  const pillarRules = pillarEntry?.rules?.trim()
-  const focusLines = [`**Pillar:** ${pillar}`, `**Theme:** ${theme}`]
-  if (pillarRules) {
-    focusLines.push(`\n**Pillar Rules (MUST follow):**\n${pillarRules}`)
-  }
-  sections.push(`## Content Focus\n${focusLines.join('\n')}`)
-
-  // Mechanic details
-  const mech = settings.mechanics.find(m => m.name === mechanic)
-  if (mech) {
-    const mechSection = [`## Post Mechanic: ${mech.name}`]
-    if (mech.description) mechSection.push(mech.description)
-    if (mech.slideRange) mechSection.push(`**Slide Range:** ${mech.slideRange.min}-${mech.slideRange.max} slides`)
-    sections.push(mechSection.join('\n'))
-  }
-
-  // Content constraints
-  const carouselCount = slideCount ?? 5
-  const slideConstraint = contentType === 'single'
-    ? '**Slides:** 1 (SINGLE POST - exactly ONE slide with hook at top, body in middle, CTA at bottom)'
-    : `**Carousel Slides:** EXACTLY ${carouselCount} slides (1 cover + ${carouselCount - 2} content + 1 CTA)\n**Cover slide (slide 1):** ONLY a hook_text (displayed centered on the slide). Leave body_text and cta_text EMPTY for the cover slide.`
   const defaults = settings.contentDefaults
-  const charLimits = [
-    `**Caption:** ${defaults.captionMinChars}-${defaults.captionMaxChars} characters`,
-    `**Body text per slide:** max ${defaults.bodyMaxChars} characters`
-  ]
-  sections.push(`## Content Constraints\n${slideConstraint}\n${charLimits.join('\n')}`)
+  const carouselCount = slideCount ?? 5
 
-  // Impulse
-  if (impulse && impulse.trim()) {
-    sections.push(`## Additional Guidance\n${impulse.trim()}`)
+  // Look up dimension entries
+  const areaEntry = settings.areas.find(a => a.name === area)
+  const approachEntry = approach ? settings.approaches.find(a => a.name === approach) : null
+  const methodEntry = settings.methods.find(m => m.name === method)
+  const tonalityEntry = settings.tonalities.find(t => t.name === tonality)
+
+  // Extract method ID (e.g., "M3" from "M3 Persoenliche Geschichte") for structure lookup
+  const methodKey = Object.keys(methodStructures).find(k =>
+    method.includes(k.split(' ')[0]) || k === method
+  )
+  const structure = methodKey ? methodStructures[methodKey] : null
+
+  // Extract tonality ID for lookup
+  const tonalityKey = Object.keys(tonalityWritingRules).find(k =>
+    tonality.includes(k.split(' ')[0]) || k === tonality
+  )
+
+  // --- Section 1: Role & Creative Brief ---
+  sections.push(`Du bist Jule - 39, Mutter von drei Kindern, Management-Job, Gruenderin von LEBEN.LIEBEN.
+Du schreibst einen ${method} Post ueber ${area}${approach ? ' durch ' + approach : ''}, in ${tonality} Tonalitaet, fuer den Zweck: ${pillar}.
+
+DEINE STIMME: Wie eine Freundin beim Kaffee. Warm, persoenlich, ehrlich, ermutigend. Aus eigener Erfahrung, nie aus der Theorie. Konkrete Alltagsszenen statt Abstraktion. "Du" (grossgeschrieben: Du, Dir, Dich, Dein).
+
+SPRACHE: Immer konkret und umgangssprachlich, nie abstrakt. "Dauer-Stress" statt "Erschoepfung". "Nur noch funktionieren" statt "zu leer sein". "An die Decke gehen" statt "weinen". Woerter benutzen, die eine Mutter beim Kaffee sagen wuerde, nicht Woerter aus einem Psychologie-Ratgeber.
+
+ALLTAGSDETAILS: Kita, Schule, Brotdose, Waesche, Abendbrot - die Welt der Zielgruppe. Nicht: Meetings, Projekte, Praesentationen (zu karrierefokussiert). Die Spannung der Zielgruppe ist Kinder + Job, nicht Job allein.
+
+DEIN PRODUKT: LEBEN.LIEBEN Dankbarkeitstagebuch. 100 Eintraege, ein Jahr. WEIL3-Methode: bei einem Grund bleiben, dreimal tiefer fragen. Letzter Gedanke am Tag. Analog, 3 Minuten, radikal einfach.
+
+WICHTIGE PRODUKTREGELN:
+- Das Handy kommt NICHT mit ins Schlafzimmer. Es bleibt draussen. Auf dem Nachttisch liegen das Journal und ein Stift.
+- Die Nutzung ist NICHT taeglich. Alle 3-4 Tage reicht voellig. Formuliere NIE so, dass sich die Leserin verpflichtet fuehlt, jeden Abend zu schreiben. "Wenn Du magst" / "Ab und zu" statt "jeden Abend". Das Journal soll einladen, nie Druck machen.
+- Bei Fakten, Zahlen und Studien: NUR verifizierbare, recherchierte Daten verwenden. Nie Zahlen erfinden. Wenn keine belastbare Quelle existiert, formuliere als persoenliche Beobachtung statt als Fakt.
+
+DEINE ZIELGRUPPE: Beruftaetige Muetter (35-45), obere Mittelschicht, DACH. Kern-Spannung: liebt Job UND Kinder, fuehlt sich in keiner Rolle gut genug. Will keine Optimierung, will mehr spueren was wichtig ist. Misstraut Werbung, vertraut persoenlichen Empfehlungen.`)
+
+  // --- Section 2: Chain-of-Thought Planning ---
+  sections.push(`## Bevor Du schreibst - plane intern
+
+Bestimme fuer Dich (nicht im Output):
+1. EINE zentrale Erkenntnis, die der Post vermittelt
+2. EINE konkrete Alltagsszene, die als Anker dient (Wer, wo, wann, was passiert)
+3. Das EINE Element, das diesen Post speichernswert macht (ueberraschender Fakt? emotionaler Moment? praktischer Tipp?)
+4. Den emotionalen Bogen: Wo startet die Leserin, wo soll sie ankommen?`)
+
+  // --- Section 3: Hook Rules ---
+  const hookFormulaText = Object.entries(hookFormulas).find(([k]) =>
+    method.includes(k.split(' ')[0]) || k === method
+  )?.[1] ?? ''
+  const tonalityModifier = tonalityKey ? hookTonalityModifiers[tonalityKey] ?? '' : ''
+
+  sections.push(`## Hook-Regeln (gelten NUR fuer hook_text auf Slide 1 / Single Post)
+
+Der Hook folgt NICHT der Brand Voice. Er ist schaerfer, direkter, provokanter.
+Ziel: In 3 Sekunden zum Stoppen bringen. Konkurrenz ist Netflix, Memes, Freunde.
+
+Was in den ersten 3 Sekunden passieren muss:
+- Ein Versprechen (was bekomme ich wenn ich weiterlese?)
+- ODER eine Spannung (ungeloeste Frage, Widerspruch)
+- ODER Wiedererkennung ("Das bin ich!")
+- ODER Ueberraschung (etwas Unerwartetes)
+- ODER eine Curiosity Gap / Bait-and-Switch: Der Hook klingt nach etwas voellig anderem als der Post tatsaechlich behandelt. Beispiel: "Wir haben jetzt getrennte Schlafzimmer. Und es tut mir so gut!" - klingt nach Beziehungskrise, handelt aber davon, dass das Handy in der Kueche schlaeft. Dieser Typ erzeugt die staerkste Neugier.
+
+Die beste Hook-Strategie: Der Leser MUSS wischen/weiterlesen, weil der Hook allein nicht aufloesbar ist.
+
+Hook-Formel fuer ${method}:
+${hookFormulaText}
+
+Tonalitaets-Modifikator: ${tonalityModifier}`)
+
+  // --- Section 4: Method Structure ---
+  if (structure) {
+    const structureText = contentType === 'carousel' && structure.carousel
+      ? structure.carousel
+      : structure.single
+    sections.push(`## Methoden-Struktur: ${method}
+
+${structure.core}
+
+${contentType === 'carousel' ? `Carousel (${carouselCount} slides):` : 'Single:'}
+${structureText}
+
+Emotionaler Bogen: ${structure.arc}${structure.keyRule ? `\n\nWichtige Regel: ${structure.keyRule}` : ''}`)
+  } else if (methodEntry) {
+    sections.push(`## Method: ${method}\n${methodEntry.description ?? ''}`)
   }
 
-  // Token budget check - truncate if over 8000 tokens (~32000 chars)
+  // --- Section 5: Tonality Guide ---
+  const writingRule = tonalityKey ? tonalityWritingRules[tonalityKey] ?? '' : ''
+  sections.push(`## Tonalitaet: ${tonality}
+
+${tonalityEntry?.description ?? ''}
+
+${writingRule}`)
+
+  // --- Section 6: Pillar CTA Calibration ---
+  const ctaSection = buildCtaSection(pillar, carouselCount)
+  sections.push(ctaSection)
+
+  // --- Section 7: Content Focus ---
+  const focusLines = [`Lebensbereich: ${area}\n${areaEntry?.description ?? ''}`]
+  if (approachEntry) {
+    focusLines.push(`\nLoesungsansatz: ${approach}\n${approachEntry.description ?? ''}`)
+  }
+  sections.push(`## Inhaltlicher Fokus\n\n${focusLines.join('\n')}`)
+
+  // --- Section 8: Anti-Patterns ---
+  sections.push(antiPatterns)
+
+  // --- Section 9: Caption Rules ---
+  sections.push(`## Caption-Regeln
+
+Die Caption ist ein eigenstaendiges Stueck Content, NICHT eine Zusammenfassung der Slides.
+
+- Eigener Hook in den ersten 125 Zeichen (vor dem "mehr"-Umbruch im Feed)
+- Der Caption-Hook darf NICHT identisch mit dem Slide-Hook sein
+- Wert liefern auch ohne die Slides gesehen zu haben
+- CTA am Ende (passend zum Pillar, siehe oben)
+- ${defaults.captionMinChars}-${defaults.captionMaxChars} Zeichen
+- Kein Hashtag-Spam. Maximal 3-5 relevante Hashtags, oder gar keine.`)
+
+  // --- Section 10: Content Constraints & Output Format ---
+  const formatSection = contentType === 'single'
+    ? `GENAU 1 Slide.
+- slide_type: "cover"
+- hook_text: Der Hook (oben auf dem Slide)
+- body_text: Der Haupttext (Mitte)
+- cta_text: CTA (unten)`
+    : `GENAU ${carouselCount} Slides. JEDER Slide hat ALLE 3 Textfelder (hook_text, body_text, cta_text):
+- Slide 1 (cover): hook_text = starker Hook. body_text = Kontext oder Einstieg. cta_text = Neugier-Trigger oder Swipe-Aufforderung.
+- Slides 2-${carouselCount - 1} (content): hook_text = Slide-Ueberschrift. body_text = Hauptinhalt. cta_text = Ueberleitung oder Mini-CTA.
+- Slide ${carouselCount} (cta): hook_text = zusammenfassende Ueberschrift. body_text = Kernbotschaft. cta_text = klarer Call-to-Action.`
+
+  sections.push(`## Format-Vorgaben
+
+${formatSection}
+
+## HARTE ZEICHENLIMITS (Ueberschreitung = Fehler)
+
+Diese Limits sind technische Grenzen der App. Text der laenger ist wird abgeschnitten und zerstoert den Post. Zaehle die Zeichen BEVOR Du antwortest.
+
+- Caption: EXAKT ${defaults.captionMinChars}-${defaults.captionMaxChars} Zeichen. Kuerze rigoros. Lieber 250 als 400.
+- Body pro Slide: MAXIMAL ${defaults.bodyMaxChars} Zeichen. Das sind circa 3-4 kurze Saetze. Wenn ein Slide-Text laenger wird, kuerze ihn oder verteile den Inhalt auf den naechsten Slide.
+- Hook: Kurz und knackig, MAXIMAL 80 Zeichen. Kuerzer ist besser.
+- CTA-Text: MAXIMAL 120 Zeichen.
+
+Faustregel: Wenn Du unsicher bist, schreib kuerzer. Ein praegnanter kurzer Text ist IMMER besser als ein langer der abgeschnitten wird.
+
+Sprache: Deutsch. Anrede "Du" (grossgeschrieben).
+
+## Output-Format
+
+Antworte NUR mit validem JSON. Kein Markdown, keine Code-Bloecke.
+
+${contentType === 'single'
+    ? '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'
+    : '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"content","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"cta","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'}
+
+Regeln:
+- JEDER Slide hat ALLE 3 Textfelder befuellt (hook_text, body_text, cta_text). KEIN Feld darf leer sein.
+- slide_type "cover" fuer Slide 1
+- ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides' : 'Alle Felder muessen vorhanden sein'}`)
+
+  // --- Section 11: Performance Learnings (empty for now) ---
+  // Will be populated by the learning system (PQFL) once performance data flows back.
+
+  // --- Section 12: Real Life Situation ---
+  if (impulse && impulse.trim()) {
+    sections.push(`## Reale Situation (Impulse)
+
+Dieser Post basiert auf einer echten Situation. Verwende diese Details als Ausgangspunkt - erfinde KEINE andere Szene:
+
+${impulse.trim()}
+
+Baue den Post um diese Situation herum. Du darfst Details leicht anpassen fuer den Lesefluss, aber die Kernsituation muss erkennbar bleiben.`)
+  }
+
+  // Token budget check
   let prompt = sections.join('\n\n')
   if (prompt.length > 32000) {
     prompt = prompt.slice(0, 32000) + '\n\n[Context truncated due to length]'
   }
 
-  // JSON output instruction
-  if (contentType === 'single') {
-    prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No markdown code blocks.\n' +
-      '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
-      'Rules: EXACTLY 1 slide. slide_type must be "cover".'
-  } else {
-    prompt += '\n\n[REQUIRED OUTPUT FORMAT]\nReturn ONLY a valid JSON object. No markdown code blocks.\n' +
-      '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"","cta_text":""},{"slide_type":"content","hook_text":"","body_text":"...","cta_text":""},{"slide_type":"cta","hook_text":"","body_text":"...","cta_text":"..."}],"caption":"..."}\n' +
-      'Rules: slide_type "cover" for first (hook_text only, body_text and cta_text must be empty), "cta" for last, "content" for middle slides.'
+  return prompt
+}
+
+/** Build pillar-specific CTA calibration section */
+function buildCtaSection(pillar: string, slideCount: number): string {
+  const pillarLower = pillar.toLowerCase()
+
+  if (pillarLower.includes('generate')) {
+    return `## CTA-Kalibrierung: ${pillar}
+
+KEIN Produktbezug. Null. Nicht mal subtil.
+Soft CTA: "Speicher Dir das fuer spaeter" / "Folge fuer mehr" / "Tagge eine Freundin, die das braucht"
+Ziel: Reichweite, Saves, Shares. Wert liefern, nichts verkaufen.`
   }
 
-  return prompt
+  if (pillarLower.includes('convert')) {
+    return `## CTA-Kalibrierung: ${pillar}
+
+Produkt erwaehnen, aber als selbstverstaendlichen Teil von Jules Leben, nicht als Pitch.
+Das Produkt gehoert zu Jules Abend wie der Nachttisch zum Schlafzimmer. Nicht anbieten, sondern zeigen dass es da ist.
+Formulierung: "Mein LEBEN.LIEBEN Journal liegt auf meinem Nachttisch." / "Ich greife nach meinem Journal."
+Produkt fruehestens auf Slide ${Math.max(slideCount - 2, 4)} bei Carousel, nie auf Slide 1-3.
+CTA: Nimm an, dass die Leserin es will. Frage WANN, nicht OB. "Wann legst Du Dir deins auf deinen Nachttisch?" statt "Link in Bio, falls das etwas fuer Dich sein koennte."
+NICHT: hedging CTAs wie "falls", "wenn Du magst", "koennte". Die Leserin ist hier, weil sie sich angesprochen fuehlt.`
+  }
+
+  // Nurture Loyalty
+  return `## CTA-Kalibrierung: ${pillar}
+
+Spreche zu Menschen, die das Produkt schon kennen oder haben.
+Engagement-CTA: "Wie macht ihr das?" / "Schreib mir, ich bin neugierig"
+Community staerken, nicht verkaufen.`
 }

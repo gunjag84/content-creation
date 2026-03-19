@@ -1,6 +1,8 @@
 import type { BalanceEntry, BalanceRecommendation, BalanceWarning, BalanceDashboardData } from '../../shared/types'
 
-// --- Recommendation engine (lifted from Electron app) ---
+// --- Recommendation engine ---
+
+const REQUIRED_DIMS = ['pillar', 'area', 'method', 'tonality'] as const
 
 export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecommendation {
   if (!balanceEntries || balanceEntries.length === 0) {
@@ -13,8 +15,10 @@ export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecomme
     return acc
   }, {} as Record<string, BalanceEntry[]>)
 
-  if (!byType['pillar'] || !byType['theme'] || !byType['mechanic']) {
-    throw new Error('Balance matrix missing required dimensions (pillar, theme, mechanic)')
+  for (const dim of REQUIRED_DIMS) {
+    if (!byType[dim]) {
+      throw new Error(`Balance matrix missing required dimension: ${dim}`)
+    }
   }
 
   const hasPerformanceData = balanceEntries.some(e => e.avg_performance !== null)
@@ -22,8 +26,10 @@ export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecomme
 
   return {
     pillar: selectFromDimension(byType['pillar'], hasPerformanceData),
-    theme: selectFromDimension(byType['theme'], hasPerformanceData),
-    mechanic: selectFromDimension(byType['mechanic'], hasPerformanceData),
+    area: selectFromDimension(byType['area'], hasPerformanceData),
+    approach: byType['approach'] ? selectFromDimension(byType['approach'], hasPerformanceData) : null,
+    method: selectFromDimension(byType['method'], hasPerformanceData),
+    tonality: selectFromDimension(byType['tonality'], hasPerformanceData),
     reasoning
   }
 }
@@ -55,15 +61,17 @@ function weightedSelection(entries: BalanceEntry[]): string {
   return entries[entries.length - 1].variable_value
 }
 
-// --- Balance dashboard (lifted from Electron app) ---
+// --- Balance dashboard ---
 
-export function calculatePillarBalance(
+export function calculateBalance(
   entries: BalanceEntry[],
   targetPercentages: Record<string, number>
 ): BalanceDashboardData {
   const pillarEntries = entries.filter(e => e.variable_type === 'pillar')
-  const mechanicEntries = entries.filter(e => e.variable_type === 'mechanic')
-  const themeEntries = entries.filter(e => e.variable_type === 'theme')
+  const areaEntries = entries.filter(e => e.variable_type === 'area')
+  const approachEntries = entries.filter(e => e.variable_type === 'approach')
+  const methodEntries = entries.filter(e => e.variable_type === 'method')
+  const tonalityEntries = entries.filter(e => e.variable_type === 'tonality')
   const totalCount = pillarEntries.reduce((s, e) => s + e.usage_count, 0)
 
   return {
@@ -73,12 +81,22 @@ export function calculatePillarBalance(
       target_pct: targetPercentages[e.variable_value] ?? 0,
       count: e.usage_count
     })),
-    mechanics: mechanicEntries.map(e => ({
+    areas: areaEntries.map(e => ({
       name: e.variable_value,
       count: e.usage_count,
       avg_performance: e.avg_performance
     })),
-    themes: themeEntries.map(e => ({
+    approaches: approachEntries.map(e => ({
+      name: e.variable_value,
+      count: e.usage_count,
+      avg_performance: e.avg_performance
+    })),
+    methods: methodEntries.map(e => ({
+      name: e.variable_value,
+      count: e.usage_count,
+      avg_performance: e.avg_performance
+    })),
+    tonalities: tonalityEntries.map(e => ({
       name: e.variable_value,
       count: e.usage_count,
       avg_performance: e.avg_performance
@@ -87,7 +105,7 @@ export function calculatePillarBalance(
   }
 }
 
-// --- Warnings (lifted from Electron app) ---
+// --- Warnings ---
 
 export function generateWarnings(entries: BalanceEntry[]): BalanceWarning[] {
   const warnings: BalanceWarning[] = []
@@ -98,7 +116,7 @@ export function generateWarnings(entries: BalanceEntry[]): BalanceWarning[] {
     const days = Math.floor((now - entry.last_used) / 86400)
     if (days > 14) continue
     warnings.push({
-      variable_type: entry.variable_type as 'pillar' | 'mechanic' | 'theme',
+      variable_type: entry.variable_type as BalanceWarning['variable_type'],
       variable_value: entry.variable_value,
       usage_count: entry.usage_count,
       days_span: days,

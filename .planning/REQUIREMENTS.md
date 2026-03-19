@@ -127,6 +127,12 @@ Deferred to future release. Tracked but not in current roadmap.
 - **CONTENT-01**: Video/Reel generation support
 - **CONTENT-02**: LinkedIn post format support
 
+### Prompt Quality Feedback Loop
+
+- **PQFL-01**: App stores correction diffs when user edits generated content (original output, edited version, active dimensions, timestamp)
+- **PQFL-02**: Analysis command reads correction log, clusters patterns, and proposes updates to skill reference files (anti-patterns.md, method-structures.md, hook-formulas.md, or SKILL.md product rules)
+- **PQFL-03**: After skill file updates, re-run evals to verify fix sticks, then port changes to prompt-assembler.ts
+
 ### UX Enhancements
 
 - **UX-01**: First-run onboarding wizard (guided brand setup, template creation, first post)

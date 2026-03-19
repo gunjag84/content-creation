@@ -66,7 +66,7 @@ describe('meta token operations', () => {
 describe('upsertPerformance with performance_score', () => {
   it('auto-computes performance_score on insert', () => {
     const db = getDatabase()
-    db.prepare("INSERT INTO posts (pillar, theme, mechanic, content_type) VALUES ('P', 'T', 'M', 'carousel')").run()
+    db.prepare("INSERT INTO posts (pillar, area, method, tonality, content_type) VALUES ('P', 'L1', 'M1', 'T1', 'carousel')").run()
 
     upsertPerformance(1, {
       reach: 100,

@@ -53,7 +53,7 @@ const ContextDocsSchema = z.object({
   targetPersona: z.string().default(''),
   productUVP: z.string().default(''),
   competitive: z.string().default(''),
-  contentStrategy: z.string().default(''),
+  hooks: z.string().default(''),
   pov: z.string().default('')
 })
 
@@ -121,6 +121,19 @@ const MechanicSchema = z.object({
   slideRange: z.object({ min: z.number(), max: z.number() }).optional()
 })
 
+const AreaSchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
+const ApproachSchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
+const MethodSchema = z.object({
+  id: z.string(), name: z.string(), description: z.string().default(''),
+  formatConstraints: z.array(z.enum(['single', 'carousel'])).optional()
+})
+const TonalitySchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
+const BlacklistEntrySchema = z.object({
+  dimension1: z.string(), value1: z.string(),
+  dimension2: z.string(), value2: z.string(),
+  severity: z.enum(['hard', 'soft'])
+})
+
 const ContentDefaultsSchema = z.object({
   captionMinChars: z.number().min(0).default(50),
   captionMaxChars: z.number().min(1).default(400),
@@ -128,11 +141,14 @@ const ContentDefaultsSchema = z.object({
 })
 
 export const SettingsSchema = z.object({
-  contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
+  contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', hooks: '', pov: '' }),
   visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
-  themes: z.array(ThemeSchema).default([]),
-  mechanics: z.array(MechanicSchema).default([]),
+  areas: z.array(AreaSchema).default([]),
+  approaches: z.array(ApproachSchema).default([]),
+  methods: z.array(MethodSchema).default([]),
+  tonalities: z.array(TonalitySchema).default([]),
+  blacklist: z.array(BlacklistEntrySchema).default([]),
   contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 })
 })
 
@@ -152,13 +168,15 @@ export interface BalanceEntry {
 
 export interface BalanceRecommendation {
   pillar: string
-  theme: string
-  mechanic: string
+  area: string
+  approach: string | null
+  method: string
+  tonality: string
   reasoning: 'cold_start_round_robin' | 'performance_weighted'
 }
 
 export interface BalanceWarning {
-  variable_type: 'pillar' | 'mechanic' | 'theme'
+  variable_type: 'pillar' | 'area' | 'approach' | 'method' | 'tonality'
   variable_value: string
   usage_count: number
   days_span: number
@@ -167,8 +185,10 @@ export interface BalanceWarning {
 
 export interface BalanceDashboardData {
   pillars: Array<{ name: string; actual_pct: number; target_pct: number; count: number }>
-  mechanics: Array<{ name: string; count: number; avg_performance: number | null }>
-  themes: Array<{ name: string; count: number; avg_performance: number | null }>
+  areas: Array<{ name: string; count: number; avg_performance: number | null }>
+  approaches: Array<{ name: string; count: number; avg_performance: number | null }>
+  methods: Array<{ name: string; count: number; avg_performance: number | null }>
+  tonalities: Array<{ name: string; count: number; avg_performance: number | null }>
   total_posts: number
 }
 
@@ -177,8 +197,10 @@ export interface BalanceDashboardData {
 export interface PostRow {
   id: number
   pillar: string
-  theme: string
-  mechanic: string
+  area: string
+  approach: string | null
+  method: string
+  tonality: string
   content_type: 'single' | 'carousel'
   caption: string | null
   slide_count: number | null

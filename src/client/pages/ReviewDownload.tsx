@@ -9,7 +9,7 @@ interface ReviewDownloadProps {
 
 export function ReviewDownload({ onDone, onBack }: ReviewDownloadProps) {
   const { slides, caption, renderedImages, setPostId } = useWizardStore()
-  const { selectedPillar, selectedTheme, selectedMechanic, contentType, impulse } = useWizardStore()
+  const { selectedPillar, selectedArea, selectedApproach, selectedMethod, selectedTonality, contentType, impulse } = useWizardStore()
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -20,8 +20,10 @@ export function ReviewDownload({ onDone, onBack }: ReviewDownloadProps) {
       const result = await api.post<{ id: number }>('/posts', {
         post: {
           pillar: selectedPillar,
-          theme: selectedTheme,
-          mechanic: selectedMechanic,
+          area: selectedArea,
+          approach: selectedApproach || null,
+          method: selectedMethod,
+          tonality: selectedTonality,
           content_type: contentType,
           caption,
           slide_count: slides.length,

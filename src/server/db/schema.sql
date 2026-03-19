@@ -2,8 +2,10 @@
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   pillar TEXT NOT NULL,
-  theme TEXT NOT NULL,
-  mechanic TEXT NOT NULL,
+  area TEXT,
+  approach TEXT,
+  method TEXT,
+  tonality TEXT,
   content_type TEXT NOT NULL DEFAULT 'carousel' CHECK(content_type IN ('single', 'carousel')),
   caption TEXT,
   slide_count INTEGER DEFAULT 1,

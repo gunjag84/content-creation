@@ -14,8 +14,10 @@ interface WizardStore {
   step: WizardStep
   // Step 1 - Create
   selectedPillar: string
-  selectedTheme: string
-  selectedMechanic: string
+  selectedArea: string
+  selectedApproach: string
+  selectedMethod: string
+  selectedTonality: string
   contentType: 'single' | 'carousel'
   slideCount: number
   impulse: string
@@ -63,8 +65,10 @@ interface WizardStore {
 const initialState = {
   step: 'create' as const,
   selectedPillar: '',
-  selectedTheme: '',
-  selectedMechanic: '',
+  selectedArea: '',
+  selectedApproach: '',
+  selectedMethod: '',
+  selectedTonality: '',
   contentType: 'carousel' as const,
   slideCount: 5,
   impulse: '',
@@ -110,8 +114,10 @@ export const useWizardStore = create<WizardStore>((set) => ({
     recommendation: rec,
     warnings,
     selectedPillar: rec.pillar,
-    selectedTheme: rec.theme,
-    selectedMechanic: rec.mechanic
+    selectedArea: rec.area,
+    selectedApproach: rec.approach ?? '',
+    selectedMethod: rec.method,
+    selectedTonality: rec.tonality
   }),
 
   setSlide: (index, field, value) => set((state) => {
@@ -156,7 +162,7 @@ export const useWizardStore = create<WizardStore>((set) => ({
   }),
 
   setIsGenerating: (value) => set({ isGenerating: value }),
-  setGenerationError: (error) => set({ generationError: error, isGenerating: false }),
+  setGenerationError: (error) => set(error ? { generationError: error, isGenerating: false } : { generationError: null }),
   setRenderedImages: (images) => set({ renderedImages: images }),
   setPostId: (id) => set({ postId: id }),
 
