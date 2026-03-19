@@ -3,12 +3,14 @@ import type { Settings } from '../../shared/types'
 /**
  * Assembles a prompt for Claude from the hybrid settings schema.
  * Context docs are raw text blobs - included with headers when non-empty.
- * Structured data (pillar, theme, mechanic) injected as content focus.
+ * Structured data (pillar, area, approach, method, tonality) injected as content focus.
  */
 export function assemblePrompt(
   pillar: string,
-  theme: string,
-  mechanic: string,
+  area: string,
+  approach: string | null,
+  method: string,
+  tonality: string,
   impulse: string,
   settings: Settings,
   contentType: 'single' | 'carousel',
@@ -33,22 +35,38 @@ export function assemblePrompt(
     }
   }
 
-  // Content focus + pillar rules
+  // Content focus: area + approach + pillar rules
+  const areaEntry = settings.areas.find(a => a.name === area)
+  const approachEntry = approach ? settings.approaches.find(a => a.name === approach) : null
   const pillarEntry = settings.pillars.find(p => p.name === pillar)
   const pillarRules = pillarEntry?.rules?.trim()
-  const focusLines = [`**Pillar:** ${pillar}`, `**Theme:** ${theme}`]
+
+  const focusLines = [
+    `**Lebensbereich (Area):** ${area}${areaEntry?.description ? ` - ${areaEntry.description}` : ''}`
+  ]
+  if (approachEntry) {
+    focusLines.push(`**Loesungsansatz (Approach):** ${approach}${approachEntry.description ? ` - ${approachEntry.description}` : ''}`)
+  }
+  focusLines.push(`**Pillar:** ${pillar}`)
   if (pillarRules) {
     focusLines.push(`\n**Pillar Rules (MUST follow):**\n${pillarRules}`)
   }
   sections.push(`## Content Focus\n${focusLines.join('\n')}`)
 
-  // Mechanic details
-  const mech = settings.mechanics.find(m => m.name === mechanic)
-  if (mech) {
-    const mechSection = [`## Post Mechanic: ${mech.name}`]
-    if (mech.description) mechSection.push(mech.description)
-    if (mech.slideRange) mechSection.push(`**Slide Range:** ${mech.slideRange.min}-${mech.slideRange.max} slides`)
-    sections.push(mechSection.join('\n'))
+  // Method details
+  const methodEntry = settings.methods.find(m => m.name === method)
+  if (methodEntry) {
+    const methodSection = [`## Method: ${methodEntry.name}`]
+    if (methodEntry.description) methodSection.push(methodEntry.description)
+    sections.push(methodSection.join('\n'))
+  }
+
+  // Tonality
+  const tonalityEntry = settings.tonalities.find(t => t.name === tonality)
+  if (tonalityEntry) {
+    const tonalitySection = [`## Tonality: ${tonalityEntry.name}`]
+    if (tonalityEntry.description) tonalitySection.push(tonalityEntry.description)
+    sections.push(tonalitySection.join('\n'))
   }
 
   // Content constraints

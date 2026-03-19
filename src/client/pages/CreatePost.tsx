@@ -1,11 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
-import type { BalanceRecommendation, BalanceWarning, GenerationResult } from '@shared/types'
+import type { BalanceRecommendation, BalanceWarning, GenerationResult, Settings } from '@shared/types'
 
 interface CreatePostProps {
   onGenerated: () => void
+}
+
+function checkBlacklist(settings: Settings, area: string, approach: string, method: string, tonality: string, pillar: string) {
+  const violations: Array<{ severity: 'hard' | 'soft'; label: string }> = []
+  const dimValues: Record<string, string> = { area, approach, method, tonality, pillar }
+
+  for (const entry of settings.blacklist) {
+    const v1 = dimValues[entry.dimension1]
+    const v2 = dimValues[entry.dimension2]
+    if (v1 && v2 && v1 === entry.value1 && v2 === entry.value2) {
+      violations.push({ severity: entry.severity, label: `${entry.value1} + ${entry.value2}` })
+    }
+  }
+  return violations
 }
 
 export function CreatePost({ onGenerated }: CreatePostProps) {
@@ -15,7 +29,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
 
   useEffect(() => {
     loadSettings()
-    // Load recommendation
     api.get<{ recommendation: BalanceRecommendation | null; warnings: BalanceWarning[] }>('/posts/meta/recommendation')
       .then(({ recommendation, warnings }) => {
         if (recommendation) store.setRecommendation(recommendation, warnings)
@@ -23,21 +36,48 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       .catch(() => {})
   }, [])
 
-  // Auto-select first item in each dropdown when settings load (if nothing selected yet)
+  // Auto-select first item in each dropdown when settings load
   useEffect(() => {
     if (!settings) return
     if (!store.selectedPillar && settings.pillars.length > 0) {
       store.setField('selectedPillar', settings.pillars[0].name)
     }
-    if (!store.selectedTheme && settings.themes.length > 0) {
-      store.setField('selectedTheme', settings.themes[0].name)
+    if (!store.selectedArea && settings.areas.length > 0) {
+      store.setField('selectedArea', settings.areas[0].name)
     }
-    if (!store.selectedMechanic && settings.mechanics.length > 0) {
-      store.setField('selectedMechanic', settings.mechanics[0].name)
+    if (!store.selectedMethod && settings.methods.length > 0) {
+      store.setField('selectedMethod', settings.methods[0].name)
+    }
+    if (!store.selectedTonality && settings.tonalities.length > 0) {
+      store.setField('selectedTonality', settings.tonalities[0].name)
     }
   }, [settings])
 
-  const canGenerate = store.selectedPillar && store.selectedTheme && store.selectedMechanic
+  // Filter methods by format constraints
+  const filteredMethods = useMemo(() => {
+    if (!settings) return []
+    return settings.methods.filter(m => {
+      if (!m.formatConstraints || m.formatConstraints.length === 0) return true
+      return m.formatConstraints.includes(store.contentType)
+    })
+  }, [settings, store.contentType])
+
+  // Reset method if current selection is invalid for format
+  useEffect(() => {
+    if (!settings || filteredMethods.length === 0) return
+    const valid = filteredMethods.some(m => m.name === store.selectedMethod)
+    if (!valid) {
+      store.setField('selectedMethod', filteredMethods[0].name)
+    }
+  }, [filteredMethods])
+
+  // Blacklist check
+  const blacklistViolations = useMemo(() => {
+    if (!settings) return []
+    return checkBlacklist(settings, store.selectedArea, store.selectedApproach, store.selectedMethod, store.selectedTonality, store.selectedPillar)
+  }, [settings, store.selectedArea, store.selectedApproach, store.selectedMethod, store.selectedTonality, store.selectedPillar])
+
+  const canGenerate = store.selectedPillar && store.selectedArea && store.selectedMethod && store.selectedTonality
 
   const handleGenerate = () => {
     store.setIsGenerating(true)
@@ -46,8 +86,10 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
     const cancel = api.streamGenerate(
       {
         pillar: store.selectedPillar,
-        theme: store.selectedTheme,
-        mechanic: store.selectedMechanic,
+        area: store.selectedArea,
+        approach: store.selectedApproach || null,
+        method: store.selectedMethod,
+        tonality: store.selectedTonality,
         contentType: store.contentType,
         slideCount: store.contentType === 'carousel' ? store.slideCount : undefined,
         impulse: store.impulse
@@ -60,7 +102,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       (msg) => store.setGenerationError(msg)
     )
 
-    // Store cancel function for potential disconnect
     return cancel
   }
 
@@ -70,18 +111,46 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   }
 
   const pillars = settings?.pillars ?? []
-  const themes = settings?.themes ?? []
-  const mechanics = settings?.mechanics ?? []
+  const areas = settings?.areas ?? []
+  const approaches = settings?.approaches ?? []
+  const tonalities = settings?.tonalities ?? []
+
+  const badgeColors: Record<string, string> = {
+    area: 'bg-green-100 text-green-700',
+    pillar: 'bg-blue-100 text-blue-700',
+    method: 'bg-gray-200 text-gray-700',
+    tonality: 'bg-amber-100 text-amber-700',
+    approach: 'bg-purple-100 text-purple-700'
+  }
 
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">Create Post</h1>
 
-      {/* Recommendation badge */}
+      {/* Recommendation badges */}
       {store.recommendation && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-          <span className="font-medium text-blue-700">Recommendation:</span>{' '}
-          {store.recommendation.pillar} / {store.recommendation.theme} / {store.recommendation.mechanic}
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className="text-xs text-gray-500 mr-1">Recommended:</span>
+          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.pillar}`}>{store.recommendation.pillar}</span>
+          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.area}`}>{store.recommendation.area}</span>
+          {store.recommendation.approach && (
+            <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.approach}`}>{store.recommendation.approach}</span>
+          )}
+          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.method}`}>{store.recommendation.method}</span>
+          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.tonality}`}>{store.recommendation.tonality}</span>
+        </div>
+      )}
+
+      {/* Blacklist warning */}
+      {blacklistViolations.length > 0 && (
+        <div className="space-y-1">
+          {blacklistViolations.map((v, i) => (
+            <div key={i} className={`text-xs rounded px-3 py-1.5 ${
+              v.severity === 'hard' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-600 border border-amber-200'
+            }`}>
+              {v.severity === 'hard' ? 'Blocked' : 'Warning'}: {v.label}
+            </div>
+          ))}
         </div>
       )}
 
@@ -94,85 +163,125 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         </div>
       )}
 
-      {/* Content type toggle */}
-      <div className="flex items-center gap-2">
-        {(['single', 'carousel'] as const).map((type) => (
-          <button
-            key={type}
-            onClick={() => store.setField('contentType', type)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              store.contentType === type ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {type === 'single' ? 'Single Post' : 'Carousel'}
-          </button>
-        ))}
-        {store.contentType === 'carousel' && (
-          <div className="flex items-center gap-2 ml-2">
-            <span className="text-sm text-gray-500">Slides:</span>
-            <button
-              onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
-              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
-              disabled={store.slideCount <= 3}
+      {/* --- CONTENT --- */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Lebensbereich</label>
+            <select
+              value={store.selectedArea}
+              onChange={(e) => store.setField('selectedArea', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
             >
-              -
-            </button>
-            <span className="w-5 text-center text-sm font-semibold">{store.slideCount}</span>
-            <button
-              onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
-              className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
-              disabled={store.slideCount >= 7}
-            >
-              +
-            </button>
+              <option value="">Select...</option>
+              {areas.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
+            </select>
           </div>
-        )}
-      </div>
-
-      {/* Dropdowns */}
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Pillar</label>
-          <select
-            value={store.selectedPillar}
-            onChange={(e) => store.setField('selectedPillar', e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Absicht (Pillar)</label>
+            <select
+              value={store.selectedPillar}
+              onChange={(e) => store.setField('selectedPillar', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            >
+              {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+            </select>
+          </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Theme</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Loesungsansatz</label>
           <select
-            value={store.selectedTheme}
-            onChange={(e) => store.setField('selectedTheme', e.target.value)}
+            value={store.selectedApproach}
+            onChange={(e) => store.setField('selectedApproach', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            {themes.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mechanic</label>
-          <select
-            value={store.selectedMechanic}
-            onChange={(e) => store.setField('selectedMechanic', e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            {mechanics.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+            <option value="">-- optional --</option>
+            {approaches.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Impulse */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Impulse (optional)</label>
-        <textarea
-          value={store.impulse}
-          onChange={(e) => store.setField('impulse', e.target.value)}
-          rows={3}
-          className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-          placeholder="Additional guidance for this post..."
-        />
+      {/* --- EXECUTION --- */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Execution</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+            <div className="flex gap-2">
+              {(['single', 'carousel'] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => store.setField('contentType', type)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${
+                    store.contentType === type ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {type === 'single' ? 'Single' : 'Carousel'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Methode</label>
+            <select
+              value={store.selectedMethod}
+              onChange={(e) => store.setField('selectedMethod', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            >
+              {filteredMethods.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tonalitaet</label>
+            <select
+              value={store.selectedTonality}
+              onChange={(e) => store.setField('selectedTonality', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            >
+              {tonalities.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
+            </select>
+          </div>
+          {store.contentType === 'carousel' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Slides</label>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
+                  className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+                  disabled={store.slideCount <= 3}
+                >
+                  -
+                </button>
+                <span className="w-6 text-center text-sm font-semibold">{store.slideCount}</span>
+                <button
+                  onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
+                  className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+                  disabled={store.slideCount >= 7}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* --- OPTIONAL --- */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Optional</p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Impulse</label>
+          <textarea
+            value={store.impulse}
+            onChange={(e) => store.setField('impulse', e.target.value)}
+            rows={3}
+            className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+            placeholder="Additional guidance for this post..."
+          />
+        </div>
       </div>
 
       {/* Mode switch + actions */}

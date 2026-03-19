@@ -6,7 +6,7 @@ import {
   updateBalanceMatrix, getBalanceMatrix,
   getAvgPerformanceByDimension
 } from '../db/queries'
-import { recommendContent, generateWarnings, calculatePillarBalance } from '../services/learning-service'
+import { recommendContent, generateWarnings, calculateBalance } from '../services/learning-service'
 import { loadSettings } from './settings'
 
 const router = Router()
@@ -54,10 +54,12 @@ router.post('/', (req, res) => {
       }
     }
 
-    // Update balance matrix
+    // Update balance matrix for all dimensions
     updateBalanceMatrix('pillar', post.pillar)
-    updateBalanceMatrix('theme', post.theme)
-    updateBalanceMatrix('mechanic', post.mechanic)
+    updateBalanceMatrix('area', post.area)
+    if (post.approach) updateBalanceMatrix('approach', post.approach)
+    updateBalanceMatrix('method', post.method)
+    updateBalanceMatrix('tonality', post.tonality)
 
     res.json({ id: postId })
   } catch (err) {
@@ -92,24 +94,29 @@ router.get('/meta/recommendation', (_req, res) => {
     const entries = getBalanceMatrix()
     const settings = loadSettings()
 
-    // Filter to only values present in current settings - prevents stale entries from being recommended
+    // Filter to only values present in current settings
     const validPillars = new Set(settings.pillars.map(p => p.name))
-    const validThemes = new Set(settings.themes.map(t => t.name))
-    const validMechanics = new Set(settings.mechanics.map(m => m.name))
+    const validAreas = new Set(settings.areas.map(a => a.name))
+    const validApproaches = new Set(settings.approaches.map(a => a.name))
+    const validMethods = new Set(settings.methods.map(m => m.name))
+    const validTonalities = new Set(settings.tonalities.map(t => t.name))
 
     const filtered = entries.filter(e => {
       if (e.variable_type === 'pillar') return validPillars.has(e.variable_value)
-      if (e.variable_type === 'theme') return validThemes.has(e.variable_value)
-      if (e.variable_type === 'mechanic') return validMechanics.has(e.variable_value)
+      if (e.variable_type === 'area') return validAreas.has(e.variable_value)
+      if (e.variable_type === 'approach') return validApproaches.has(e.variable_value)
+      if (e.variable_type === 'method') return validMethods.has(e.variable_value)
+      if (e.variable_type === 'tonality') return validTonalities.has(e.variable_value)
       return false
     })
 
-    // Need at least one entry per dimension to recommend
+    // Need at least one entry per required dimension
     const hasPillar = filtered.some(e => e.variable_type === 'pillar')
-    const hasTheme = filtered.some(e => e.variable_type === 'theme')
-    const hasMechanic = filtered.some(e => e.variable_type === 'mechanic')
+    const hasArea = filtered.some(e => e.variable_type === 'area')
+    const hasMethod = filtered.some(e => e.variable_type === 'method')
+    const hasTonality = filtered.some(e => e.variable_type === 'tonality')
 
-    if (!hasPillar || !hasTheme || !hasMechanic) {
+    if (!hasPillar || !hasArea || !hasMethod || !hasTonality) {
       res.json({ recommendation: null, warnings: [] })
       return
     }
@@ -131,7 +138,7 @@ router.get('/meta/balance', (_req, res) => {
     for (const p of settings.pillars) {
       targets[p.name] = p.targetPct
     }
-    const dashboard = calculatePillarBalance(entries, targets)
+    const dashboard = calculateBalance(entries, targets)
     res.json(dashboard)
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
@@ -142,9 +149,10 @@ router.get('/meta/balance', (_req, res) => {
 router.get('/meta/stats', (_req, res) => {
   try {
     const byPillar = getAvgPerformanceByDimension('pillar')
-    const byTheme = getAvgPerformanceByDimension('theme')
-    const byMechanic = getAvgPerformanceByDimension('mechanic')
-    res.json({ byPillar, byTheme, byMechanic })
+    const byArea = getAvgPerformanceByDimension('area')
+    const byMethod = getAvgPerformanceByDimension('method')
+    const byTonality = getAvgPerformanceByDimension('tonality')
+    res.json({ byPillar, byArea, byMethod, byTonality })
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }

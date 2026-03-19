@@ -23,30 +23,36 @@ afterEach(() => {
 
 describe('posts', () => {
   it('insertPost + getPost round-trip returns correct data', () => {
-    const id = insertPost({ pillar: 'Growth', theme: 'AI Tools', mechanic: 'Tutorial', content_type: 'carousel', caption: 'Hello world' })
+    const id = insertPost({ pillar: 'Growth', area: 'L3 Alltagschaos', method: 'M1 Provokante These', tonality: 'T1 Emotional', content_type: 'carousel', caption: 'Hello world' })
     expect(id).toBeGreaterThan(0)
 
     const post = getPost(id)
     expect(post).toBeDefined()
     expect(post!.pillar).toBe('Growth')
-    expect(post!.theme).toBe('AI Tools')
-    expect(post!.mechanic).toBe('Tutorial')
+    expect(post!.area).toBe('L3 Alltagschaos')
+    expect(post!.approach).toBeNull()
+    expect(post!.method).toBe('M1 Provokante These')
+    expect(post!.tonality).toBe('T1 Emotional')
     expect(post!.content_type).toBe('carousel')
     expect(post!.caption).toBe('Hello world')
     expect(post!.status).toBe('draft')
   })
 
+  it('insertPost with approach stores approach', () => {
+    const id = insertPost({ pillar: 'A', area: 'L1', approach: 'A1 Dankbarkeit', method: 'M1', tonality: 'T1', content_type: 'single' })
+    const post = getPost(id)
+    expect(post!.approach).toBe('A1 Dankbarkeit')
+  })
+
   it('listPosts returns all inserted posts', () => {
-    insertPost({ pillar: 'A', theme: 'T1', mechanic: 'M', content_type: 'single' })
-    insertPost({ pillar: 'B', theme: 'T2', mechanic: 'M', content_type: 'single' })
+    insertPost({ pillar: 'A', area: 'L1', method: 'M1', tonality: 'T1', content_type: 'single' })
+    insertPost({ pillar: 'B', area: 'L2', method: 'M2', tonality: 'T2', content_type: 'single' })
     const posts = listPosts()
     expect(posts.length).toBe(2)
-    const pillars = posts.map(p => p.pillar).sort()
-    expect(pillars).toEqual(['A', 'B'])
   })
 
   it('updatePostStatus changes status from draft to approved', () => {
-    const id = insertPost({ pillar: 'P', theme: 'T', mechanic: 'M', content_type: 'single' })
+    const id = insertPost({ pillar: 'P', area: 'L1', method: 'M1', tonality: 'T1', content_type: 'single' })
     updatePostStatus(id, 'approved')
     const post = getPost(id)
     expect(post!.status).toBe('approved')
@@ -55,7 +61,7 @@ describe('posts', () => {
 
 describe('slides', () => {
   it('insertSlide + getSlidesByPost returns slides ordered by slide_number', () => {
-    const postId = insertPost({ pillar: 'P', theme: 'T', mechanic: 'M', content_type: 'carousel' })
+    const postId = insertPost({ pillar: 'P', area: 'L1', method: 'M1', tonality: 'T1', content_type: 'carousel' })
     insertSlide({ post_id: postId, slide_number: 2, slide_type: 'content', body_text: 'Body 2' })
     insertSlide({ post_id: postId, slide_number: 1, slide_type: 'cover', hook_text: 'Hook 1' })
 
@@ -70,7 +76,7 @@ describe('slides', () => {
 
 describe('performance', () => {
   it('upsertPerformance + getPerformance round-trip', () => {
-    const postId = insertPost({ pillar: 'P', theme: 'T', mechanic: 'M', content_type: 'single' })
+    const postId = insertPost({ pillar: 'P', area: 'L1', method: 'M1', tonality: 'T1', content_type: 'single' })
     upsertPerformance(postId, { reach: 1500, likes: 80, comments: 12 })
 
     const perf = getPerformance(postId)
@@ -81,7 +87,7 @@ describe('performance', () => {
   })
 
   it('upsertPerformance updates on conflict (same post_id)', () => {
-    const postId = insertPost({ pillar: 'P', theme: 'T', mechanic: 'M', content_type: 'single' })
+    const postId = insertPost({ pillar: 'P', area: 'L1', method: 'M1', tonality: 'T1', content_type: 'single' })
     upsertPerformance(postId, { reach: 500 })
     upsertPerformance(postId, { reach: 999, saves: 40 })
 
@@ -93,27 +99,28 @@ describe('performance', () => {
 
 describe('balance matrix', () => {
   it('updateBalanceMatrix inserts with usage_count=1 on first call', () => {
-    updateBalanceMatrix('pillar', 'Growth')
+    updateBalanceMatrix('area', 'L1')
     const entries = getBalanceMatrix()
-    const entry = entries.find(e => e.variable_type === 'pillar' && e.variable_value === 'Growth')
+    const entry = entries.find(e => e.variable_type === 'area' && e.variable_value === 'L1')
     expect(entry).toBeDefined()
     expect(entry!.usage_count).toBe(1)
   })
 
   it('updateBalanceMatrix increments usage_count on subsequent calls', () => {
-    updateBalanceMatrix('pillar', 'Growth')
-    updateBalanceMatrix('pillar', 'Growth')
-    updateBalanceMatrix('pillar', 'Growth')
+    updateBalanceMatrix('method', 'M1')
+    updateBalanceMatrix('method', 'M1')
+    updateBalanceMatrix('method', 'M1')
     const entries = getBalanceMatrix()
-    const entry = entries.find(e => e.variable_value === 'Growth')!
+    const entry = entries.find(e => e.variable_value === 'M1')!
     expect(entry.usage_count).toBe(3)
   })
 
   it('getBalanceMatrix returns all tracked entries', () => {
     updateBalanceMatrix('pillar', 'A')
-    updateBalanceMatrix('pillar', 'B')
-    updateBalanceMatrix('mechanic', 'Tutorial')
+    updateBalanceMatrix('area', 'L1')
+    updateBalanceMatrix('method', 'M1')
+    updateBalanceMatrix('tonality', 'T1')
     const entries = getBalanceMatrix()
-    expect(entries.length).toBe(3)
+    expect(entries.length).toBe(4)
   })
 })

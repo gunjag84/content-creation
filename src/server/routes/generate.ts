@@ -21,9 +21,9 @@ router.post('/', async (req, res) => {
     return
   }
 
-  const { pillar, theme, mechanic, contentType, slideCount, impulse } = req.body
-  if (!pillar || !theme || !mechanic) {
-    res.status(400).json({ error: 'pillar, theme, and mechanic are required' })
+  const { pillar, area, approach, method, tonality, contentType, slideCount, impulse } = req.body
+  if (!pillar || !area || !method || !tonality) {
+    res.status(400).json({ error: 'pillar, area, method, and tonality are required' })
     return
   }
 
@@ -37,7 +37,8 @@ router.post('/', async (req, res) => {
 
   const settings = loadSettings()
   const prompt = assemblePrompt(
-    pillar, theme, mechanic,
+    pillar, area, approach || null,
+    method, tonality,
     impulse || '',
     settings,
     contentType || 'carousel',

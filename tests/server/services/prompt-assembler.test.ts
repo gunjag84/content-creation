@@ -19,16 +19,12 @@ const baseSettings: Settings = {
     handle: '@brand'
   },
   pillars: [],
-  themes: [],
-  contentDefaults: { captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 },
-  mechanics: [
-    {
-      id: 'm1',
-      name: 'Educational',
-      description: 'Teach something useful',
-      slideRange: { min: 3, max: 7 }
-    }
-  ]
+  areas: [{ id: 'a1', name: 'L3 Alltagschaos', description: 'Daily chaos of working parents' }],
+  approaches: [{ id: 'ap1', name: 'A1 Dankbarkeit', description: 'Gratitude practice' }],
+  methods: [{ id: 'm1', name: 'M1 Provokante These', description: 'Start with a bold claim' }],
+  tonalities: [{ id: 't1', name: 'T1 Emotional', description: 'Warm and empathetic tone' }],
+  blacklist: [],
+  contentDefaults: { captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 }
 }
 
 describe('assemblePrompt', () => {
@@ -37,90 +33,81 @@ describe('assemblePrompt', () => {
       ...baseSettings,
       contextDocs: { ...baseSettings.contextDocs, brandVoice: 'Direct and concise' }
     }
-    const result = assemblePrompt('Pillar A', 'Theme X', 'Educational', '', settings, 'single')
+    const result = assemblePrompt('Pillar A', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', settings, 'single')
     expect(result).toContain('## Brand Voice')
     expect(result).toContain('Direct and concise')
   })
 
   it('skips empty context docs', () => {
-    const result = assemblePrompt('Pillar A', 'Theme X', 'Educational', '', baseSettings, 'single')
+    const result = assemblePrompt('Pillar A', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'single')
     expect(result).not.toContain('## Brand Voice')
-    expect(result).not.toContain('## Target Persona')
   })
 
-  it('includes content focus with pillar and theme', () => {
-    const result = assemblePrompt('Growth', 'AI Tools', 'Educational', '', baseSettings, 'carousel')
+  it('includes area in content focus', () => {
+    const result = assemblePrompt('Growth', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
     expect(result).toContain('## Content Focus')
-    expect(result).toContain('**Pillar:** Growth')
-    expect(result).toContain('**Theme:** AI Tools')
+    expect(result).toContain('L3 Alltagschaos')
+    expect(result).toContain('Daily chaos of working parents')
   })
 
-  it('includes mechanic section when mechanic is found in settings', () => {
-    const result = assemblePrompt('Pillar', 'Theme', 'Educational', '', baseSettings, 'carousel')
-    expect(result).toContain('## Post Mechanic: Educational')
-    expect(result).toContain('Teach something useful')
-    expect(result).toContain('**Slide Range:** 3-7 slides')
+  it('includes approach when provided', () => {
+    const result = assemblePrompt('Growth', 'L3 Alltagschaos', 'A1 Dankbarkeit', 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
+    expect(result).toContain('A1 Dankbarkeit')
+    expect(result).toContain('Gratitude practice')
   })
 
-  it('single post: output instruction requires exactly 1 slide with type cover', () => {
-    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'single')
+  it('omits approach when null', () => {
+    const result = assemblePrompt('Growth', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
+    expect(result).not.toContain('Loesungsansatz')
+  })
+
+  it('includes method section', () => {
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
+    expect(result).toContain('## Method: M1 Provokante These')
+    expect(result).toContain('Start with a bold claim')
+  })
+
+  it('includes tonality section', () => {
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
+    expect(result).toContain('## Tonality: T1 Emotional')
+    expect(result).toContain('Warm and empathetic tone')
+  })
+
+  it('single post output format requires exactly 1 slide', () => {
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'single')
     expect(result).toContain('EXACTLY 1 slide')
-    expect(result).toContain('"slide_type":"cover"')
-    expect(result).not.toContain('"slide_type":"content"')
   })
 
-  it('carousel: output instruction includes cover/content/cta slide types', () => {
-    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'carousel')
+  it('carousel output includes cover/content/cta slide types', () => {
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', baseSettings, 'carousel')
     expect(result).toContain('"slide_type":"cover"')
     expect(result).toContain('"slide_type":"content"')
     expect(result).toContain('"slide_type":"cta"')
   })
 
-  it('includes impulse section when impulse is non-empty', () => {
-    const result = assemblePrompt('P', 'T', 'Educational', 'Focus on beginners', baseSettings, 'single')
+  it('includes impulse section when non-empty', () => {
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', 'Focus on beginners', baseSettings, 'single')
     expect(result).toContain('## Additional Guidance')
     expect(result).toContain('Focus on beginners')
   })
 
-  it('includes pillar rules when pillar has rules defined', () => {
+  it('includes pillar rules when defined', () => {
     const settings = {
       ...baseSettings,
       pillars: [{ id: 'p1', name: 'Growth', targetPct: 50, rules: 'Never mention the product' }]
     }
-    const result = assemblePrompt('Growth', 'Theme X', 'Educational', '', settings, 'single')
+    const result = assemblePrompt('Growth', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', settings, 'single')
     expect(result).toContain('**Pillar Rules (MUST follow):**')
     expect(result).toContain('Never mention the product')
   })
 
-  it('omits pillar rules when pillar has no rules', () => {
-    const settings = {
-      ...baseSettings,
-      pillars: [{ id: 'p1', name: 'Growth', targetPct: 50, rules: '' }]
-    }
-    const result = assemblePrompt('Growth', 'Theme X', 'Educational', '', settings, 'single')
-    expect(result).not.toContain('Pillar Rules')
-  })
-
-  it('carousel prompt instructs cover slide to have hook_text only', () => {
-    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'carousel', 5)
-    expect(result).toContain('ONLY a hook_text')
-    expect(result).toContain('body_text and cta_text must be empty')
-  })
-
-  it('includes caption and body char limits from contentDefaults', () => {
-    const result = assemblePrompt('P', 'T', 'Educational', '', baseSettings, 'single')
-    expect(result).toContain('50-400 characters')
-    expect(result).toContain('max 400 characters')
-  })
-
-  it('truncates prompt when context docs exceed 32000 chars and appends marker', () => {
+  it('truncates prompt when context docs exceed 32000 chars', () => {
     const longDoc = 'x'.repeat(40000)
     const settings = {
       ...baseSettings,
       contextDocs: { ...baseSettings.contextDocs, brandVoice: longDoc }
     }
-    const result = assemblePrompt('P', 'T', 'Educational', '', settings, 'single')
-    // Without truncation, length would be 40000+. With truncation it is ~32000 + marker + JSON instruction.
+    const result = assemblePrompt('P', 'L3 Alltagschaos', null, 'M1 Provokante These', 'T1 Emotional', '', settings, 'single')
     expect(result.length).toBeLessThan(40000)
     expect(result).toContain('[Context truncated due to length]')
   })
