@@ -137,11 +137,6 @@ const MethodSchema = z.object({
   formatConstraints: z.array(z.enum(['single', 'carousel'])).optional()
 })
 const TonalitySchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
-const BlacklistEntrySchema = z.object({
-  dimension1: z.string(), value1: z.string(),
-  dimension2: z.string(), value2: z.string(),
-  severity: z.enum(['hard', 'soft'])
-})
 
 const ContentDefaultsSchema = z.object({
   captionMinChars: z.number().min(0).default(50),
@@ -156,7 +151,6 @@ export const SettingsSchema = z.object({
   areas: z.array(AreaSchema).default([]),
   methods: z.array(MethodSchema).default([]),
   tonalities: z.array(TonalitySchema).default([]),
-  blacklist: z.array(BlacklistEntrySchema).default([]),
   contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 })
 })
 

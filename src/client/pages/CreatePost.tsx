@@ -3,24 +3,10 @@ import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
 import { getAnglesForPillar, getFilteredMethods, getFilteredTonalities, isAreaRequired } from '@shared/pillarConstraints'
-import type { BalanceRecommendation, BalanceWarning, GenerationResult, Settings } from '@shared/types'
+import type { BalanceRecommendation, BalanceWarning, GenerationResult } from '@shared/types'
 
 interface CreatePostProps {
   onGenerated: () => void
-}
-
-function checkBlacklist(settings: Settings, area: string, angle: string, method: string, tonality: string, pillar: string) {
-  const violations: Array<{ severity: 'hard' | 'soft'; label: string }> = []
-  const dimValues: Record<string, string> = { area, angle, method, tonality, pillar }
-
-  for (const entry of settings.blacklist) {
-    const v1 = dimValues[entry.dimension1]
-    const v2 = dimValues[entry.dimension2]
-    if (v1 && v2 && v1 === entry.value1 && v2 === entry.value2) {
-      violations.push({ severity: entry.severity, label: `${entry.value1} + ${entry.value2}` })
-    }
-  }
-  return violations
 }
 
 export function CreatePost({ onGenerated }: CreatePostProps) {
@@ -114,12 +100,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
     }
   }, [filteredMethods])
 
-  // Blacklist check
-  const blacklistViolations = useMemo(() => {
-    if (!settings) return []
-    return checkBlacklist(settings, store.selectedArea, store.selectedAngle, store.selectedMethod, store.selectedTonality, store.selectedPillar)
-  }, [settings, store.selectedArea, store.selectedAngle, store.selectedMethod, store.selectedTonality, store.selectedPillar])
-
   const canGenerate = store.selectedPillar
     && store.selectedAngle
     && (areaRequired ? store.selectedArea : true)
@@ -183,19 +163,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           )}
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.method}`}>{store.recommendation.method}</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.tonality}`}>{store.recommendation.tonality}</span>
-        </div>
-      )}
-
-      {/* Blacklist warning */}
-      {blacklistViolations.length > 0 && (
-        <div className="space-y-1">
-          {blacklistViolations.map((v, i) => (
-            <div key={i} className={`text-xs rounded px-3 py-1.5 ${
-              v.severity === 'hard' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-600 border border-amber-200'
-            }`}>
-              {v.severity === 'hard' ? 'Blocked' : 'Warning'}: {v.label}
-            </div>
-          ))}
         </div>
       )}
 
