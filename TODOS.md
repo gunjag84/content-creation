@@ -1,5 +1,13 @@
 # TODOS
 
+1. Implement Landing Page link
+2. Implement Hook System (hook strategy as first-class dimension in wizard)
+3. Implement CTA Strategy system (CTA strategy as first-class dimension in wizard)
+
+(check vs initial requirements.md in planning)
+(#4 Pillar hierarchy and #5 Real Life Situations - addressed by hierarchy branch)
+
+
 ## P2 - Hook-First Creation Flow
 **What:** Restructure CreatePost wizard to lead with hook selection before dimension selection.
 **Why:** Hooks are the highest-leverage scroll-stopping element - they should drive creative direction, not be an afterthought after area/method/tonality.
