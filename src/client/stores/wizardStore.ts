@@ -15,7 +15,7 @@ interface WizardStore {
   // Step 1 - Create
   selectedPillar: string
   selectedArea: string
-  selectedApproach: string
+  selectedAngle: string
   selectedMethod: string
   selectedTonality: string
   contentType: 'single' | 'carousel'
@@ -66,7 +66,7 @@ const initialState = {
   step: 'create' as const,
   selectedPillar: '',
   selectedArea: '',
-  selectedApproach: '',
+  selectedAngle: '',
   selectedMethod: '',
   selectedTonality: '',
   contentType: 'carousel' as const,
@@ -115,7 +115,7 @@ export const useWizardStore = create<WizardStore>((set) => ({
     warnings,
     selectedPillar: rec.pillar,
     selectedArea: rec.area,
-    selectedApproach: rec.approach ?? '',
+    selectedAngle: rec.angle ?? '',
     selectedMethod: rec.method,
     selectedTonality: rec.tonality
   }),

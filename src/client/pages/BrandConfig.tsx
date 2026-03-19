@@ -150,7 +150,7 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
   }
 
   const addPillar = () => {
-    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0 }] })
+    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0, rules: '', angles: [], allowedTonalities: [], allowedMethods: [], areaRequired: true }] })
   }
 
   const updatePillar = (index: number, field: string, value: string | number) => {
@@ -484,33 +484,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         )}
       />
 
-      {/* Approaches */}
-      <DimensionListEditor
-        title="Approaches"
-        infoText="Solution approaches - the 'how to solve it' angle. Optional per post. Examples: gratitude, journaling, mindfulness, digital detox."
-        emptyMessage="No approaches configured yet."
-        items={local.approaches}
-        onAdd={() => { setLocal({ ...local, approaches: [...local.approaches, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
-        onRemove={(id) => {
-          setLocal({
-            ...local,
-            approaches: local.approaches.filter(a => a.id !== id),
-            blacklist: local.blacklist.filter(b => !(b.dimension1 === 'approach' && b.value1 === local.approaches.find(a => a.id === id)?.name) && !(b.dimension2 === 'approach' && b.value2 === local.approaches.find(a => a.id === id)?.name))
-          })
-          setSaved(false)
-        }}
-        onUpdate={(id, updates) => {
-          setLocal({ ...local, approaches: local.approaches.map(a => a.id === id ? { ...a, ...updates } : a) })
-          setSaved(false)
-        }}
-        renderFields={(item, onUpdate) => (
-          <div className="space-y-2">
-            <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Approach name (e.g. A1 Dankbarkeit)" />
-            <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
-          </div>
-        )}
-      />
-
       {/* Methods */}
       <DimensionListEditor
         title="Methods"
@@ -626,10 +599,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
           <p className="text-sm text-gray-400">No blacklist rules configured.</p>
         )}
         {local.blacklist.map((entry, i) => {
-          const dims = ['area', 'approach', 'method', 'tonality', 'pillar'] as const
+          const dims = ['area', 'angle', 'method', 'tonality', 'pillar'] as const
           const getValues = (dim: string) => {
             if (dim === 'area') return local.areas.map(a => a.name)
-            if (dim === 'approach') return local.approaches.map(a => a.name)
+            if (dim === 'angle') return local.pillars.flatMap(p => (p.angles ?? []).map(a => a.name))
             if (dim === 'method') return local.methods.map(m => m.name)
             if (dim === 'tonality') return local.tonalities.map(t => t.name)
             if (dim === 'pillar') return local.pillars.map(p => p.name)

@@ -272,7 +272,7 @@ export function PostHistory() {
                 <span className="text-xs font-mono text-gray-400">#{post.id}</span>
                 <span className="text-sm font-medium">{post.pillar}</span>
                 {post.area && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">{post.area}</span>}
-                {post.approach && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{post.approach}</span>}
+                {post.angle && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{post.angle}</span>}
                 {post.method && <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">{post.method}</span>}
                 {post.tonality && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">{post.tonality}</span>}
                 <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{post.content_type}</span>

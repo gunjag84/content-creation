@@ -9,7 +9,7 @@ interface ReviewDownloadProps {
 
 export function ReviewDownload({ onDone, onBack }: ReviewDownloadProps) {
   const { slides, caption, renderedImages, setPostId } = useWizardStore()
-  const { selectedPillar, selectedArea, selectedApproach, selectedMethod, selectedTonality, contentType, impulse } = useWizardStore()
+  const { selectedPillar, selectedArea, selectedAngle, selectedMethod, selectedTonality, contentType, impulse } = useWizardStore()
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -21,7 +21,7 @@ export function ReviewDownload({ onDone, onBack }: ReviewDownloadProps) {
         post: {
           pillar: selectedPillar,
           area: selectedArea,
-          approach: selectedApproach || null,
+          angle: selectedAngle || null,
           method: selectedMethod,
           tonality: selectedTonality,
           content_type: contentType,

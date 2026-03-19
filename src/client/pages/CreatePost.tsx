@@ -2,15 +2,16 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
+import { getAnglesForPillar, getFilteredMethods, getFilteredTonalities, isAreaRequired } from '@shared/pillarConstraints'
 import type { BalanceRecommendation, BalanceWarning, GenerationResult, Settings } from '@shared/types'
 
 interface CreatePostProps {
   onGenerated: () => void
 }
 
-function checkBlacklist(settings: Settings, area: string, approach: string, method: string, tonality: string, pillar: string) {
+function checkBlacklist(settings: Settings, area: string, angle: string, method: string, tonality: string, pillar: string) {
   const violations: Array<{ severity: 'hard' | 'soft'; label: string }> = []
-  const dimValues: Record<string, string> = { area, approach, method, tonality, pillar }
+  const dimValues: Record<string, string> = { area, angle, method, tonality, pillar }
 
   for (const entry of settings.blacklist) {
     const v1 = dimValues[entry.dimension1]
@@ -36,33 +37,75 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       .catch(() => {})
   }, [])
 
-  // Auto-select first item in each dropdown when settings load
+  // Auto-select first pillar when settings load
   useEffect(() => {
     if (!settings) return
     if (!store.selectedPillar && settings.pillars.length > 0) {
       store.setField('selectedPillar', settings.pillars[0].name)
     }
-    if (!store.selectedArea && settings.areas.length > 0) {
-      store.setField('selectedArea', settings.areas[0].name)
-    }
-    if (!store.selectedMethod && settings.methods.length > 0) {
-      store.setField('selectedMethod', settings.methods[0].name)
-    }
-    if (!store.selectedTonality && settings.tonalities.length > 0) {
-      store.setField('selectedTonality', settings.tonalities[0].name)
-    }
   }, [settings])
 
-  // Filter methods by format constraints
-  const filteredMethods = useMemo(() => {
-    if (!settings) return []
-    return settings.methods.filter(m => {
+  // Cascade reset when pillar changes
+  useEffect(() => {
+    if (!settings || !store.selectedPillar) return
+    const pillarAngles = getAnglesForPillar(settings, store.selectedPillar)
+    const pillarMethods = getFilteredMethods(settings, store.selectedPillar).filter(m => {
       if (!m.formatConstraints || m.formatConstraints.length === 0) return true
       return m.formatConstraints.includes(store.contentType)
     })
-  }, [settings, store.contentType])
+    const pillarTonalities = getFilteredTonalities(settings, store.selectedPillar)
+    const areaReq = isAreaRequired(settings, store.selectedPillar)
 
-  // Reset method if current selection is invalid for format
+    // Reset angle to first angle of new pillar
+    const currentAngleValid = pillarAngles.some(a => a.name === store.selectedAngle)
+    if (!currentAngleValid) {
+      store.setField('selectedAngle', pillarAngles.length > 0 ? pillarAngles[0].name : '')
+    }
+
+    // Reset method if no longer valid
+    const currentMethodValid = pillarMethods.some(m => m.name === store.selectedMethod)
+    if (!currentMethodValid && pillarMethods.length > 0) {
+      store.setField('selectedMethod', pillarMethods[0].name)
+    }
+
+    // Reset tonality if no longer valid
+    const currentTonalityValid = pillarTonalities.some(t => t.name === store.selectedTonality)
+    if (!currentTonalityValid && pillarTonalities.length > 0) {
+      store.setField('selectedTonality', pillarTonalities[0].name)
+    }
+
+    // Clear area if now optional and was previously set to nothing valid
+    if (!areaReq && store.selectedArea === '') {
+      // area is optional - no action needed, empty is valid
+    }
+  }, [store.selectedPillar, settings])
+
+  // Derived filtered lists
+  const angles = useMemo(() => {
+    if (!settings) return []
+    return getAnglesForPillar(settings, store.selectedPillar)
+  }, [settings, store.selectedPillar])
+
+  const filteredMethods = useMemo(() => {
+    if (!settings) return []
+    const pillarFiltered = getFilteredMethods(settings, store.selectedPillar)
+    return pillarFiltered.filter(m => {
+      if (!m.formatConstraints || m.formatConstraints.length === 0) return true
+      return m.formatConstraints.includes(store.contentType)
+    })
+  }, [settings, store.selectedPillar, store.contentType])
+
+  const filteredTonalities = useMemo(() => {
+    if (!settings) return []
+    return getFilteredTonalities(settings, store.selectedPillar)
+  }, [settings, store.selectedPillar])
+
+  const areaRequired = useMemo(() => {
+    if (!settings) return true
+    return isAreaRequired(settings, store.selectedPillar)
+  }, [settings, store.selectedPillar])
+
+  // Reset method if current selection is invalid for format or pillar
   useEffect(() => {
     if (!settings || filteredMethods.length === 0) return
     const valid = filteredMethods.some(m => m.name === store.selectedMethod)
@@ -74,10 +117,14 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   // Blacklist check
   const blacklistViolations = useMemo(() => {
     if (!settings) return []
-    return checkBlacklist(settings, store.selectedArea, store.selectedApproach, store.selectedMethod, store.selectedTonality, store.selectedPillar)
-  }, [settings, store.selectedArea, store.selectedApproach, store.selectedMethod, store.selectedTonality, store.selectedPillar])
+    return checkBlacklist(settings, store.selectedArea, store.selectedAngle, store.selectedMethod, store.selectedTonality, store.selectedPillar)
+  }, [settings, store.selectedArea, store.selectedAngle, store.selectedMethod, store.selectedTonality, store.selectedPillar])
 
-  const canGenerate = store.selectedPillar && store.selectedArea && store.selectedMethod && store.selectedTonality
+  const canGenerate = store.selectedPillar
+    && store.selectedAngle
+    && (areaRequired ? store.selectedArea : true)
+    && store.selectedMethod
+    && store.selectedTonality
 
   const handleGenerate = () => {
     store.setIsGenerating(true)
@@ -87,7 +134,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       {
         pillar: store.selectedPillar,
         area: store.selectedArea,
-        approach: store.selectedApproach || null,
+        angle: store.selectedAngle || null,
         method: store.selectedMethod,
         tonality: store.selectedTonality,
         contentType: store.contentType,
@@ -112,15 +159,13 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
 
   const pillars = settings?.pillars ?? []
   const areas = settings?.areas ?? []
-  const approaches = settings?.approaches ?? []
-  const tonalities = settings?.tonalities ?? []
 
   const badgeColors: Record<string, string> = {
     area: 'bg-green-100 text-green-700',
     pillar: 'bg-blue-100 text-blue-700',
     method: 'bg-gray-200 text-gray-700',
     tonality: 'bg-amber-100 text-amber-700',
-    approach: 'bg-purple-100 text-purple-700'
+    angle: 'bg-purple-100 text-purple-700'
   }
 
   return (
@@ -133,8 +178,8 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           <span className="text-xs text-gray-500 mr-1">Recommended:</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.pillar}`}>{store.recommendation.pillar}</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.area}`}>{store.recommendation.area}</span>
-          {store.recommendation.approach && (
-            <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.approach}`}>{store.recommendation.approach}</span>
+          {store.recommendation.angle && (
+            <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.angle}`}>{store.recommendation.angle}</span>
           )}
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.method}`}>{store.recommendation.method}</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.tonality}`}>{store.recommendation.tonality}</span>
@@ -166,38 +211,50 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       {/* --- CONTENT --- */}
       <div className="space-y-3">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</p>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
-            <select
-              value={store.selectedArea}
-              onChange={(e) => store.setField('selectedArea', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="">Select...</option>
-              {areas.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Pillar</label>
-            <select
-              value={store.selectedPillar}
-              onChange={(e) => store.setField('selectedPillar', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-            </select>
-          </div>
-        </div>
+
+        {/* Pillar - full width, root selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Approach</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Pillar</label>
           <select
-            value={store.selectedApproach}
-            onChange={(e) => store.setField('selectedApproach', e.target.value)}
+            value={store.selectedPillar}
+            onChange={(e) => store.setField('selectedPillar', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">-- optional --</option>
-            {approaches.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
+            <option value="">Select pillar...</option>
+            {pillars.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+          </select>
+        </div>
+
+        {/* Angle - full width, pillar-specific */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Angle</label>
+          <select
+            value={store.selectedAngle}
+            onChange={(e) => store.setField('selectedAngle', e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+            disabled={!store.selectedPillar || angles.length === 0}
+          >
+            <option value="">Select angle...</option>
+            {angles.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
+          </select>
+          {store.selectedPillar && angles.length === 0 && (
+            <p className="text-xs text-amber-600 mt-1">No angles configured for this pillar. Add angles in Brand Configuration.</p>
+          )}
+        </div>
+
+        {/* Area - full width, optional for Nurture Loyalty */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Area
+            {!areaRequired && <span className="ml-1 text-xs text-gray-400">(optional)</span>}
+          </label>
+          <select
+            value={store.selectedArea}
+            onChange={(e) => store.setField('selectedArea', e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="">{areaRequired ? 'Select area...' : '-- optional --'}</option>
+            {areas.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
           </select>
         </div>
       </div>
@@ -205,6 +262,28 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       {/* --- EXECUTION --- */}
       <div className="space-y-3">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Execution</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
+            <select
+              value={store.selectedMethod}
+              onChange={(e) => store.setField('selectedMethod', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            >
+              {filteredMethods.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tonality</label>
+            <select
+              value={store.selectedTonality}
+              onChange={(e) => store.setField('selectedTonality', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            >
+              {filteredTonalities.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
+            </select>
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
@@ -221,28 +300,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
                 </button>
               ))}
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
-            <select
-              value={store.selectedMethod}
-              onChange={(e) => store.setField('selectedMethod', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              {filteredMethods.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tonality</label>
-            <select
-              value={store.selectedTonality}
-              onChange={(e) => store.setField('selectedTonality', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              {tonalities.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
-            </select>
           </div>
           {store.contentType === 'carousel' && (
             <div>
