@@ -28,9 +28,27 @@ export function initDatabase(dbPath?: string): Database.Database {
     db.exec(sql)
   } else {
     // Migrate existing DBs
+    // Phase A: approach -> angle rename. If 'angle' column missing, add it and migrate data from 'approach'.
+    // Clean break preferred: delete data/content-creation.db for a fresh start with the new schema.
     const cols = (db.prepare('PRAGMA table_info(posts)').all() as { name: string }[]).map(c => c.name)
     if (!cols.includes('template_id')) db.exec('ALTER TABLE posts ADD COLUMN template_id INTEGER')
     if (!cols.includes('ad_hoc')) db.exec('ALTER TABLE posts ADD COLUMN ad_hoc INTEGER NOT NULL DEFAULT 0')
+
+    // Phase A migrations: approach -> angle
+    if (!cols.includes('angle')) {
+      console.log('[db] Migrating: adding angle column from approach')
+      db.exec('ALTER TABLE posts ADD COLUMN angle TEXT')
+      if (cols.includes('approach')) {
+        db.exec('UPDATE posts SET angle = approach')
+      }
+    }
+    // Rename balance_matrix entries from 'approach' to 'angle'
+    db.exec("UPDATE balance_matrix SET variable_type = 'angle' WHERE variable_type = 'approach'")
+
+    // Stub columns for future phases
+    if (!cols.includes('situation_id')) db.exec('ALTER TABLE posts ADD COLUMN situation_id TEXT')
+    if (!cols.includes('hook_strategy')) db.exec('ALTER TABLE posts ADD COLUMN hook_strategy TEXT')
+    if (!cols.includes('cta_strategy')) db.exec('ALTER TABLE posts ADD COLUMN cta_strategy TEXT')
 
     // MECE dimension migration: theme+mechanic -> area+approach+method+tonality
     if (!cols.includes('area')) {

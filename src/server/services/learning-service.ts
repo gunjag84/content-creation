@@ -27,7 +27,7 @@ export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecomme
   return {
     pillar: selectFromDimension(byType['pillar'], hasPerformanceData),
     area: selectFromDimension(byType['area'], hasPerformanceData),
-    approach: byType['approach'] ? selectFromDimension(byType['approach'], hasPerformanceData) : null,
+    angle: byType['angle'] ? selectFromDimension(byType['angle'], hasPerformanceData) : null,
     method: selectFromDimension(byType['method'], hasPerformanceData),
     tonality: selectFromDimension(byType['tonality'], hasPerformanceData),
     reasoning
@@ -69,7 +69,7 @@ export function calculateBalance(
 ): BalanceDashboardData {
   const pillarEntries = entries.filter(e => e.variable_type === 'pillar')
   const areaEntries = entries.filter(e => e.variable_type === 'area')
-  const approachEntries = entries.filter(e => e.variable_type === 'approach')
+  const angleEntries = entries.filter(e => e.variable_type === 'angle')
   const methodEntries = entries.filter(e => e.variable_type === 'method')
   const tonalityEntries = entries.filter(e => e.variable_type === 'tonality')
   const totalCount = pillarEntries.reduce((s, e) => s + e.usage_count, 0)
@@ -86,7 +86,7 @@ export function calculateBalance(
       count: e.usage_count,
       avg_performance: e.avg_performance
     })),
-    approaches: approachEntries.map(e => ({
+    angles: angleEntries.map(e => ({
       name: e.variable_value,
       count: e.usage_count,
       avg_performance: e.avg_performance

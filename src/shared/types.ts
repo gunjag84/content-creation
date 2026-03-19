@@ -102,11 +102,21 @@ const VisualSchema = z.object({
   handle: z.string().default('')
 })
 
+const AngleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().default('')
+})
+
 const PillarSchema = z.object({
   id: z.string(),
   name: z.string(),
   targetPct: z.number().min(0).max(100),
-  rules: z.string().default('')
+  rules: z.string().default(''),
+  angles: z.array(AngleSchema).default([]),
+  allowedTonalities: z.array(z.string()).default([]),
+  allowedMethods: z.array(z.string()).default([]),
+  areaRequired: z.boolean().default(true)
 })
 
 const ThemeSchema = z.object({
@@ -122,7 +132,6 @@ const MechanicSchema = z.object({
 })
 
 const AreaSchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
-const ApproachSchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
 const MethodSchema = z.object({
   id: z.string(), name: z.string(), description: z.string().default(''),
   formatConstraints: z.array(z.enum(['single', 'carousel'])).optional()
@@ -145,7 +154,6 @@ export const SettingsSchema = z.object({
   visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   areas: z.array(AreaSchema).default([]),
-  approaches: z.array(ApproachSchema).default([]),
   methods: z.array(MethodSchema).default([]),
   tonalities: z.array(TonalitySchema).default([]),
   blacklist: z.array(BlacklistEntrySchema).default([]),
@@ -169,14 +177,14 @@ export interface BalanceEntry {
 export interface BalanceRecommendation {
   pillar: string
   area: string
-  approach: string | null
+  angle: string | null
   method: string
   tonality: string
   reasoning: 'cold_start_round_robin' | 'performance_weighted'
 }
 
 export interface BalanceWarning {
-  variable_type: 'pillar' | 'area' | 'approach' | 'method' | 'tonality'
+  variable_type: 'pillar' | 'area' | 'angle' | 'method' | 'tonality'
   variable_value: string
   usage_count: number
   days_span: number
@@ -186,7 +194,7 @@ export interface BalanceWarning {
 export interface BalanceDashboardData {
   pillars: Array<{ name: string; actual_pct: number; target_pct: number; count: number }>
   areas: Array<{ name: string; count: number; avg_performance: number | null }>
-  approaches: Array<{ name: string; count: number; avg_performance: number | null }>
+  angles: Array<{ name: string; count: number; avg_performance: number | null }>
   methods: Array<{ name: string; count: number; avg_performance: number | null }>
   tonalities: Array<{ name: string; count: number; avg_performance: number | null }>
   total_posts: number
@@ -198,7 +206,7 @@ export interface PostRow {
   id: number
   pillar: string
   area: string
-  approach: string | null
+  angle: string | null
   method: string
   tonality: string
   content_type: 'single' | 'carousel'
@@ -210,6 +218,9 @@ export interface PostRow {
   ad_hoc: number
   status: 'draft' | 'approved' | 'exported'
   created_at: number
+  situationId?: string | null
+  hookStrategy?: string | null
+  ctaStrategy?: string | null
 }
 
 export interface SlideRow {

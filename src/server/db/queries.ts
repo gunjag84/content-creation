@@ -7,7 +7,7 @@ import { computePerformanceScore } from '../../shared/performanceScore'
 export interface PostInsert {
   pillar: string
   area: string
-  approach?: string | null
+  angle?: string | null
   method: string
   tonality: string
   content_type: 'single' | 'carousel'
@@ -18,18 +18,21 @@ export interface PostInsert {
   template_id?: number
   ad_hoc?: number
   status?: 'draft' | 'approved' | 'exported'
+  situationId?: string | null
+  hookStrategy?: string | null
+  ctaStrategy?: string | null
 }
 
 export function insertPost(data: PostInsert): number {
   const db = getDatabase()
   const stmt = db.prepare(`
-    INSERT INTO posts (pillar, area, approach, method, tonality, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status)
-    VALUES (@pillar, @area, @approach, @method, @tonality, @content_type, @caption, @slide_count, @impulse, @background_path, @template_id, @ad_hoc, @status)
+    INSERT INTO posts (pillar, area, angle, method, tonality, content_type, caption, slide_count, impulse, background_path, template_id, ad_hoc, status, situation_id, hook_strategy, cta_strategy)
+    VALUES (@pillar, @area, @angle, @method, @tonality, @content_type, @caption, @slide_count, @impulse, @background_path, @template_id, @ad_hoc, @status, @situation_id, @hook_strategy, @cta_strategy)
   `)
   const result = stmt.run({
     pillar: data.pillar,
     area: data.area,
-    approach: data.approach ?? null,
+    angle: data.angle ?? null,
     method: data.method,
     tonality: data.tonality,
     content_type: data.content_type,
@@ -39,7 +42,10 @@ export function insertPost(data: PostInsert): number {
     background_path: data.background_path ?? null,
     template_id: data.template_id ?? null,
     ad_hoc: data.ad_hoc ?? 0,
-    status: data.status ?? 'draft'
+    status: data.status ?? 'draft',
+    situation_id: data.situationId ?? null,
+    hook_strategy: data.hookStrategy ?? null,
+    cta_strategy: data.ctaStrategy ?? null
   })
   return result.lastInsertRowid as number
 }
@@ -222,10 +228,10 @@ export function linkIgPost(igMediaId: string, postId: number): void {
 
 // --- Stats aggregation ---
 
-export function getAvgPerformanceByDimension(dimension: 'pillar' | 'area' | 'approach' | 'method' | 'tonality'): Array<{ name: string; avg_performance: number }> {
+export function getAvgPerformanceByDimension(dimension: 'pillar' | 'area' | 'angle' | 'method' | 'tonality'): Array<{ name: string; avg_performance: number }> {
   const db = getDatabase()
   const columnMap: Record<string, string> = {
-    pillar: 'p.pillar', area: 'p.area', approach: 'p.approach',
+    pillar: 'p.pillar', area: 'p.area', angle: 'p.angle',
     method: 'p.method', tonality: 'p.tonality'
   }
   const column = columnMap[dimension]

@@ -1,9 +1,10 @@
 -- posts table
+-- Note: Phase A clean break - if upgrading from old schema, delete data/content-creation.db to get fresh start
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   pillar TEXT NOT NULL,
   area TEXT,
-  approach TEXT,
+  angle TEXT,
   method TEXT,
   tonality TEXT,
   content_type TEXT NOT NULL DEFAULT 'carousel' CHECK(content_type IN ('single', 'carousel')),
@@ -14,7 +15,10 @@ CREATE TABLE IF NOT EXISTS posts (
   template_id INTEGER,
   ad_hoc INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'approved', 'exported')),
-  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  situation_id TEXT,
+  hook_strategy TEXT,
+  cta_strategy TEXT
 );
 
 -- slides table

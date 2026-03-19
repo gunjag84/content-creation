@@ -18,7 +18,7 @@ import {
 export function assemblePrompt(
   pillar: string,
   area: string,
-  approach: string | null,
+  angle: string | null,
   method: string,
   tonality: string,
   impulse: string,
@@ -32,7 +32,8 @@ export function assemblePrompt(
 
   // Look up dimension entries
   const areaEntry = settings.areas.find(a => a.name === area)
-  const approachEntry = approach ? settings.approaches.find(a => a.name === approach) : null
+  const pillarEntry = settings.pillars.find(p => p.name === pillar)
+  const angleEntry = angle && pillarEntry ? pillarEntry.angles.find(a => a.name === angle) : null
   const methodEntry = settings.methods.find(m => m.name === method)
   const tonalityEntry = settings.tonalities.find(t => t.name === tonality)
 
@@ -49,7 +50,7 @@ export function assemblePrompt(
 
   // --- Section 1: Role & Creative Brief ---
   sections.push(`Du bist Jule - 39, Mutter von drei Kindern, Management-Job, Gruenderin von LEBEN.LIEBEN.
-Du schreibst einen ${method} Post ueber ${area}${approach ? ' durch ' + approach : ''}, in ${tonality} Tonalitaet, fuer den Zweck: ${pillar}.
+Du schreibst einen ${method} Post ueber ${area}${angle ? ', Angle: ' + angle : ''}, in ${tonality} Tonalitaet, fuer den Zweck: ${pillar}.
 
 DEINE STIMME: Wie eine Freundin beim Kaffee. Warm, persoenlich, ehrlich, ermutigend. Aus eigener Erfahrung, nie aus der Theorie. Konkrete Alltagsszenen statt Abstraktion. "Du" (grossgeschrieben: Du, Dir, Dich, Dein).
 
@@ -131,8 +132,8 @@ ${writingRule}`)
 
   // --- Section 7: Content Focus ---
   const focusLines = [`Lebensbereich: ${area}\n${areaEntry?.description ?? ''}`]
-  if (approachEntry) {
-    focusLines.push(`\nLoesungsansatz: ${approach}\n${approachEntry.description ?? ''}`)
+  if (angleEntry) {
+    focusLines.push(`\nAngle: ${angle}\n${angleEntry.description ?? ''}`)
   }
   sections.push(`## Inhaltlicher Fokus\n\n${focusLines.join('\n')}`)
 
