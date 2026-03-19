@@ -116,6 +116,7 @@ const PillarSchema = z.object({
   angles: z.array(AngleSchema).default([]),
   allowedTonalities: z.array(z.string()).default([]),
   allowedMethods: z.array(z.string()).default([]),
+  allowedAreas: z.array(z.string()).default([]),
   areaRequired: z.boolean().default(true)
 })
 
@@ -138,10 +139,20 @@ const MethodSchema = z.object({
 })
 const TonalitySchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
 
+const GenerationFieldsOption = z.enum(['all', 'hook_body', 'body_cta', 'body_only', 'hook_only'])
+
+const GenerationFieldsSchema = z.object({
+  single: GenerationFieldsOption.default('all'),
+  carouselCover: GenerationFieldsOption.default('all'),
+  carouselContent: GenerationFieldsOption.default('all'),
+  carouselCta: GenerationFieldsOption.default('all'),
+})
+
 const ContentDefaultsSchema = z.object({
   captionMinChars: z.number().min(0).default(50),
   captionMaxChars: z.number().min(1).default(400),
-  bodyMaxChars: z.number().min(1).default(400)
+  bodyMaxChars: z.number().min(1).default(400),
+  generationFields: GenerationFieldsSchema.default({ single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' })
 })
 
 export const SettingsSchema = z.object({

@@ -9,8 +9,8 @@
   },
   "visual": {
     "colors": [
-      "white",
-      "#cab22b",
+      "#FFFFFF",
+      "#EAB308",
       "#375546"
     ],
     "fonts": {
@@ -19,9 +19,9 @@
       "cta": "custom:daniel-bold-001"
     },
     "fontSizes": {
-      "headline": 90,
-      "body": 50,
-      "cta": 110
+      "headline": 100,
+      "body": 60,
+      "cta": 100
     },
     "fontLibrary": [
       {
@@ -64,44 +64,146 @@
       "id": "p1",
       "name": "Generate Demand",
       "targetPct": 65,
-      "rules": "",
+      "rules": "Ziel: Aufmerksamkeit, Wiedererkennung, emotionale Resonanz. Kein Produkt, kein Pitch. Die Leserin soll denken: 'Das bin ich. Die versteht mich.'\n\n- Sprich das Gefühl an, nie die Lösung. Zeige das Problem in Alltagsszenen, die Luise sofort wiedererkennt.\n- Nutze Kontraste: voller Kalender vs. leeres Herz. Funktionieren vs. Fühlen.\n- Wissenschaft nur als überraschenden Fakt einstreuen (40%-Statistik, Negativity Bias), nie dozierend.\n- Humor darf schärfer sein als im Rest - augenzwinkernd über den Wahnsinn des Alltags.\n- Jeder Post muss teilbar sein: 'Tagge eine Freundin' oder Screenshot-würdig.\n- Kein Journal, kein Produkt, kein Link, kein Shop. Reine Resonanz.",
       "angles": [
-        { "id": "gd-a1", "name": "Reality of Moms' Life", "description": "Validating lived experience, messy reality" },
-        { "id": "gd-a2", "name": "Appreciation", "description": "Self-acceptance, you are enough, doing less" },
-        { "id": "gd-a3", "name": "Science of Happiness", "description": "Science-backed gratitude truths, studies" },
-        { "id": "gd-a4", "name": "Analog Ritual Aspiration", "description": "Showcase journaling as loving, tactile ritual" }
+        {
+          "id": "gd-a1",
+          "name": "Reality of Moms' Life",
+          "description": "Validating lived experience, messy reality"
+        },
+        {
+          "id": "gd-a2",
+          "name": "Appreciation",
+          "description": "Self-acceptance, you are enough, doing less"
+        },
+        {
+          "id": "gd-a3",
+          "name": "Science of Happiness",
+          "description": "Science-backed gratitude truths, studies"
+        },
+        {
+          "id": "gd-a4",
+          "name": "Analog Ritual Aspiration",
+          "description": "Showcase journaling as loving, tactile ritual"
+        }
       ],
-      "allowedTonalities": ["T1 Emotional", "T2 Humorvoll", "T5 Ermutigend"],
-      "allowedMethods": [],
+      "allowedTonalities": [
+        "T1 Emotional",
+        "T2 Humorvoll",
+        "T3 Sachlich",
+        "T4 Provokant",
+        "T5 Ermutigend"
+      ],
+      "allowedMethods": [
+        "M1 Provokante These",
+        "M2 Frage & Antwort",
+        "M3 Persönliche Geschichte",
+        "M4 Vorher / Nachher",
+        "M6 Zitat & Kommentar",
+        "M7 Faktencheck",
+        "M8 Liste",
+        "M9 Mythos vs. Realität",
+        "M13 Beobachtung"
+      ],
+      "allowedAreas": [
+        "L1 Familie & Beziehungen",
+        "L2 Innere Welt",
+        "L3 Alltagslogistik",
+        "L4 Digitale Welt"
+      ],
       "areaRequired": true
     },
     {
       "id": "p2",
       "name": "Convert Demand",
       "targetPct": 25,
-      "rules": "",
+      "rules": "Ziel: Interesse in Kaufabsicht wandeln. Produkt zeigen, Nutzen erklären, Einladung formulieren.\n\n- Immer konkreten Nutzen vor Feature: Was verändert sich im Alltag, nicht was das Journal enthält.\n- WEIL3-Methode erklären und demonstrieren - sie ist der Differentiator zum 6-Minuten-Tagebuch.\n- Social Proof mit echten Geschichten, nie mit generischen Testimonials.\n- Wissenschaft als Vertrauensanker: Emmons-Studie, Lyubomirsky 40%, Harvard Grant Study.\n- CTA als Einladung: 'Wenn Du magst, findest Du das Journal im Shop.' Nie als Druck.\n- Preis darf genannt werden (34,90 EUR / 29,90 EUR Launch). Analog-Argument gegen App-Konkurrenz.",
       "angles": [
-        { "id": "cd-a1", "name": "Product-Centric Storytelling", "description": "Showcase journal, gratitude ritual, tactile experience, unboxing" },
-        { "id": "cd-a2", "name": "Benefit-Driven Education", "description": "WHY3 methodology, science-backed rationale, practical impact" },
-        { "id": "cd-a3", "name": "Social Proof & Testimonials", "description": "User stories, reviews, personalized rituals, transformation" }
+        {
+          "id": "cd-a1",
+          "name": "Product-Centric Storytelling",
+          "description": "Showcase journal, gratitude ritual, tactile experience, unboxing"
+        },
+        {
+          "id": "cd-a2",
+          "name": "Benefit-Driven Education",
+          "description": "WHY3 methodology, science-backed rationale, practical impact"
+        },
+        {
+          "id": "cd-a3",
+          "name": "Social Proof & Testimonials",
+          "description": "User stories, reviews, personalized rituals, transformation"
+        }
       ],
-      "allowedTonalities": ["T1 Emotional", "T3 Sachlich", "T5 Ermutigend"],
-      "allowedMethods": [],
+      "allowedTonalities": [
+        "T1 Emotional",
+        "T3 Sachlich",
+        "T5 Ermutigend"
+      ],
+      "allowedMethods": [
+        "M2 Frage & Antwort",
+        "M3 Persönliche Geschichte",
+        "M4 Vorher / Nachher",
+        "M5 Testimonial",
+        "M7 Faktencheck",
+        "M8 Liste",
+        "M9 Mythos vs. Realität",
+        "M10 Anleitung",
+        "M11 Call to Action"
+      ],
+      "allowedAreas": [
+        "L1 Familie & Beziehungen",
+        "L2 Innere Welt",
+        "L3 Alltagslogistik",
+        "L4 Digitale Welt",
+        "L5 Produkt & Angebot",
+        "L7 Community & Social Proof"
+      ],
       "areaRequired": true
     },
     {
       "id": "p3",
       "name": "Nurture Loyalty",
       "targetPct": 10,
-      "rules": "",
+      "rules": "Ziel: Beziehung vertiefen, Community stärken, Markenbindung. Kein Produkt, kein Pitch.\n\n- Jules echte Geschichte erzählen: die Krise, die Erkenntnis, der Weg. Verletzlich, nicht poliert.\n- Behind the Scenes zeigt Entscheidungen und Werte, nicht nur hübsche Bilder.\n- Community aktiv einbinden: Fragen stellen, Challenges starten, Nutzerinnen-Wins feiern.\n- Thought Leadership über die Mission: analog vs. digital, Tiefe vs. Breite, Erlaubnis vs. Optimierung.\n- Kein Produkt-Push. Kein CTA zum Shop. Die Community soll sich zugehörig fühlen, nicht verkauft.",
       "angles": [
-        { "id": "nl-a1", "name": "Founder Story & Vulnerability", "description": "Authentic founder stories and challenges" },
-        { "id": "nl-a2", "name": "Exclusive BTS", "description": "Product development, brand evolution, behind-the-scenes" },
-        { "id": "nl-a3", "name": "Mission Thought Leadership", "description": "Core values, sustainability, digital detox, mindful living" },
-        { "id": "nl-a4", "name": "Community Building", "description": "Polls, Q&As, challenges, gratitude journaling highlights" }
+        {
+          "id": "nl-a1",
+          "name": "Founder Story & Vulnerability",
+          "description": "Authentic founder stories and challenges"
+        },
+        {
+          "id": "nl-a2",
+          "name": "Exclusive BTS",
+          "description": "Product development, brand evolution, behind-the-scenes"
+        },
+        {
+          "id": "nl-a3",
+          "name": "Mission Thought Leadership",
+          "description": "Core values, sustainability, digital detox, mindful living"
+        },
+        {
+          "id": "nl-a4",
+          "name": "Community Building",
+          "description": "Polls, Q&As, challenges, gratitude journaling highlights"
+        }
       ],
-      "allowedTonalities": ["T1 Emotional", "T5 Ermutigend"],
-      "allowedMethods": [],
+      "allowedTonalities": [
+        "T1 Emotional",
+        "T5 Ermutigend"
+      ],
+      "allowedMethods": [
+        "M1 Provokante These",
+        "M2 Frage & Antwort",
+        "M3 Persönliche Geschichte",
+        "M6 Zitat & Kommentar",
+        "M12 Behind the Scenes",
+        "M13 Beobachtung"
+      ],
+      "allowedAreas": [
+        "L6 Marke & Gründerin",
+        "L7 Community & Social Proof"
+      ],
       "areaRequired": false
     }
   ],
@@ -245,39 +347,15 @@
       "description": "Aufbauend, stärkend, du schaffst das. Energie geben statt nehmen."
     }
   ],
-  "blacklist": [
-    {
-      "dimension1": "method",
-      "value1": "M11 Call to Action",
-      "dimension2": "tonality",
-      "value2": "T4 Provokant",
-      "severity": "hard"
-    },
-    {
-      "dimension1": "method",
-      "value1": "M5 Testimonial",
-      "dimension2": "tonality",
-      "value2": "T4 Provokant",
-      "severity": "hard"
-    },
-    {
-      "dimension1": "area",
-      "value1": "L5 Produkt & Angebot",
-      "dimension2": "tonality",
-      "value2": "T4 Provokant",
-      "severity": "hard"
-    },
-    {
-      "dimension1": "method",
-      "value1": "M7 Faktencheck",
-      "dimension2": "tonality",
-      "value2": "T1 Emotional",
-      "severity": "soft"
-    }
-  ],
   "contentDefaults": {
     "captionMinChars": 50,
     "captionMaxChars": 400,
-    "bodyMaxChars": 300
+    "bodyMaxChars": 300,
+    "generationFields": {
+      "single": "all",
+      "carouselCover": "hook_only",
+      "carouselContent": "body_only",
+      "carouselCta": "body_cta"
+    }
   }
 }

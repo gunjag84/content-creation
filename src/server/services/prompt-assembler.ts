@@ -153,16 +153,20 @@ Die Caption ist ein eigenstaendiges Stueck Content, NICHT eine Zusammenfassung d
 - Kein Hashtag-Spam. Maximal 3-5 relevante Hashtags, oder gar keine.`)
 
   // --- Section 10: Content Constraints & Output Format ---
+  const gf = defaults.generationFields ?? { single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' }
+
   const formatSection = contentType === 'single'
     ? `GENAU 1 Slide.
 - slide_type: "cover"
-- hook_text: Der Hook (oben auf dem Slide)
-- body_text: Der Haupttext (Mitte)
-- cta_text: CTA (unten)`
-    : `GENAU ${carouselCount} Slides. JEDER Slide hat ALLE 3 Textfelder (hook_text, body_text, cta_text):
-- Slide 1 (cover): hook_text = starker Hook. body_text = Kontext oder Einstieg. cta_text = Neugier-Trigger oder Swipe-Aufforderung.
-- Slides 2-${carouselCount - 1} (content): hook_text = Slide-Ueberschrift. body_text = Hauptinhalt. cta_text = Ueberleitung oder Mini-CTA.
-- Slide ${carouselCount} (cta): hook_text = zusammenfassende Ueberschrift. body_text = Kernbotschaft. cta_text = klarer Call-to-Action.`
+${describeFields(gf.single)}`
+    : `GENAU ${carouselCount} Slides:
+- Slide 1 (cover): ${describeFieldsInline(gf.carouselCover)}
+- Slides 2-${carouselCount - 1} (content): ${describeFieldsInline(gf.carouselContent)}
+- Slide ${carouselCount} (cta): ${describeFieldsInline(gf.carouselCta)}`
+
+  const fieldRule = contentType === 'single'
+    ? buildFieldRule(gf.single)
+    : buildCarouselFieldRules(gf)
 
   sections.push(`## Format-Vorgaben
 
@@ -186,13 +190,14 @@ Sprache: Deutsch. Anrede "Du" (grossgeschrieben).
 Antworte NUR mit validem JSON. Kein Markdown, keine Code-Bloecke.
 
 ${contentType === 'single'
-    ? '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'
-    : '{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"content","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"cta","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}'}
+    ? `{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}`
+    : `{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"content","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"cta","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}`}
 
 Regeln:
-- JEDER Slide hat ALLE 3 Textfelder befuellt (hook_text, body_text, cta_text). KEIN Feld darf leer sein.
+- JEDER Slide hat IMMER alle 3 JSON-Felder (hook_text, body_text, cta_text) als Keys.
+${fieldRule}
 - slide_type "cover" fuer Slide 1
-- ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides' : 'Alle Felder muessen vorhanden sein'}`)
+- ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides' : 'Alle Felder muessen als Keys vorhanden sein'}`)
 
   // --- Section 11: Performance Learnings (empty for now) ---
   // Will be populated by the learning system (PQFL) once performance data flows back.
@@ -246,4 +251,72 @@ NICHT: hedging CTAs wie "falls", "wenn Du magst", "koennte". Die Leserin ist hie
 Spreche zu Menschen, die das Produkt schon kennen oder haben.
 Engagement-CTA: "Wie macht ihr das?" / "Schreib mir, ich bin neugierig"
 Community staerken, nicht verkaufen.`
+}
+
+type FieldMode = 'all' | 'hook_body' | 'body_cta' | 'body_only' | 'hook_only'
+
+const FIELD_LABELS: Record<FieldMode, string[]> = {
+  all: ['hook_text', 'body_text', 'cta_text'],
+  hook_body: ['hook_text', 'body_text'],
+  body_cta: ['body_text', 'cta_text'],
+  body_only: ['body_text'],
+  hook_only: ['hook_text'],
+}
+
+function activeFields(mode: FieldMode): string[] {
+  return FIELD_LABELS[mode] ?? FIELD_LABELS.all
+}
+
+function emptyFields(mode: FieldMode): string[] {
+  const active = new Set(activeFields(mode))
+  return ['hook_text', 'body_text', 'cta_text'].filter(f => !active.has(f))
+}
+
+/** Multi-line field description for single slide */
+function describeFields(mode: FieldMode): string {
+  const lines: string[] = []
+  const active = new Set(activeFields(mode))
+  if (active.has('hook_text')) lines.push('- hook_text: Der Hook (oben auf dem Slide)')
+  if (active.has('body_text')) lines.push('- body_text: Der Haupttext (Mitte)')
+  if (active.has('cta_text')) lines.push('- cta_text: CTA (unten)')
+  const empty = emptyFields(mode)
+  if (empty.length > 0) lines.push(`- ${empty.join(', ')}: Leerer String ""`)
+  return lines.join('\n')
+}
+
+/** Inline field description for carousel slide types */
+function describeFieldsInline(mode: FieldMode): string {
+  const active = activeFields(mode)
+  const empty = emptyFields(mode)
+  let desc = active.join(' + ') + ' befuellen'
+  if (empty.length > 0) desc += `. ${empty.join(', ')} = ""`
+  return desc
+}
+
+/** Build field population rule for single posts */
+function buildFieldRule(mode: FieldMode): string {
+  if (mode === 'all') return '- Alle 3 Felder (hook_text, body_text, cta_text) mit Inhalt befuellen. KEIN Feld leer.'
+  const active = activeFields(mode)
+  const empty = emptyFields(mode)
+  return `- Nur ${active.join(' und ')} mit Inhalt befuellen.\n- ${empty.join(' und ')} MUSS ein leerer String "" sein.`
+}
+
+/** Build field population rules for carousel (different per slide type) */
+function buildCarouselFieldRules(gf: { carouselCover: string; carouselContent: string; carouselCta: string }): string {
+  const lines: string[] = []
+  const modes = [
+    ['Cover (Slide 1)', gf.carouselCover as FieldMode],
+    ['Content (mittlere Slides)', gf.carouselContent as FieldMode],
+    ['CTA (letzter Slide)', gf.carouselCta as FieldMode],
+  ] as const
+  for (const [label, mode] of modes) {
+    const active = activeFields(mode)
+    const empty = emptyFields(mode)
+    if (mode === 'all') {
+      lines.push(`- ${label}: Alle 3 Felder mit Inhalt befuellen.`)
+    } else {
+      lines.push(`- ${label}: Nur ${active.join(' + ')} befuellen.${empty.length > 0 ? ` ${empty.join(' + ')} = ""` : ''}`)
+    }
+  }
+  return lines.join('\n')
 }

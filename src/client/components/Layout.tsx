@@ -8,16 +8,36 @@ interface LayoutProps {
   onNavigate: (page: any) => void
 }
 
-const navItems = [
+interface NavItem {
+  id: string
+  label: string
+  icon: string
+  children?: { id: string; label: string }[]
+}
+
+const navItems: NavItem[] = [
   { id: 'create', label: 'Create Post', icon: '✦' },
-  { id: 'brand', label: 'Brand Config', icon: '◆' },
+  {
+    id: 'brand',
+    label: 'Settings',
+    icon: '⚙',
+    children: [
+      { id: 'brand-identity', label: 'Brand Identity' },
+      { id: 'brand-library', label: 'Creative Library' },
+      { id: 'brand-design', label: 'Design' },
+      { id: 'brand-strategy', label: 'Content Strategy' },
+      { id: 'brand-tech', label: 'Tech' },
+    ]
+  },
   { id: 'history', label: 'Post History', icon: '▤' },
   { id: 'instagram', label: 'Instagram', icon: '📷' },
-  { id: 'settings', label: 'Settings', icon: '⚙' }
 ]
+
+const isBrandPage = (page: string) => page === 'brand' || page.startsWith('brand-')
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   const [navOpen, setNavOpen] = useState(true)
+  const [brandExpanded, setBrandExpanded] = useState(isBrandPage(currentPage))
   const settingsLoading = useSettingsStore(s => s.loading)
   const isGenerating = useWizardStore(s => s.isGenerating)
   const isLoading = settingsLoading || isGenerating
@@ -48,26 +68,69 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         </div>
 
         {navItems.map((item) => {
-          const isActive =
-            currentPage === item.id ||
-            (currentPage === 'edit' && item.id === 'create') ||
-            (currentPage === 'review' && item.id === 'create')
+          const hasChildren = item.children && item.children.length > 0
+          const isParentActive = hasChildren
+            ? isBrandPage(currentPage)
+            : currentPage === item.id ||
+              (currentPage === 'edit' && item.id === 'create') ||
+              (currentPage === 'review' && item.id === 'create')
+
           return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              title={!navOpen ? item.label : undefined}
-              className={`flex items-center gap-2.5 py-2.5 text-sm text-left transition-colors ${
-                navOpen ? 'px-4' : 'px-0 justify-center'
-              } ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <span className="flex-shrink-0">{item.icon}</span>
-              {navOpen && <span className="truncate">{item.label}</span>}
-            </button>
+            <div key={item.id}>
+              <button
+                onClick={() => {
+                  if (hasChildren) {
+                    if (navOpen) {
+                      setBrandExpanded(!brandExpanded)
+                    } else {
+                      setNavOpen(true)
+                      setBrandExpanded(true)
+                    }
+                    if (!isBrandPage(currentPage)) {
+                      onNavigate('brand-identity')
+                    }
+                  } else {
+                    onNavigate(item.id)
+                  }
+                }}
+                title={!navOpen ? item.label : undefined}
+                className={`w-full flex items-center gap-2.5 py-2.5 text-sm text-left transition-colors ${
+                  navOpen ? 'px-4' : 'px-0 justify-center'
+                } ${
+                  isParentActive
+                    ? hasChildren && navOpen ? 'text-blue-700 font-medium' : 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="flex-shrink-0">{item.icon}</span>
+                {navOpen && (
+                  <>
+                    <span className="truncate flex-1">{item.label}</span>
+                    {hasChildren && (
+                      <span className="text-[10px] text-gray-400">{brandExpanded ? '▾' : '▸'}</span>
+                    )}
+                  </>
+                )}
+              </button>
+
+              {/* Sub-navigation */}
+              {hasChildren && navOpen && brandExpanded && item.children!.map((child) => {
+                const isChildActive = currentPage === child.id
+                return (
+                  <button
+                    key={child.id}
+                    onClick={() => onNavigate(child.id)}
+                    className={`w-full flex items-center py-2 text-sm text-left transition-colors pl-10 pr-4 ${
+                      isChildActive
+                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    <span className="truncate">{child.label}</span>
+                  </button>
+                )
+              })}
+            </div>
           )
         })}
       </nav>

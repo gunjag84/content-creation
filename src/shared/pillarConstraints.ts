@@ -19,6 +19,13 @@ export function getFilteredTonalities(settings: Settings, pillarName: string) {
   return settings.tonalities.filter(t => allowed.has(t.name))
 }
 
+export function getFilteredAreas(settings: Settings, pillarName: string) {
+  const pillar = settings.pillars.find(p => p.name === pillarName)
+  if (!pillar || !pillar.allowedAreas || pillar.allowedAreas.length === 0) return settings.areas
+  const allowed = new Set(pillar.allowedAreas)
+  return settings.areas.filter(a => allowed.has(a.name))
+}
+
 export function isAreaRequired(settings: Settings, pillarName: string): boolean {
   const pillar = settings.pillars.find(p => p.name === pillarName)
   return pillar?.areaRequired ?? true

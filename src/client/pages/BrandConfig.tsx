@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { useSettingsStore } from '../stores/settingsStore'
-import { ContextEditor } from '../components/ContextEditor'
+import { ContextEditor, AutoTextarea } from '../components/ContextEditor'
 import { DimensionListEditor } from '../components/DimensionListEditor'
+import { ColorPalette } from '../components/ColorPalette'
 import { api } from '../lib/apiClient'
-import type { Settings, FontLibraryEntry } from '@shared/types'
+import type { Settings, FontLibraryEntry, IgConnectionStatus } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
-import { toHex } from '@shared/colorUtils'
 
 function InfoPopover({ text }: { text: string }) {
   return (
@@ -35,14 +35,15 @@ function InfoPopover({ text }: { text: string }) {
   )
 }
 
-type Section = 'identity' | 'library' | 'design' | 'strategy'
+type Section = 'identity' | 'library' | 'design' | 'strategy' | 'tech'
 
-const SECTIONS: { key: Section; label: string; icon: string }[] = [
-  { key: 'identity', label: 'Brand Identity', icon: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z' },
-  { key: 'library', label: 'Creative Library', icon: 'M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25' },
-  { key: 'design', label: 'Design Settings', icon: 'M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z' },
-  { key: 'strategy', label: 'Content Strategy', icon: 'M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605' },
-]
+const SECTION_TITLES: Record<Section, { title: string; description: string }> = {
+  identity: { title: 'Brand Identity', description: 'Define who your brand is - voice, audience, positioning, and competitive context.' },
+  library: { title: 'Creative Library', description: 'Reusable creative assets - situations, hooks, and CTAs that feed into content generation.' },
+  design: { title: 'Design', description: 'Visual identity - colors, fonts, logo, and content formatting defaults.' },
+  strategy: { title: 'Content Strategy', description: 'Pillars, areas, methods, and tonalities that define your content mix and guide AI generation.' },
+  tech: { title: 'Tech', description: 'Instagram connection, API tokens, and technical configuration.' },
+}
 
 const identityDocLabels: Record<string, string> = {
   brandVoice: 'Brand Voice',
@@ -56,14 +57,14 @@ const FONT_ROLES = ['headline', 'body', 'cta'] as const
 type FontRole = typeof FONT_ROLES[number]
 
 interface BrandConfigProps {
+  section?: Section
   onBack?: () => void
 }
 
-export function BrandConfig({ onBack }: BrandConfigProps) {
+export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) {
   const { settings, loading, load, save } = useSettingsStore()
   const [local, setLocal] = useState<Settings | null>(null)
   const [saved, setSaved] = useState(false)
-  const [section, setSection] = useState<Section>('identity')
   const [uploadingFont, setUploadingFont] = useState<FontRole | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const localRef = useRef<Settings | null>(null)
@@ -159,7 +160,7 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
   }
 
   const addPillar = () => {
-    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0, rules: '', angles: [], allowedTonalities: [], allowedMethods: [], areaRequired: true }] })
+    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0, rules: '', angles: [], allowedTonalities: [], allowedMethods: [], allowedAreas: [], areaRequired: true }] })
   }
 
   const updatePillar = (index: number, field: string, value: string | number) => {
@@ -178,16 +179,9 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="px-3 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
-            >
-              &#8592; Back
-            </button>
-          )}
-          <h1 className="text-2xl font-bold">Brand Configuration</h1>
+        <div>
+          <h1 className="text-2xl font-bold">{SECTION_TITLES[section].title}</h1>
+          <p className="text-sm text-gray-500 mt-1">{SECTION_TITLES[section].description}</p>
         </div>
         <button
           onClick={handleSave}
@@ -199,32 +193,10 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         </button>
       </div>
 
-      {/* Section Tabs */}
-      <div className="flex gap-1 border-b border-gray-200">
-        {SECTIONS.map(({ key, label, icon }) => (
-          <button
-            key={key}
-            onClick={() => setSection(key)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              section === key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
-            </svg>
-            {label}
-          </button>
-        ))}
-      </div>
-
       {/* Section Content */}
       {section === 'identity' && (
         <div className="space-y-6">
           <section className="space-y-4">
-            <h2 className="text-lg font-semibold">Brand Identity</h2>
-            <p className="text-sm text-gray-500">Define who your brand is - voice, audience, positioning, and competitive context.</p>
             {Object.entries(identityDocLabels).map(([key, label]) => (
               <ContextEditor
                 key={key}
@@ -235,8 +207,12 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               />
             ))}
           </section>
+        </div>
+      )}
 
-          {/* Hooks textarea stays in Identity for now (will move to Creative Library in follow-up) */}
+      {section === 'library' && (
+        <div className="space-y-6">
+          {/* Hooks - live editor */}
           <section className="space-y-4">
             <ContextEditor
               label="Hooks"
@@ -244,15 +220,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               onChange={(v) => updateContextDoc('hooks', v)}
               placeholder="List your hook patterns and examples..."
             />
-          </section>
-        </div>
-      )}
-
-      {section === 'library' && (
-        <div className="space-y-6">
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Creative Library</h2>
-            <p className="text-sm text-gray-500">Reusable creative assets - situations, hooks, and CTAs that feed into content generation.</p>
           </section>
 
           <div className="grid grid-cols-1 gap-4">
@@ -268,18 +235,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               </p>
             </div>
 
-            {/* Hooks */}
-            <div className="border border-gray-200 rounded-lg p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-800">Hooks</h3>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">Coming soon</span>
-              </div>
-              <p className="text-sm text-gray-500">
-                Proven hook patterns and templates for grabbing attention on the first slide.
-                Currently managed as a text field in Brand Identity.
-              </p>
-            </div>
-
             {/* CTAs */}
             <div className="border border-gray-200 rounded-lg p-5">
               <div className="flex items-center justify-between mb-2">
@@ -288,7 +243,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               </div>
               <p className="text-sm text-gray-500">
                 Call-to-action variants for different post types and goals.
-                Currently managed as a single text field in Design Settings.
               </p>
             </div>
           </div>
@@ -297,33 +251,17 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
 
       {section === 'design' && (
         <div className="space-y-8">
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Design Settings</h2>
-            <p className="text-sm text-gray-500">Visual identity - colors, fonts, logo, and content formatting defaults.</p>
-          </section>
-
           {/* Colors */}
           <section className="space-y-4">
             <h3 className="text-sm font-semibold text-gray-700">Colors</h3>
             <div className="grid grid-cols-3 gap-4">
               {['Primary', 'Secondary', 'Background'].map((label, i) => (
-                <div key={i}>
-                  <label className="block text-xs text-gray-500 mb-1">{label} Color</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={toHex(local.visual.colors[i] || '')}
-                      onChange={(e) => updateColor(i, e.target.value)}
-                      className="w-10 h-10 rounded cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={local.visual.colors[i] || ''}
-                      onChange={(e) => updateColor(i, e.target.value)}
-                      className="flex-1 border rounded px-2 py-1 text-sm font-mono"
-                    />
-                  </div>
-                </div>
+                <BrandColorPicker
+                  key={i}
+                  label={label}
+                  color={local.visual.colors[i] || '#000000'}
+                  onChange={(c) => updateColor(i, c)}
+                />
               ))}
             </div>
           </section>
@@ -466,18 +404,6 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
             </div>
           </section>
 
-          {/* CTA */}
-          <section className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-700">Standard CTA</h3>
-            <input
-              type="text"
-              value={local.visual.cta}
-              onChange={(e) => updateVisual('cta', e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="Follow for more"
-            />
-          </section>
-
           {/* Content Defaults */}
           <section className="space-y-4">
             <div className="flex items-center gap-1.5">
@@ -517,16 +443,52 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
               </div>
             </div>
           </section>
+
+          {/* Generation Fields */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-semibold text-gray-700">Generation Fields</h3>
+              <InfoPopover text="Controls which text zones the AI fills per slide type. 'All fields' generates hook, body, and CTA. Other options limit generation to specific zones - the remaining zones stay empty for manual editing." />
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              {([
+                ['single', 'Single Slide'],
+                ['carouselCover', 'Carousel Cover'],
+                ['carouselContent', 'Carousel Content'],
+                ['carouselCta', 'Carousel CTA'],
+              ] as const).map(([key, label]) => (
+                <div key={key}>
+                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                  <select
+                    value={local.contentDefaults.generationFields?.[key] ?? 'all'}
+                    onChange={(e) => setLocal({
+                      ...local,
+                      contentDefaults: {
+                        ...local.contentDefaults,
+                        generationFields: {
+                          ...{ single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' },
+                          ...local.contentDefaults.generationFields,
+                          [key]: e.target.value,
+                        }
+                      }
+                    })}
+                    className="w-full border rounded px-2 py-2 text-sm bg-white"
+                  >
+                    <option value="all">All fields</option>
+                    <option value="hook_body">Hook + Body</option>
+                    <option value="body_cta">Body + CTA</option>
+                    <option value="body_only">Only Body</option>
+                    <option value="hook_only">Only Hook</option>
+                  </select>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       )}
 
       {section === 'strategy' && (
         <div className="space-y-8">
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Content Strategy</h2>
-            <p className="text-sm text-gray-500">Pillars, areas, methods, and tonalities that define your content mix and guide AI generation.</p>
-          </section>
-
           {/* Pillars */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
@@ -557,12 +519,11 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
                   <span className="text-xs text-gray-400">%</span>
                   <button onClick={() => removePillar(i)} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
                 </div>
-                <textarea
+                <AutoTextarea
                   value={p.rules ?? ''}
-                  onChange={(e) => updatePillar(i, 'rules', e.target.value)}
-                  rows={2}
-                  className="w-full border rounded px-3 py-2 text-sm resize-none text-gray-600"
+                  onChange={(v) => updatePillar(i, 'rules', v)}
                   placeholder="Content rules for this pillar (what to include, what to avoid...)"
+                  className="w-full border rounded px-3 py-2 text-sm resize-none overflow-hidden text-gray-600"
                 />
               </div>
             ))}
@@ -683,6 +644,176 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
                 <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
               </div>
             )}
+          />
+        </div>
+      )}
+
+      {section === 'tech' && (
+        <TechSection />
+      )}
+    </div>
+  )
+}
+
+function TechSection() {
+  const [status, setStatus] = useState<IgConnectionStatus | null>(null)
+  const [token, setToken] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchStatus = async () => {
+    try {
+      const data = await api.get<IgConnectionStatus>('/instagram/status')
+      setStatus(data)
+    } catch {
+      setStatus({ connected: false })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchStatus() }, [])
+
+  const handleConnect = async () => {
+    if (!token.trim()) return
+    setConnecting(true)
+    setError(null)
+    try {
+      const result = await api.post<{ connected: boolean; username: string; expires_at: number }>('/instagram/connect', { access_token: token.trim() })
+      setStatus({
+        connected: true,
+        username: result.username,
+        expires_at: result.expires_at,
+        days_until_expiry: 60,
+        expired: false,
+        near_expiry: false
+      })
+      setToken('')
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  const handleDisconnect = async () => {
+    try {
+      await api.delete('/instagram/connect')
+      setStatus({ connected: false })
+      setToken('')
+      setError(null)
+    } catch (err) {
+      setError((err as Error).message)
+    }
+  }
+
+  if (loading) return <div className="text-gray-500">Loading...</div>
+
+  const isExpired = status?.expired
+  const isNearExpiry = status?.near_expiry
+  const showPasteField = !status?.connected || isExpired
+
+  return (
+    <div className="space-y-8">
+      <div className="border rounded-lg p-6 space-y-4 max-w-lg">
+        <h3 className="text-sm font-semibold text-gray-700">Instagram Connection</h3>
+
+        {showPasteField ? (
+          <>
+            {isExpired && (
+              <p className="text-red-500 text-sm">Token expired - please reconnect</p>
+            )}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Access Token</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={token}
+                  onChange={(e) => { setToken(e.target.value); setError(null) }}
+                  disabled={connecting}
+                  placeholder="Paste your Instagram access token"
+                  className="flex-1 border rounded px-3 py-2 text-sm disabled:opacity-50"
+                />
+                <button
+                  onClick={handleConnect}
+                  disabled={connecting || !token.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {connecting && (
+                    <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {connecting ? 'Connecting...' : 'Connect'}
+                </button>
+              </div>
+              {error && (
+                <p className="text-red-500 text-xs mt-1">{error}</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Connected: @{status?.username}</p>
+                {isNearExpiry ? (
+                  <p className="text-amber-600 text-xs mt-0.5">
+                    Token expires in {status?.days_until_expiry} days
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Expires: {status?.expires_at
+                      ? new Date(status.expires_at * 1000).toLocaleDateString()
+                      : 'Unknown'}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleDisconnect}
+                className="text-red-500 hover:text-red-700 text-sm"
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function BrandColorPicker({ label, color, onChange }: { label: string; color: string; onChange: (c: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-xs text-gray-500 mb-1">{label} Color</label>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 border rounded px-2 py-1.5 hover:bg-gray-50 w-full"
+      >
+        <div
+          className="w-6 h-6 rounded border border-gray-200 flex-shrink-0"
+          style={{ backgroundColor: color }}
+        />
+        <span className="text-sm font-mono text-gray-700">{color}</span>
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2">
+          <ColorPalette
+            color={color}
+            onChange={(c) => onChange(c)}
           />
         </div>
       )}

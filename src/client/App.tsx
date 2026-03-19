@@ -6,11 +6,10 @@ import { EditPreview } from './pages/EditPreview'
 import { ReviewDownload } from './pages/ReviewDownload'
 import { PostHistory } from './pages/PostHistory'
 import { Login } from './pages/Login'
-import { Settings } from './pages/Settings'
 import { InstagramPosts } from './pages/InstagramPosts'
 import { useWizardStore } from './stores/wizardStore'
 
-type Page = 'brand' | 'create' | 'edit' | 'review' | 'history' | 'instagram' | 'settings' | 'login'
+type Page = 'brand' | 'brand-identity' | 'brand-library' | 'brand-design' | 'brand-strategy' | 'brand-tech' | 'create' | 'edit' | 'review' | 'history' | 'instagram' | 'login'
 
 export function App() {
   const [page, setPage] = useState<Page>('create')
@@ -55,7 +54,16 @@ export function App() {
   const renderPage = () => {
     switch (page) {
       case 'brand':
-        return <BrandConfig onBack={hasBack ? goBack : undefined} />
+      case 'brand-identity':
+        return <BrandConfig section="identity" onBack={hasBack ? goBack : undefined} />
+      case 'brand-library':
+        return <BrandConfig section="library" onBack={hasBack ? goBack : undefined} />
+      case 'brand-design':
+        return <BrandConfig section="design" onBack={hasBack ? goBack : undefined} />
+      case 'brand-strategy':
+        return <BrandConfig section="strategy" onBack={hasBack ? goBack : undefined} />
+      case 'brand-tech':
+        return <BrandConfig section="tech" onBack={hasBack ? goBack : undefined} />
       case 'create':
         return <CreatePost onGenerated={() => { setPageHistory(h => [...h, page]); setPage('edit') }} />
       case 'edit':
@@ -66,8 +74,6 @@ export function App() {
         return <PostHistory />
       case 'instagram':
         return <InstagramPosts />
-      case 'settings':
-        return <Settings />
       default:
         return <CreatePost onGenerated={() => { setPageHistory(h => [...h, page]); setPage('edit') }} />
     }

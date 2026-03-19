@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
-import { getAnglesForPillar, getFilteredMethods, getFilteredTonalities, isAreaRequired } from '@shared/pillarConstraints'
+import { getAnglesForPillar, getFilteredAreas, getFilteredMethods, getFilteredTonalities, isAreaRequired } from '@shared/pillarConstraints'
 import type { BalanceRecommendation, BalanceWarning, GenerationResult } from '@shared/types'
 
 interface CreatePostProps {
@@ -60,9 +60,11 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
       store.setField('selectedTonality', pillarTonalities[0].name)
     }
 
-    // Clear area if now optional and was previously set to nothing valid
-    if (!areaReq && store.selectedArea === '') {
-      // area is optional - no action needed, empty is valid
+    // Reset area if no longer valid for this pillar
+    const pillarAreas = getFilteredAreas(settings, store.selectedPillar)
+    const currentAreaValid = store.selectedArea === '' || pillarAreas.some(a => a.name === store.selectedArea)
+    if (!currentAreaValid) {
+      store.setField('selectedArea', '')
     }
   }, [store.selectedPillar, settings])
 
@@ -138,7 +140,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   }
 
   const pillars = settings?.pillars ?? []
-  const areas = settings?.areas ?? []
+  const areas = settings ? getFilteredAreas(settings, store.selectedPillar) : []
 
   const badgeColors: Record<string, string> = {
     area: 'bg-green-100 text-green-700',
@@ -224,6 +226,21 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             {areas.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
           </select>
         </div>
+
+        {/* Real Life Situation - optional, anchors content in authenticity */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Real Life Situation
+            <span className="ml-1 text-xs text-gray-400">(optional)</span>
+          </label>
+          <textarea
+            value={store.impulse}
+            onChange={(e) => store.setField('impulse', e.target.value)}
+            rows={3}
+            className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+            placeholder="Describe a real situation from Jule's life that anchors this post..."
+          />
+        </div>
       </div>
 
       {/* --- EXECUTION --- */}
@@ -290,21 +307,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* --- OPTIONAL --- */}
-      <div className="space-y-3">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Optional</p>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Real Life Situation</label>
-          <textarea
-            value={store.impulse}
-            onChange={(e) => store.setField('impulse', e.target.value)}
-            rows={3}
-            className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-            placeholder="Describe a real situation from Jule's life that anchors this post..."
-          />
         </div>
       </div>
 
