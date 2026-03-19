@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.4] - 2026-03-19
+
+### Added
+- **MECE Dimension System**: Replaced theme/mechanic with a 5-dimension MECE framework: Area (life topic), Approach (solution angle), Method (storytelling structure), Tonality (tone of voice), and Pillar (business goal). Full DB migration, UI, and prompt integration.
+- **Prompt Assembler v2**: Ported create-content skill prompt template into the codebase with brand context docs, dimension descriptions, and format-aware instructions
+- **Prompt References**: New module for inline reference blocks (context docs, pillars, dimension descriptions) used by the assembler
+- **DimensionListEditor**: Reusable component for managing dimension lists in Brand Config with add/remove/edit and info popovers
+- **Blacklist System**: Configurable forbidden/discouraged dimension combinations with hard (blocked) and soft (warning) severity levels
+- **Generation Modal**: Full-screen modal overlay with real-time token streaming during AI generation, replacing the previous inline indicator
+- **Balance Recommendations**: API endpoint suggests underrepresented dimension combinations; wizard shows recommendation badges
+- **Hook System Design**: Architecture docs for future hook-first creation flow
+
+### Changed
+- **Brand Config**: Areas, Approaches, Methods, and Tonalities replace Themes and Mechanics with richer fields (description, format constraints)
+- **CreatePost Wizard**: New dimension dropdowns with format-aware method filtering, blacklist warnings, and recommendation display
+- **Post History**: Dimension badges show area/method/tonality instead of theme/mechanic; null values display "--"
+- **Learning Service**: Tracks all 5 MECE dimensions in balance matrix for usage analytics
+
+### Fixed
+- **Generation loading state**: `setGenerationError(null)` was resetting `isGenerating` to false immediately after `setIsGenerating(true)`, preventing any loading indicator from appearing
+- **Empty dimension badges**: Null dimension values in Post History no longer render as empty colored badges
+
 ## [2.2.0] - 2026-03-19
 
 ### Added
