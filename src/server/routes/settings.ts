@@ -17,6 +17,11 @@ function loadSettings(): Settings {
     return SettingsSchema.parse({})
   }
   const raw = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'))
+  // Migrate: contentStrategy -> hooks
+  if (raw.contextDocs && 'contentStrategy' in raw.contextDocs && !('hooks' in raw.contextDocs)) {
+    raw.contextDocs.hooks = raw.contextDocs.contentStrategy
+    delete raw.contextDocs.contentStrategy
+  }
   return SettingsSchema.parse(raw)
 }
 

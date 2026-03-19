@@ -53,7 +53,7 @@ const ContextDocsSchema = z.object({
   targetPersona: z.string().default(''),
   productUVP: z.string().default(''),
   competitive: z.string().default(''),
-  contentStrategy: z.string().default(''),
+  hooks: z.string().default(''),
   pov: z.string().default('')
 })
 
@@ -141,7 +141,7 @@ const ContentDefaultsSchema = z.object({
 })
 
 export const SettingsSchema = z.object({
-  contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' }),
+  contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', hooks: '', pov: '' }),
   visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
   areas: z.array(AreaSchema).default([]),

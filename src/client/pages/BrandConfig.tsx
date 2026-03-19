@@ -40,7 +40,7 @@ const contextDocLabels: Record<string, string> = {
   targetPersona: 'Target Persona',
   productUVP: 'Product & UVP',
   competitive: 'Competitive Landscape',
-  contentStrategy: 'Content Strategy',
+  hooks: 'Hooks',
   pov: 'Point of View'
 }
 
@@ -457,9 +457,9 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         ))}
       </section>
 
-      {/* Lebensbereiche (Areas) */}
+      {/* Areas */}
       <DimensionListEditor
-        title="Lebensbereiche"
+        title="Areas"
         infoText="Life areas your content covers - the 'what' of each post. Each post is tagged with one area so the app can track coverage and suggest underrepresented topics."
         emptyMessage="No areas configured yet."
         items={local.areas}
@@ -484,9 +484,9 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         )}
       />
 
-      {/* Loesungsansaetze (Approaches) */}
+      {/* Approaches */}
       <DimensionListEditor
-        title="Loesungsansaetze"
+        title="Approaches"
         infoText="Solution approaches - the 'how to solve it' angle. Optional per post. Examples: gratitude, journaling, mindfulness, digital detox."
         emptyMessage="No approaches configured yet."
         items={local.approaches}
@@ -511,9 +511,9 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         )}
       />
 
-      {/* Methoden (Methods) */}
+      {/* Methods */}
       <DimensionListEditor
-        title="Methoden"
+        title="Methods"
         infoText="Storytelling methods - how the post is structured. Examples: provocative thesis, Q&A, personal story, listicle, myth-busting. Some methods have format constraints (single-only or carousel-only)."
         emptyMessage="No methods configured yet."
         items={local.methods}
@@ -577,9 +577,9 @@ export function BrandConfig({ onBack }: BrandConfigProps) {
         )}
       />
 
-      {/* Tonalitaet (Tonalities) */}
+      {/* Tonalities */}
       <DimensionListEditor
-        title="Tonalitaet"
+        title="Tonalities"
         infoText="Tone of voice for each post - emotional, humorous, matter-of-fact, or provocative. Tracked for variety across your feed."
         emptyMessage="No tonalities configured yet."
         items={local.tonalities}

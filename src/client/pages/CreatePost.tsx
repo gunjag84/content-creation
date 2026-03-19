@@ -168,7 +168,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</p>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Lebensbereich</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
             <select
               value={store.selectedArea}
               onChange={(e) => store.setField('selectedArea', e.target.value)}
@@ -179,7 +179,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Absicht (Pillar)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Pillar</label>
             <select
               value={store.selectedPillar}
               onChange={(e) => store.setField('selectedPillar', e.target.value)}
@@ -190,7 +190,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Loesungsansatz</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Approach</label>
           <select
             value={store.selectedApproach}
             onChange={(e) => store.setField('selectedApproach', e.target.value)}
@@ -223,7 +223,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Methode</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
             <select
               value={store.selectedMethod}
               onChange={(e) => store.setField('selectedMethod', e.target.value)}
@@ -235,7 +235,7 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tonalitaet</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tonality</label>
             <select
               value={store.selectedTonality}
               onChange={(e) => store.setField('selectedTonality', e.target.value)}

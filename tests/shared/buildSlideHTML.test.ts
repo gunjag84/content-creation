@@ -13,7 +13,7 @@ const baseSlide: Slide = {
 }
 
 const baseSettings: Settings = {
-  contextDocs: { brandVoice: '', targetPersona: '', productUVP: '', competitive: '', contentStrategy: '', pov: '' },
+  contextDocs: { brandVoice: '', targetPersona: '', productUVP: '', competitive: '', hooks: '', pov: '' },
   visual: {
     colors: ['#ffffff', '#cccccc', '#1a1a2e'],
     fonts: { headline: '', body: '', cta: '' },

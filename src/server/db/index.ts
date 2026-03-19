@@ -41,22 +41,22 @@ export function initDatabase(dbPath?: string): Database.Database {
 
       // Migrate existing data with hardcoded mappings
       const themeMigrationMap: Record<string, { area: string | null, approach: string | null }> = {
-        'Alltag berufstaetiger Muetter':               { area: 'L3 Alltagschaos',              approach: null },
-        'Alltag berufstätiger Mütter':                 { area: 'L3 Alltagschaos',              approach: null },
-        'Wissenschaft des Glücks und der Dankbarkeit': { area: 'L5 Selbstbild',                approach: 'A1 Dankbarkeit' },
-        'Wissenschaft des Gluecks und der Dankbarkeit':{ area: 'L5 Selbstbild',                approach: 'A1 Dankbarkeit' },
-        'Analoge Rituale als Gegenbewegung':           { area: 'L6 Jahreszeiten & Phasen',     approach: 'A3 Achtsamkeit & Routinen' },
-        'Produkt und Erlebnis':                        { area: 'L9 Hinter den Kulissen / Marke', approach: null },
-        'Marke und Community':                         { area: 'L9 Hinter den Kulissen / Marke', approach: null },
+        'Alltag berufstaetiger Muetter':               { area: 'L3 Alltagslogistik',           approach: null },
+        'Alltag berufstätiger Mütter':                 { area: 'L3 Alltagslogistik',           approach: null },
+        'Wissenschaft des Glücks und der Dankbarkeit': { area: 'L2 Innere Welt',               approach: 'A1 Dankbarkeit & WEIL3' },
+        'Wissenschaft des Gluecks und der Dankbarkeit':{ area: 'L2 Innere Welt',               approach: 'A1 Dankbarkeit & WEIL3' },
+        'Analoge Rituale als Gegenbewegung':           { area: 'L5 Produkt & Angebot',         approach: 'A2 Achtsamkeit & Rituale' },
+        'Produkt und Erlebnis':                        { area: 'L5 Produkt & Angebot',         approach: null },
+        'Marke und Community':                         { area: 'L6 Marke & Gründerin',         approach: null },
       }
       const mechanicMigrationMap: Record<string, string> = {
         'Provokative Frage':         'M1 Provokante These',
-        'Polarisierende Aussage':    'M10 Kontroverse Meinung',
-        'Storytelling':              'M3 Persoenliche Geschichte',
+        'Polarisierende Aussage':    'M1 Provokante These',
+        'Storytelling':              'M3 Persönliche Geschichte',
         'Listicle / How-To':         'M8 Liste',
-        'Myth-Busting':              'M9 Mythos vs. Realitaet',
+        'Myth-Busting':              'M9 Mythos vs. Realität',
         'Social Proof / Testimonial':'M5 Testimonial',
-        'Behind the Scenes':         'M15 Beobachtung',
+        'Behind the Scenes':         'M12 Behind the Scenes',
       }
 
       // Apply mappings to existing rows

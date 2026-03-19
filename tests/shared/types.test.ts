@@ -9,7 +9,7 @@ describe('SettingsSchema', () => {
         targetPersona: 'Founders',
         productUVP: 'Best product',
         competitive: 'Niche player',
-        contentStrategy: 'Value first',
+        hooks: 'Value first',
         pov: 'AI is a tool'
       },
       visual: {
