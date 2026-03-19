@@ -162,7 +162,7 @@ export const useWizardStore = create<WizardStore>((set) => ({
   }),
 
   setIsGenerating: (value) => set({ isGenerating: value }),
-  setGenerationError: (error) => set({ generationError: error, isGenerating: false }),
+  setGenerationError: (error) => set(error ? { generationError: error, isGenerating: false } : { generationError: null }),
   setRenderedImages: (images) => set({ renderedImages: images }),
   setPostId: (id) => set({ postId: id }),
 

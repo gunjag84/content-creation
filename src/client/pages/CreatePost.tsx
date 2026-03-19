@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
@@ -302,19 +302,70 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         </button>
       </div>
 
-      {/* Stream output */}
-      {store.isGenerating && store.streamText && (
-        <pre className="bg-gray-50 rounded-lg p-4 text-xs text-gray-600 max-h-60 overflow-y-auto whitespace-pre-wrap">
-          {store.streamText}
-        </pre>
+      {/* Generation modal */}
+      {(store.isGenerating || store.generationError) && (
+        <GenerationModal
+          isGenerating={store.isGenerating}
+          streamText={store.streamText}
+          error={store.generationError}
+          onDismissError={() => store.setGenerationError(null)}
+        />
       )}
+    </div>
+  )
+}
 
-      {/* Error */}
-      {store.generationError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-          {store.generationError}
+function GenerationModal({ isGenerating, streamText, error, onDismissError }: {
+  isGenerating: boolean
+  streamText: string
+  error: string | null
+  onDismissError: () => void
+}) {
+  const scrollRef = useRef<HTMLPreElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [streamText])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {isGenerating && (
+              <span className="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            )}
+            <h2 className="text-lg font-semibold text-gray-900">
+              {error ? 'Generation failed' : isGenerating && !streamText ? 'Connecting to Claude...' : isGenerating ? 'Generating...' : 'Done'}
+            </h2>
+          </div>
+          {error && (
+            <button
+              onClick={onDismissError}
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            >
+              &times;
+            </button>
+          )}
         </div>
-      )}
+
+        {/* Body */}
+        <div className="px-6 py-4">
+          {error ? (
+            <div className="text-sm text-red-600 bg-red-50 rounded-lg p-4">{error}</div>
+          ) : (
+            <pre
+              ref={scrollRef}
+              className="text-sm text-gray-700 font-mono bg-gray-50 rounded-lg p-4 h-80 overflow-y-auto whitespace-pre-wrap"
+            >
+              {streamText || 'Waiting for response...'}
+            </pre>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
