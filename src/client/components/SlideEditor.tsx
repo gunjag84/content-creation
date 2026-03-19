@@ -117,9 +117,9 @@ export function SlideEditor({
   const activeValues = resolveZoneValues(activeZoneId, overrides, settings)
 
   const zones: Array<{ id: string; label: string; show: boolean }> = [
-    { id: 'hook', label: 'Hook', show: slide.slide_type === 'cover' || slide.slide_type === 'content' },
+    { id: 'hook', label: 'Hook', show: true },
     { id: 'body', label: 'Body', show: true },
-    { id: 'cta',  label: 'CTA',  show: slide.slide_type === 'cta' || slide.slide_type === 'cover' },
+    { id: 'cta',  label: 'CTA',  show: true },
   ]
 
   const textFieldMap: Record<string, keyof Slide> = {

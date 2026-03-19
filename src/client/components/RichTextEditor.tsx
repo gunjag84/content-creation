@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { TextStyle, Color, FontFamily, FontSize } from '@tiptap/extension-text-style'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { HexColorPicker } from 'react-colorful'
+import { ColorPalette } from './ColorPalette'
 import { FONT_OPTIONS } from '@shared/fontOptions'
 import type { FontLibraryEntry } from '@shared/types'
 
@@ -254,7 +254,7 @@ export function RichTextEditor({
                 onMouseDown={e => e.preventDefault()}
                 onPointerDown={e => e.stopPropagation()}
               >
-                <HexColorPicker
+                <ColorPalette
                   color={state.color || '#000000'}
                   onChange={c => {
                     const sel = savedSelection.current

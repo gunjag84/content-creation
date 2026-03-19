@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { HexColorPicker } from 'react-colorful'
+import { ColorPalette } from './ColorPalette'
 import type { ZoneOverride, FontLibraryEntry } from '@shared/types'
 import { FONT_OPTIONS } from '@shared/fontOptions'
 import { toHex } from '@shared/colorUtils'
@@ -43,11 +43,6 @@ export function ZoneToolbar({ values, onChange, fontLibrary }: ZoneToolbarProps)
   const lineHeight = values.lineHeight ?? 1.3
   const letterSpacing = values.letterSpacing ?? 0
 
-  // hexInput is local state for typing partial hex values.
-  // Sync from prop when zone switches (color prop changes externally).
-  const [hexInput, setHexInput] = useState(color)
-  useEffect(() => { setHexInput(color) }, [color])
-
   function toggle(key: 'bold' | 'italic') {
     if (key === 'bold') {
       onChange({ ...values, fontWeight: isBold ? 'normal' : 'bold' })
@@ -66,7 +61,6 @@ export function ZoneToolbar({ values, onChange, fontLibrary }: ZoneToolbarProps)
   }
 
   function applyColor(c: string) {
-    setHexInput(c)
     onChange({ ...values, color: c })
   }
 
@@ -152,20 +146,10 @@ export function ZoneToolbar({ values, onChange, fontLibrary }: ZoneToolbarProps)
           />
           {showColor && (
             <div
-              className="absolute z-50 top-9 left-0 bg-white border border-gray-200 rounded-lg shadow-md p-3 space-y-2"
+              className="absolute z-50 top-9 left-0 bg-white border border-gray-200 rounded-lg shadow-md p-3"
               tabIndex={-1}
             >
-              <HexColorPicker color={color} onChange={applyColor} />
-              <input
-                type="text"
-                value={hexInput}
-                onChange={e => {
-                  setHexInput(e.target.value)
-                  if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) applyColor(e.target.value)
-                }}
-                className="w-full border border-gray-200 rounded px-2 py-1 text-xs font-mono"
-                placeholder="#000000"
-              />
+              <ColorPalette color={color} onChange={applyColor} />
             </div>
           )}
         </div>

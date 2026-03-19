@@ -1,6 +1,7 @@
 import type { Slide, Settings, ZoneOverride } from './types'
 import { resolveFont, fileUrl } from './fontResolver'
-import { ZONE_POSITION_DEFAULTS } from './zoneDefaults'
+import { ZONE_POSITION_DEFAULTS, computeZoneLayout } from './zoneDefaults'
+import type { ZoneId } from './zoneDefaults'
 
 const CANVAS_W = 1080
 const CANVAS_H = 1350
@@ -57,39 +58,32 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     cta:  { ...ZONE_POSITION_DEFAULTS.cta,  font: ctaFont.family,  fontSize: fontSizes.cta,  color: primaryColor, weight: 'bold' as const }
   }
 
-  // Carousel cover: hook-only, positioned in body zone (center of slide)
-  const allSlides = params.allSlides ?? []
-  const isCarouselCover = slide.slide_type === 'cover' && allSlides.length > 1
-
-  const textMap = isCarouselCover
-    ? { hook: '', body: slide.hook_text || '', cta: '' }
-    : { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
+  // All slides use all 3 zones with dynamic layout (empty zones collapse)
+  const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
 
-  // For carousel cover, render hook text in body zone with headline styling
-  const styleOverride: Partial<Record<string, { font: string; fontSize: number; color: string; weight: 'bold' | 'normal' }>> = {}
-  if (isCarouselCover) {
-    styleOverride.body = { font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' }
-  }
+  // Compute dynamic zone layout (empty zones collapse, present zones expand)
+  const presentZones = zoneIds.filter(z => !!textMap[z]) as ZoneId[]
+  const dynamicLayout = computeZoneLayout(presentZones, overrides)
 
   const zoneElements = zoneIds.map(zoneId => {
     const text = textMap[zoneId]
     if (!text) return ''
     const def = zoneDefaults[zoneId]
-    const so = styleOverride[zoneId]
     const ov: ZoneOverride = overrides[zoneId] ?? {}
-    const fontSize = ov.fontSize ?? so?.fontSize ?? def.fontSize
-    const fontWeight = ov.fontWeight ?? so?.weight ?? def.weight
+    const fontSize = ov.fontSize ?? def.fontSize
+    const fontWeight = ov.fontWeight ?? def.weight
     const fontStyle = ov.fontStyle ?? 'normal'
-    const color = ov.color ?? so?.color ?? def.color
+    const color = ov.color ?? def.color
     const textAlign = ov.textAlign ?? 'center'
-    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : (so?.font ?? def.font)
+    const fontFamily = ov.fontFamily ? `'${ov.fontFamily}'` : def.font
     const lineHeight = ov.lineHeight ?? 1.3
     const letterSpacing = ov.letterSpacing ?? 0
 
-    // Position: use overrides if set, otherwise full-width defaults
-    const top = ov.posTop ?? def.top
-    const height = ov.posHeight ?? def.height
+    // Position: use overrides if set, otherwise dynamic layout
+    const layout = dynamicLayout[zoneId]
+    const top = ov.posTop ?? layout?.top ?? def.top
+    const height = ov.posHeight ?? layout?.height ?? def.height
     const positionCss = (ov.posLeft !== undefined || ov.posWidth !== undefined)
       ? `left:${ov.posLeft ?? 0}px;width:${ov.posWidth ?? CANVAS_W}px;`
       : `left:0;right:0;`

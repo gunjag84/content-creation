@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Slide, Settings, ZoneOverride } from '@shared/types'
 import { resolveFont, fileUrl } from '@shared/fontResolver'
-import { ZONE_POSITION_DEFAULTS } from '@shared/zoneDefaults'
+import { ZONE_POSITION_DEFAULTS, computeZoneLayout } from '@shared/zoneDefaults'
+import type { ZoneId } from '@shared/zoneDefaults'
 import { GOOGLE_FONT_NAMES, googleFontImport } from '@shared/fonts'
 
 const SLIDE_W = 1080
@@ -37,16 +38,16 @@ function clamp(val: number, min: number, max: number) {
   return Math.max(min, Math.min(max, val))
 }
 
-function getZoneRect(def: { top: number; height: number }, ov: ZoneOverride) {
+function getZoneRect(def: { top: number; height: number }, ov: ZoneOverride, layout?: { top: number; height: number }) {
   return {
-    top: ov.posTop ?? def.top,
+    top: ov.posTop ?? layout?.top ?? def.top,
     left: ov.posLeft ?? 0,
     width: ov.posWidth ?? SLIDE_W,
-    height: ov.posHeight ?? def.height,
+    height: ov.posHeight ?? layout?.height ?? def.height,
   }
 }
 
-export function SlidePreview({ slide, settings, className, isCarousel, activeZoneId, onZoneDragLive, onZoneDragCommit }: SlidePreviewProps) {
+export function SlidePreview({ slide, settings, className, activeZoneId, onZoneDragLive, onZoneDragCommit }: SlidePreviewProps) {
   const baseUrl = window.location.origin
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -143,18 +144,13 @@ export function SlidePreview({ slide, settings, className, isCarousel, activeZon
     cta:  { ...ZONE_POSITION_DEFAULTS.cta,  font: ctaFont.family,  fontSize: fontSizes.cta,  color: primaryColor, weight: 'bold' as const },
   }
 
-  // Carousel cover: hook-only, positioned in body zone (center of slide)
-  const isCarouselCover = slide.slide_type === 'cover' && !!isCarousel
-
-  const textMap = isCarouselCover
-    ? { hook: '', body: slide.hook_text || '', cta: '' }
-    : { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
+  // All slides use all 3 zones with dynamic layout (empty zones collapse)
+  const textMap = { hook: slide.hook_text || '', body: slide.body_text || '', cta: ctaText }
   const overrides = slide.zone_overrides ?? {}
 
-  // For carousel cover, render hook text in body zone with headline styling
-  const coverStyleOverride = isCarouselCover
-    ? { body: { font: headlineFont.family, fontSize: fontSizes.headline, color: primaryColor, weight: 'bold' as const } }
-    : {} as Record<string, never>
+  // Compute dynamic zone layout (empty zones collapse, present zones expand)
+  const presentZones = (['hook', 'body', 'cta'] as const).filter(z => !!textMap[z]) as ZoneId[]
+  const dynamicLayout = computeZoneLayout(presentZones, overrides)
 
   const bgX = slide.background_position_x ?? 50
   const bgY = slide.background_position_y ?? 50
@@ -171,7 +167,7 @@ export function SlidePreview({ slide, settings, className, isCarousel, activeZon
 
     const def = zoneDefaults[zoneId as keyof typeof zoneDefaults]
     const ov = overrides[zoneId] ?? {}
-    const rect = getZoneRect(def, ov)
+    const rect = getZoneRect(def, ov, dynamicLayout[zoneId])
 
     dragState.current = {
       zoneId,
@@ -278,7 +274,7 @@ export function SlidePreview({ slide, settings, className, isCarousel, activeZon
           if (!text) return null
           const def = zoneDefaults[zoneId]
           const ov: ZoneOverride = overrides[zoneId] ?? {}
-          const rect = getZoneRect(def, ov)
+          const rect = getZoneRect(def, ov, dynamicLayout[zoneId])
 
           const isActive = activeZoneId === zoneId || selectedZoneId === zoneId
           const showHandles = isDraggable && selectedZoneId === zoneId
@@ -298,13 +294,12 @@ export function SlidePreview({ slide, settings, className, isCarousel, activeZon
             ...(isDraggable ? { cursor: showHandles ? 'grab' : 'pointer' } : {}),
           }
 
-          const so = coverStyleOverride[zoneId as keyof typeof coverStyleOverride]
           const textStyle: React.CSSProperties = {
-            fontFamily: ov.fontFamily ? `'${ov.fontFamily}'` : (so?.font ?? def.font),
-            fontSize: ov.fontSize ?? so?.fontSize ?? def.fontSize,
-            fontWeight: ov.fontWeight ?? so?.weight ?? def.weight,
+            fontFamily: ov.fontFamily ? `'${ov.fontFamily}'` : def.font,
+            fontSize: ov.fontSize ?? def.fontSize,
+            fontWeight: ov.fontWeight ?? def.weight,
             fontStyle: ov.fontStyle ?? 'normal',
-            color: ov.color ?? so?.color ?? def.color,
+            color: ov.color ?? def.color,
             textAlign: ov.textAlign ?? 'center',
             lineHeight: ov.lineHeight ?? 1.3,
             letterSpacing: ov.letterSpacing ? `${ov.letterSpacing}px` : undefined,

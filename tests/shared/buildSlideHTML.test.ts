@@ -165,20 +165,24 @@ describe('buildSlideHTML - zone position overrides', () => {
 describe('buildSlideHTML - carousel cover slide', () => {
   const contentSlide: Slide = { uid: 'content-uid', slide_number: 2, slide_type: 'content', hook_text: '', body_text: 'Content body', cta_text: '', overlay_opacity: 0.5 }
 
-  it('renders hook text in body zone position for carousel cover', () => {
-    const cover = { ...baseSlide, hook_text: 'Big Hook', body_text: 'Should be hidden', cta_text: 'Should be hidden' }
+  it('renders all three zones for carousel cover with dynamic layout', () => {
+    const cover = { ...baseSlide, hook_text: 'Big Hook', body_text: 'Body Text', cta_text: 'CTA Text' }
     const html = buildSlideHTML({ slide: cover, allSlides: [cover, contentSlide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
-    // Hook text should appear in the body zone (top:280)
+    // All 3 zones render with default proportional layout
     expect(html).toContain('Big Hook')
-    expect(html).toContain('top:280px')
-    // Body and CTA text should NOT appear
-    expect(html).not.toContain('Should be hidden')
+    expect(html).toContain('Body Text')
+    expect(html).toContain('CTA Text')
+    expect(html).toContain('top:0px')    // hook at top
+    expect(html).toContain('top:280px')  // body at 280
+    expect(html).toContain('top:920px')  // cta at 920
   })
 
-  it('uses headline styling for hook text in body zone on carousel cover', () => {
+  it('collapses empty zones for carousel cover with only hook text', () => {
     const cover = { ...baseSlide, hook_text: 'Styled Hook', body_text: '', cta_text: '' }
     const html = buildSlideHTML({ slide: cover, allSlides: [cover, contentSlide], settings: baseSettings, baseUrl: 'http://localhost:3001' })
-    // Should use headline font size (56 default) and bold weight in the body zone
+    // Only hook zone renders, takes full 1110px
+    expect(html).toContain('Styled Hook')
+    expect(html).toContain('height:1110px')
     expect(html).toContain('font-size:56px')
     expect(html).toContain('font-weight:bold')
   })
