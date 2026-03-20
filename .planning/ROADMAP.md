@@ -1,23 +1,14 @@
 # Roadmap: Content Creation System
 
-## Overview
+## Milestones
 
-This roadmap transforms an AI-powered Instagram content creation concept into a working Electron desktop app. The journey starts with core infrastructure and rendering capabilities, builds up the settings and template system that defines brand identity, integrates AI generation with the full post workflow and learning system, and finishes with production readiness and polish. Each phase delivers a coherent capability that can be verified independently, building toward the complete core loop: pick a topic and mechanic, generate text via Claude, render branded images from HTML/CSS templates, and export upload-ready PNGs - all guided by brand settings and performance insights.
+- [x] **v1.0 Core System** - Phases 1-3.1 (shipped 2026-03-17)
+- [ ] **v2.0 Dynamic Zone Model** - Phases 4-8 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [ ] **Phase 1: Foundation & Rendering** - Electron scaffolding, HTML-to-PNG rendering pipeline, data layer with SQLite and JSON config
-- [ ] **Phase 2: Settings & Templates** - Brand configuration (11 settings areas), visual template builder with drag-and-drop zone editor (UAT gap closure in progress)
-- [x] **Phase 3: Content Generation** - AI integration, full post workflow, story generation, performance-based learning system (completed 2026-03-17)
-- [ ] **Phase 4: Production Readiness** - Performance tracking UI, logging and error handling, testing and polish
-
-## Phase Details
+<details>
+<summary>v1.0 Core System (Phases 1-3.1) - SHIPPED 2026-03-17</summary>
 
 ### Phase 1: Foundation & Rendering
 **Goal**: Working Electron app with HTML-to-PNG rendering at Instagram dimensions and persistent data storage
@@ -32,9 +23,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md - Scaffold electron-vite project, app shell with sidebar nav, dark mode, IPC type contracts
-- [ ] 01-02-PLAN.md - SQLite data layer with full schema, JSON settings with Zod validation and versioning, secure API key storage, graceful shutdown
-- [ ] 01-03-PLAN.md - HTML-to-PNG rendering pipeline with hidden BrowserWindow, test render page, build verification
+- [x] 01-01-PLAN.md - Scaffold electron-vite project, app shell with sidebar nav, dark mode, IPC type contracts
+- [x] 01-02-PLAN.md - SQLite data layer with full schema, JSON settings with Zod validation and versioning, secure API key storage, graceful shutdown
+- [x] 01-03-PLAN.md - HTML-to-PNG rendering pipeline with hidden BrowserWindow, test render page, build verification
 
 ### Phase 2: Settings & Templates
 **Goal**: Complete brand configuration system with all 11 settings areas and visual template creation tools with canvas-based zone editor
@@ -49,21 +40,21 @@ Plans:
 **Plans**: 15 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Extend Zod schemas for all 11 settings areas, extract blueprint data to JSON, install dependencies, template/font IPC handlers
-- [ ] 02-02-PLAN.md - Settings page shell with vertical tabs, Zustand store, auto-save hook, 6 simple form sections (voice, persona, defaults, competitor, viral, master prompt)
-- [ ] 02-03-PLAN.md - Interactive settings sections: coupled pillar sliders, theme hierarchy display, mechanics catalog, story tools catalog
-- [ ] 02-04-PLAN.md - Brand guidance section with color pickers, font upload/preview, logo placement, live brand preview card
-- [ ] 02-05-PLAN.md - Template builder with react-konva zone editor, overlay controls, background selector
-- [ ] 02-06-PLAN.md - Template management UI (list, edit, delete, duplicate), carousel variant editor, save-as-template dialog
-- [ ] 02-07-PLAN.md - [GAP CLOSURE] Fix startup errors (better-sqlite3 rebuild, Zod validation), wire settings versioning to SQLite
-- [ ] 02-08-PLAN.md - [GAP CLOSURE] Integrate settings sub-navigation into main sidebar
-- [ ] 02-09-PLAN.md - [GAP CLOSURE] Fix toggle switches for dark theme, add standard fonts, improve Brand Guidance labels
-- [ ] 02-10-PLAN.md - [GAP CLOSURE] Fix template builder (image loading, zone persistence, canvas sizing, button contrast) and brand preview 431 error
-- [ ] 02-11-PLAN.md - [GAP CLOSURE] Brand Guidance dark theme fix (left column bg-white, font dropdown in all slots, remove oversized preview)
-- [ ] 02-12-PLAN.md - [GAP CLOSURE] Brand preview render fix (temp file HTML loading, JSON parse fix, error state display)
-- [ ] 02-13-PLAN.md - [GAP CLOSURE] Template builder dark theme (BackgroundSelector, OverlayControls, Button outline variant)
-- [ ] 02-14-PLAN.md - [GAP CLOSURE] Zone editor canvas height cap and draw mode discoverability
-- [ ] 02-15-PLAN.md - [GAP CLOSURE] Full CRUD for Mechanics, Story Tools, and Themes catalogs
+- [x] 02-01-PLAN.md - Extend Zod schemas for all 11 settings areas, extract blueprint data to JSON, install dependencies, template/font IPC handlers
+- [x] 02-02-PLAN.md - Settings page shell with vertical tabs, Zustand store, auto-save hook, 6 simple form sections (voice, persona, defaults, competitor, viral, master prompt)
+- [x] 02-03-PLAN.md - Interactive settings sections: coupled pillar sliders, theme hierarchy display, mechanics catalog, story tools catalog
+- [x] 02-04-PLAN.md - Brand guidance section with color pickers, font upload/preview, logo placement, live brand preview card
+- [x] 02-05-PLAN.md - Template builder with react-konva zone editor, overlay controls, background selector
+- [x] 02-06-PLAN.md - Template management UI (list, edit, delete, duplicate), carousel variant editor, save-as-template dialog
+- [x] 02-07-PLAN.md - [GAP CLOSURE] Fix startup errors (better-sqlite3 rebuild, Zod validation), wire settings versioning to SQLite
+- [x] 02-08-PLAN.md - [GAP CLOSURE] Integrate settings sub-navigation into main sidebar
+- [x] 02-09-PLAN.md - [GAP CLOSURE] Fix toggle switches for dark theme, add standard fonts, improve Brand Guidance labels
+- [x] 02-10-PLAN.md - [GAP CLOSURE] Fix template builder (image loading, zone persistence, canvas sizing, button contrast) and brand preview 431 error
+- [x] 02-11-PLAN.md - [GAP CLOSURE] Brand Guidance dark theme fix (left column bg-white, font dropdown in all slots, remove oversized preview)
+- [x] 02-12-PLAN.md - [GAP CLOSURE] Brand preview render fix (temp file HTML loading, JSON parse fix, error state display)
+- [x] 02-13-PLAN.md - [GAP CLOSURE] Template builder dark theme (BackgroundSelector, OverlayControls, Button outline variant)
+- [x] 02-14-PLAN.md - [GAP CLOSURE] Zone editor canvas height cap and draw mode discoverability
+- [x] 02-15-PLAN.md - [GAP CLOSURE] Full CRUD for Mechanics, Story Tools, and Themes catalogs
 
 ### Phase 3: Content Generation
 **Goal**: End-to-end content workflow from recommendation to export with AI generation and performance-based learning
@@ -80,25 +71,24 @@ Plans:
 **Plans**: 13 plans
 
 Plans:
-- [ ] 03-01-PLAN.md - Install deps (@anthropic-ai/sdk, @dnd-kit, react-hook-form), shared generation types, Wave 0 test scaffolds
-- [ ] 03-02-PLAN.md - [TDD] Recommendation engine (round-robin cold start + performance-weighted) + prompt assembler
-- [ ] 03-03-PLAN.md - [TDD] Learning system (balance matrix queries, warning thresholds, pillar balance) + post/slide CRUD IPC
-- [ ] 03-04-PLAN.md - [TDD] Claude API generation IPC handlers (streaming) + file export IPC handlers
-- [ ] 03-05-PLAN.md - [TDD] Zustand wizard store + CreatePost shell + Step 1 (Recommendation & Selection UI)
+- [x] 03-01-PLAN.md - Install deps (@anthropic-ai/sdk, @dnd-kit, react-hook-form), shared generation types, Wave 0 test scaffolds
+- [x] 03-02-PLAN.md - [TDD] Recommendation engine (round-robin cold start + performance-weighted) + prompt assembler
+- [x] 03-03-PLAN.md - [TDD] Learning system (balance matrix queries, warning thresholds, pillar balance) + post/slide CRUD IPC
+- [x] 03-04-PLAN.md - [TDD] Claude API generation IPC handlers (streaming) + file export IPC handlers
+- [x] 03-05-PLAN.md - [TDD] Zustand wizard store + CreatePost shell + Step 1 (Recommendation & Selection UI)
 - [x] 03-06-PLAN.md - Step 2 (streaming generation display) + Step 3 (two-panel text editor, thumbnails, caption, drag reorder)
-- [ ] 03-07-PLAN.md - Step 4 (render & review, export) + Step 5 (story proposals, story render, story export)
-- [ ] 03-08-PLAN.md - Dashboard BalanceWidget + final end-to-end UAT checkpoint
-- [ ] 03-09-PLAN.md - [GAP CLOSURE] Fix Step 2 header ternary, manual mode spinner, and drag-and-drop UID-based reorder
-- [ ] 03-10-PLAN.md - [GAP CLOSURE] Fix alternative hooks prompt assembly and error handling
-- [ ] 03-11-PLAN.md - [GAP CLOSURE] Fix render service image wait, auto-render on mount, and click-to-zoom modal
-- [ ] 03-12-PLAN.md - [GAP CLOSURE] Add avg_performance display to BalanceWidget (LEARN-02)
-- [ ] 03-13-PLAN.md - [GAP CLOSURE] Add ad-hoc post support with theme balance exclusion (LEARN-05)
+- [x] 03-07-PLAN.md - Step 4 (render & review, export) + Step 5 (story proposals, story render, story export)
+- [x] 03-08-PLAN.md - Dashboard BalanceWidget + final end-to-end UAT checkpoint
+- [x] 03-09-PLAN.md - [GAP CLOSURE] Fix Step 2 header ternary, manual mode spinner, and drag-and-drop UID-based reorder
+- [x] 03-10-PLAN.md - [GAP CLOSURE] Fix alternative hooks prompt assembly and error handling
+- [x] 03-11-PLAN.md - [GAP CLOSURE] Fix render service image wait, auto-render on mount, and click-to-zoom modal
+- [x] 03-12-PLAN.md - [GAP CLOSURE] Add avg_performance display to BalanceWidget (LEARN-02)
+- [x] 03-13-PLAN.md - [GAP CLOSURE] Add ad-hoc post support with theme balance exclusion (LEARN-05)
 
-### Phase 03.1: Visual Slide Editor - per-slide zone positioning, font controls, undo/redo, presets (INSERTED)
-
-**Goal:** Per-slide visual editing in Step 3 with zone position/font overrides, undo/redo history, and reusable presets - all with immediate live preview feedback
+### Phase 3.1: Visual Slide Editor (INSERTED)
+**Goal**: Per-slide visual editing in Step 3 with zone position/font overrides, undo/redo history, and reusable presets - all with immediate live preview feedback
+**Depends on**: Phase 3
 **Requirements**: VSED-01, VSED-02, VSED-03, VSED-04, VSED-05, VSED-06, VSED-07, VSED-08
-**Depends on:** Phase 3
 **Success Criteria** (what must be TRUE):
   1. User can adjust per-slide zone position (X/Y offset), font size, font weight, and color for each template zone
   2. Zone overrides merge over template defaults at render time without modifying the template
@@ -106,39 +96,115 @@ Plans:
   4. User can save zone override configurations as named presets and apply them to any slide
   5. LivePreview in Step 3 shows actual template rendering with zone overrides in real-time
   6. Rendered PNGs in Step 4 reflect all zone overrides from Step 3
-**Plans:** 4 plans
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03.1-01-PLAN.md - ZoneOverride types, extract buildSlideHTML to shared utility, extend Zustand store with history/undo/redo/zone overrides (TDD)
-- [ ] 03.1-02-PLAN.md - PresetsService JSON persistence, IPC handlers, preload API, store applyPreset action (TDD)
-- [ ] 03.1-03-PLAN.md - SlideZoneOverrides UI panel, template loading in Step 3, LivePreview upgrade, undo/redo toolbar
-- [ ] 03.1-04-PLAN.md - SlidePresetManager UI, full visual editor human verification checkpoint
+- [x] 03.1-01-PLAN.md - ZoneOverride types, extract buildSlideHTML to shared utility, extend Zustand store with history/undo/redo/zone overrides (TDD)
+- [x] 03.1-02-PLAN.md - PresetsService JSON persistence, IPC handlers, preload API, store applyPreset action (TDD)
+- [x] 03.1-03-PLAN.md - SlideZoneOverrides UI panel, template loading in Step 3, LivePreview upgrade, undo/redo toolbar
+- [x] 03.1-04-PLAN.md - SlidePresetManager UI, full visual editor human verification checkpoint
 
-### Phase 4: Production Readiness
-**Goal**: Production-ready app with performance tracking, logging, error handling, and polished UX
-**Depends on**: Phase 3
-**Requirements**: PERF-01, PERF-02, PERF-03, PERF-04, PERF-05, PERF-06
+</details>
+
+---
+
+## v2.0 Dynamic Zone Model (In Progress)
+
+**Milestone Goal:** Replace fixed 3-zone slide architecture with dynamic N-zone model - configurable style types, layout templates, and PowerPoint-style text formatting.
+
+### Phase 4: Data Model
+**Goal**: Shared types, Zod schemas, and DB schema that support dynamic N-zone slides throughout the entire system
+**Depends on**: Phase 3.1
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04
 **Success Criteria** (what must be TRUE):
-  1. System auto-captures post metadata on creation and shows manual performance input form 7 days after publication
-  2. User can add revenue attribution and qualitative notes per post, with story performance linked to parent feed post
-  3. Comprehensive logging to app.getPath('userData')/logs/ with user-friendly error messages and "Export Logs" feature
-  4. App handles uncaught exceptions gracefully without crashing and shows user-friendly error dialogs with recovery options
-  5. User sees progress indicators for long operations (rendering, generation) and preview confirmation before export
+  1. Slide type uses zones[] array instead of hook_text/body_text/cta_text - all existing code that references the old fields fails type-check until updated
+  2. Zone entity carries id, styleType, content (HTML), position (top/left/width/height), and style overrides with Zod validation enforcing the shape
+  3. SQLite slides table has a JSON zones column and the three old text columns are removed - migrations run cleanly on a fresh database
+  4. Shared Zod schemas for Zone, StyleType, and LayoutTemplate are importable from a single location by both client and server code
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md - Zone, StyleType, LayoutTemplate Zod schemas + TypeScript types + unit tests
+- [ ] 04-02-PLAN.md - DB migration: drop hook_text/body_text/cta_text, add zones JSON column + update all query files + integration tests
+
+### Phase 5: Style System
+**Goal**: User-configurable style type registry in settings and layout templates that pre-configure zones per slide
+**Depends on**: Phase 4
+**Requirements**: STYLE-01, STYLE-02, STYLE-03, STYLE-04, STYLE-05
+**Success Criteria** (what must be TRUE):
+  1. User can create a custom style type (e.g., "Hook 2") with fontSize, fontWeight, fontFamily, color, textAlign, lineHeight, and letterSpacing and it persists across sessions
+  2. Default style types (Hook, Body, CTA) are present on first launch, editable, and cannot leave the system in a state with zero style types
+  3. User can create a layout template that defines zone count, positions, and style type assignments, then apply it to a new slide
+  4. Applying a style type to a zone updates the entire zone's text appearance to that type's defaults immediately in the editor
+  5. User can select individual words within a zone and override font, size, or color independently of the zone-level style type
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01-PLAN.md - StyleType registry: Zod schema extension, settings JSON persistence, IPC handlers, default seeding
+- [ ] 05-02-PLAN.md - Style types settings UI (list, create, edit, delete with confirmation)
+- [ ] 05-03-PLAN.md - LayoutTemplate registry: schema, persistence, IPC handlers
+- [ ] 05-04-PLAN.md - Layout templates settings UI + zone-level style type application + TipTap word-level override integration
+
+### Phase 6: Editor UI
+**Goal**: Slide editor supports adding, removing, and visually positioning N zones per slide with full drag, resize, and style type controls
+**Depends on**: Phase 4, Phase 5
+**Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05
+**Success Criteria** (what must be TRUE):
+  1. User can click a plus button on any slide, pick a style type from a dropdown, and a new zone appears on the slide canvas with default position and sizing
+  2. User can delete any zone from a slide and the slide renders correctly without the deleted zone
+  3. User can add a carousel slide and choose from available layout templates to pre-populate zones
+  4. SlidePreview renders all zones from the zones[] array with correct position, size, and style - drag and resize work on each zone independently
+  5. SlideEditor renders one editor panel per zone dynamically, showing the zone's style type and TipTap content editor
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01-PLAN.md - Update SlidePreview to render N zones dynamically with drag/resize per zone
+- [ ] 06-02-PLAN.md - Update SlideEditor to render dynamic zone panels from zones array
+- [ ] 06-03-PLAN.md - Add zone controls (plus button with style type picker, delete) + add slide with layout template picker
+
+### Phase 7: Generation Pipeline
+**Goal**: AI generation outputs dynamic zone arrays and the HTML renderer builds slides from N zones
+**Depends on**: Phase 4
+**Requirements**: GEN-01, GEN-02, GEN-03
+**Success Criteria** (what must be TRUE):
+  1. Claude API returns a zones[] array per slide with styleType and content fields - the response parses without error and maps to the Zone type
+  2. Prompt assembler constructs the generation prompt using zone array structure instead of the three named text fields (hook_text, body_text, cta_text)
+  3. buildSlideHTML renders a complete slide HTML string from an arbitrary zones[] array, positioning each zone using its top/left/width/height values
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01-PLAN.md - Update prompt assembler to output zone array structure + update Claude response parser
+- [ ] 07-02-PLAN.md - Rewrite buildSlideHTML to render N zones from array with dynamic positioning
+
+### Phase 8: Drafts
+**Goal**: Users can save, resume, export, and import post drafts as a complete snapshot of slide state
+**Depends on**: Phase 4
+**Requirements**: DRAFT-01, DRAFT-02, DRAFT-03, DRAFT-04
+**Success Criteria** (what must be TRUE):
+  1. User can save the current post state as a draft - all slides, zones, styling, and background settings are persisted to SQLite
+  2. User can open a saved draft and resume editing from exactly where they left off, with all zones and content restored
+  3. User can export any draft as a JSON file to the filesystem for external backup
+  4. User can import a previously exported JSON file and it opens as an editable draft in the editor
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01-PLAN.md - Draft SQLite schema, save/load IPC handlers, Zustand store actions (TDD)
+- [ ] 08-02-PLAN.md - Drafts UI (save button, draft list, resume, delete) + JSON export/import
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 03.1 -> 4
+v1.0: 1 -> 2 -> 3 -> 3.1
+v2.0: 4 -> 5 -> 6 -> 7 -> 8 (Phase 7 can start after Phase 4; Phase 8 can start after Phase 4)
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Foundation & Rendering | 3/3 | Complete | 2026-03-10 |
-| 2. Settings & Templates | 15/15 | Complete | 2026-03-11 |
-| 3. Content Generation | 13/13 | Complete    | 2026-03-17 |
-| 03.1. Visual Slide Editor | 0/4 | Not started | - |
-| 4. Production Readiness | 0/2 | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Foundation & Rendering | v1.0 | 3/3 | Complete | 2026-03-10 |
+| 2. Settings & Templates | v1.0 | 15/15 | Complete | 2026-03-11 |
+| 3. Content Generation | v1.0 | 13/13 | Complete | 2026-03-17 |
+| 3.1. Visual Slide Editor | v1.0 | 4/4 | Complete | 2026-03-17 |
+| 4. Data Model | v2.0 | 0/2 | Not started | - |
+| 5. Style System | v2.0 | 0/4 | Not started | - |
+| 6. Editor UI | v2.0 | 0/3 | Not started | - |
+| 7. Generation Pipeline | v2.0 | 0/2 | Not started | - |
+| 8. Drafts | v2.0 | 0/2 | Not started | - |

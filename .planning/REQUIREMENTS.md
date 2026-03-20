@@ -129,33 +129,33 @@ Requirements for dynamic zone model milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | - | Pending |
-| DATA-02 | - | Pending |
-| DATA-03 | - | Pending |
-| DATA-04 | - | Pending |
-| STYLE-01 | - | Pending |
-| STYLE-02 | - | Pending |
-| STYLE-03 | - | Pending |
-| STYLE-04 | - | Pending |
-| STYLE-05 | - | Pending |
-| EDIT-01 | - | Pending |
-| EDIT-02 | - | Pending |
-| EDIT-03 | - | Pending |
-| EDIT-04 | - | Pending |
-| EDIT-05 | - | Pending |
-| GEN-01 | - | Pending |
-| GEN-02 | - | Pending |
-| GEN-03 | - | Pending |
-| DRAFT-01 | - | Pending |
-| DRAFT-02 | - | Pending |
-| DRAFT-03 | - | Pending |
-| DRAFT-04 | - | Pending |
+| DATA-01 | Phase 4 | Pending |
+| DATA-02 | Phase 4 | Pending |
+| DATA-03 | Phase 4 | Pending |
+| DATA-04 | Phase 4 | Pending |
+| STYLE-01 | Phase 5 | Pending |
+| STYLE-02 | Phase 5 | Pending |
+| STYLE-03 | Phase 5 | Pending |
+| STYLE-04 | Phase 5 | Pending |
+| STYLE-05 | Phase 5 | Pending |
+| EDIT-01 | Phase 6 | Pending |
+| EDIT-02 | Phase 6 | Pending |
+| EDIT-03 | Phase 6 | Pending |
+| EDIT-04 | Phase 6 | Pending |
+| EDIT-05 | Phase 6 | Pending |
+| GEN-01 | Phase 7 | Pending |
+| GEN-02 | Phase 7 | Pending |
+| GEN-03 | Phase 7 | Pending |
+| DRAFT-01 | Phase 8 | Pending |
+| DRAFT-02 | Phase 8 | Pending |
+| DRAFT-03 | Phase 8 | Pending |
+| DRAFT-04 | Phase 8 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-20 after v2.0 milestone definition*
+*Last updated: 2026-03-20 after v2.0 roadmap creation*
