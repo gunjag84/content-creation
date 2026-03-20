@@ -1,244 +1,161 @@
 # Requirements: Content Creation System
 
-**Defined:** 2026-03-10
+**Defined:** 2026-03-10 (v1.0), updated 2026-03-20 (v2.0)
 **Core Value:** The core loop must work end-to-end: pick a topic and mechanic, generate text via Claude, render branded images from HTML/CSS templates, and export upload-ready PNGs - all guided by brand settings and performance insights.
 
-## v1 Requirements
+## v2.0 Requirements
 
-Requirements for initial release. Each maps to roadmap phases.
+Requirements for dynamic zone model milestone. Each maps to roadmap phases.
+
+### Data Model
+
+- [ ] **DATA-01**: Slide uses zones[] array instead of fixed hook_text/body_text/cta_text fields
+- [ ] **DATA-02**: Zone entity stores id, styleType, content (HTML), position (top/left/width/height), and style overrides
+- [ ] **DATA-03**: DB schema updated - slides table uses JSON zones column, old 3-field columns removed
+- [ ] **DATA-04**: Shared Zod schemas for Zone, StyleType, and LayoutTemplate with full validation
+
+### Style System
+
+- [ ] **STYLE-01**: User can create, edit, and delete style types in settings (name, fontSize, fontWeight, fontFamily, color, textAlign, lineHeight, letterSpacing)
+- [ ] **STYLE-02**: Default style types (Hook, Body, CTA) ship pre-configured and are editable
+- [ ] **STYLE-03**: User can create layout templates that define zone count, positions, and style type assignments
+- [ ] **STYLE-04**: Zone-level formatting applies style type defaults to entire zone
+- [ ] **STYLE-05**: User can override individual words within a zone (font, size, color) via inline TipTap selection
+
+### Editor UI
+
+- [ ] **EDIT-01**: User can add a zone to any slide via plus button with style type picker
+- [ ] **EDIT-02**: User can delete any zone from a slide
+- [ ] **EDIT-03**: User can add a carousel slide and choose from available layout templates
+- [ ] **EDIT-04**: SlidePreview renders N zones dynamically with drag and resize support
+- [ ] **EDIT-05**: SlideEditor renders zone editor panels dynamically from zones array
+
+### Generation
+
+- [ ] **GEN-01**: AI generates zones[] array per slide with styleType and content fields
+- [ ] **GEN-02**: Prompt assembler outputs zone array structure instead of 3 named text fields
+- [ ] **GEN-03**: buildSlideHTML renders N zones from array with dynamic positioning
+
+### Drafts
+
+- [ ] **DRAFT-01**: User can save draft to SQLite with full slide state (zones, styling, backgrounds)
+- [ ] **DRAFT-02**: User can resume editing any saved draft
+- [ ] **DRAFT-03**: User can export draft as JSON file for backup
+- [ ] **DRAFT-04**: User can import draft from JSON file
+
+## v1.0 Requirements (Completed)
 
 ### Settings & Configuration
 
-- [x] **SET-01**: User can configure brand voice (tonality, do's/don'ts, example posts upload, auto-generated voice profile with manual override)
-- [x] **SET-02**: User can configure target persona (demographics, pain points, goals, language expectations, media consumption, buying behavior)
-- [x] **SET-03**: User can configure content pillars with coupled percentage sliders (Generate Demand / Convert Demand / Nurture Loyalty, sum = 100%)
-- [x] **SET-04**: User can manage theme hierarchy via tree editor (add/edit/archive Oberthema -> Unterthema -> Kernaussage, drag & drop reorder)
-- [x] **SET-05**: User can manage post mechanic catalog (7 pre-filled mechanics with hook rules, slide ranges, structure guidelines, pillar mapping, activate/deactivate)
-- [x] **SET-06**: User can configure content defaults (carousel slide min/max, caption max chars, hashtag min/max, stories per feed post)
-- [x] **SET-07**: User can configure brand guidance visuals (primary/secondary/background colors, headline/body/CTA fonts with custom upload, logo upload + placement, last carousel slide rules, standard CTA)
-- [x] **SET-08**: User can write competitor analysis as free-text differentiation (optional, prompt block skipped when empty)
-- [x] **SET-09**: User can manage story tools catalog (18 pre-filled Instagram tools with engagement type, pillar mapping, mechanic recommendations, activate/deactivate)
-- [x] **SET-10**: User can write viral post expertise (hook formulas, viral mechanics, post structures - optional, prompt block skipped when empty)
-- [x] **SET-11**: User can view and edit master prompt template (code editor, rarely used, pre-filled with working default)
-- [x] **SET-12**: Every settings change is automatically versioned with timestamp (system can show which version was active for any post)
+- [x] **SET-01**: User can configure brand voice
+- [x] **SET-02**: User can configure target persona
+- [x] **SET-03**: User can configure content pillars with coupled percentage sliders
+- [x] **SET-04**: User can manage theme hierarchy via tree editor
+- [x] **SET-05**: User can manage post mechanic catalog
+- [x] **SET-06**: User can configure content defaults
+- [x] **SET-07**: User can configure brand guidance visuals
+- [x] **SET-08**: User can write competitor analysis
+- [x] **SET-09**: User can manage story tools catalog
+- [x] **SET-10**: User can write viral post expertise
+- [x] **SET-11**: User can view and edit master prompt template
+- [x] **SET-12**: Every settings change is automatically versioned
 
 ### Template System
 
-- [x] **TPL-01**: User can create a template by uploading a background image and being guided through zone definition
-- [x] **TPL-02**: User can visually drag rectangles on image preview to define text zones (hook, body, CTA) with font role, alignment, and max_lines per zone
-- [x] **TPL-03**: User can visually define no-text zones (protected areas where text must not appear)
-- [x] **TPL-04**: User can configure overlay settings per template (color, opacity, gradient with stops, enabled/disabled)
-- [x] **TPL-05**: User can set background type per template (image, solid color from brand guidance, gradient from brand guidance)
-- [x] **TPL-06**: User can manage templates in settings (list, edit zones, delete, duplicate)
-- [x] **TPL-07**: System renders HTML/CSS templates to PNG at Instagram dimensions (1080x1350 feed, 1080x1920 story)
-- [x] **TPL-08**: User is offered "save as template?" when uploading a custom background image during manual post flow
-- [x] **TPL-09**: Templates support carousel variants (separate cover slide, content slide, CTA slide HTML with shared config)
+- [x] **TPL-01** through **TPL-09**: Template creation, zone editor, overlay, backgrounds, management, rendering, carousel variants
 
 ### Post Generation Workflow
 
-- [x] **POST-01**: System recommends a content pillar, theme, and mechanic based on rotation balance (equal rotation until learning data exists)
-- [x] **POST-02**: User can accept or override the system recommendation (choose pillar, theme/subtopic/key message, content type, mechanic, template)
-- [x] **POST-03**: User can choose content type: single post or carousel
-- [ ] **POST-04**: User can optionally upload a custom background image that overrides the template background for this post
-- [ ] **POST-05**: User can optionally provide a free-text impulse to guide AI generation (supplements standard context, does not replace it)
-- [x] **POST-06**: System generates slide text and caption via Claude API using master prompt assembled from all active config areas
-- [x] **POST-07**: User can enter text manually without AI generation (manual mode - system provides empty zones, user fills them)
-- [x] **POST-08**: User can edit individual slide texts, hooks, and CTAs inline after generation
-- [x] **POST-09**: User can request alternative hook suggestions from AI
-- [x] **POST-10**: User can edit caption independently from slide text (different rules: longer, storytelling, SEO, hashtags, CTA)
-- [x] **POST-11**: User can reorder carousel slides via drag and drop
-- [x] **POST-12**: User can request a completely new AI-generated draft
-- [x] **POST-13**: System automatically renders PNGs after text is approved (seconds, not minutes)
-- [x] **POST-14**: User sees rendered PNG preview with caption for visual review before export
-- [x] **POST-15**: User can adjust per-slide overlay opacity for carousels and trigger re-render
-- [x] **POST-16**: User can approve and export upload-ready PNGs + caption text file
-- [x] **POST-17**: Last carousel slide automatically applies standard CTA from brand guidance (logo + CTA text + handle) unless manually overridden
+- [x] **POST-01** through **POST-17**: Full generation workflow (recommendation, selection, generation, editing, rendering, review, export)
 
-### Visual Slide Editor (Inserted - Phase 03.1)
+### Visual Slide Editor
 
-- [x] **VSED-01**: User can set per-slide zone overrides (position X/Y, width, height, font size, font weight, color) that merge over template zone defaults at render time
-- [x] **VSED-02**: History system captures current slide state before each mutation for undo support
-- [x] **VSED-03**: User can undo the last zone override change (restores previous slide state)
-- [x] **VSED-04**: User can redo an undone change (re-applies the forward state)
-- [x] **VSED-05**: History stack is capped at 50 entries to prevent unbounded memory growth
-- [x] **VSED-06**: User can save zone override configurations as named presets and apply them to any slide
-- [x] **VSED-07**: buildSlideHTML applies zone_overrides over template zones when rendering HTML for both preview and PNG export
-- [x] **VSED-08**: Presets persist to disk (JSON file) and survive app restart with save/load/delete round-trip
+- [x] **VSED-01** through **VSED-08**: Zone overrides, undo/redo, presets, buildSlideHTML integration
 
 ### Story Generation
 
-- [x] **STORY-01**: System generates story proposals linked to the feed post (2-4 stories per post, configurable)
-- [x] **STORY-02**: Story content inherits from feed post (slide texts, caption, theme, mechanic) - no new content invented
-- [x] **STORY-03**: System assigns story type per story (teaser before post, reference to post, deepening of aspect, behind-the-scenes)
-- [x] **STORY-04**: System recommends interactive tool per story based on post mechanic and pillar (from story tools catalog)
-- [x] **STORY-05**: System generates concrete text for interactive tools (poll question + options, quiz question + answers, etc.)
-- [x] **STORY-06**: System generates story image - either reformatted feed slide (9:16 with brand color padding) or dedicated story template
-- [x] **STORY-07**: System recommends timing per story (before or after feed post)
-- [x] **STORY-08**: User can approve, reject, or edit each story (text, tool choice, source slide, image)
-- [x] **STORY-09**: System renders story PNGs at 1080x1920 (9:16)
-- [x] **STORY-10**: User can export story PNGs alongside feed post PNGs
-
-### Performance Tracking
-
-- [ ] **PERF-01**: System auto-captures post metadata on creation (pillar, theme, subtopic, key message, mechanic, template, content type, slide count, ad-hoc flag)
-- [ ] **PERF-02**: System shows manual performance input form 7 days after feed post publication (reach, impressions, likes, comments, shares, saves, revenue, qualitative notes)
-- [ ] **PERF-03**: System shows manual story performance input form within 24 hours of story publication (impressions, reach, replies, taps forward/back, exits, sticker taps)
-- [ ] **PERF-04**: User can add revenue attribution and qualitative notes per post (always manual, never API-replaced)
-- [ ] **PERF-05**: Data model supports API override per metric field (manual value + API value columns, API wins when present, manual shown as override option)
-- [ ] **PERF-06**: Story performance is linked to parent feed post in database
+- [x] **STORY-01** through **STORY-10**: Story proposals, content inheritance, tools, rendering, export
 
 ### Learning System
 
-- [x] **LEARN-01**: System tracks balance matrix across all steerable variables (pillar distribution, theme distribution, mechanic distribution, content type distribution, template distribution, story tool distribution)
-- [x] **LEARN-02**: System calculates performance-per-variable (avg metrics per theme, per mechanic, per pillar, per template, per story tool)
-- [x] **LEARN-03**: System generates soft-signal warnings when a variable is overused (e.g., "Mechanic X used 4x in 2 weeks - rotate?")
-- [x] **LEARN-04**: Recommendations use equal rotation in cold start (no data yet), then shift to data-driven weighting as performance accumulates
-- [x] **LEARN-05**: Ad-hoc posts are flagged and excluded from theme balance calculation but included in pillar balance
-- [x] **LEARN-06**: Pillar balance tracks actual vs. target percentage (from content pillar sliders) and warns on deviation
+- [x] **LEARN-01** through **LEARN-06**: Balance matrix, performance tracking, soft-signal warnings, rotation
 
 ### Infrastructure
 
-- [x] **INFRA-01**: Electron desktop app starts with double-click on .exe (no terminal, no dev server)
-- [x] **INFRA-02**: React + Tailwind CSS frontend with electron-vite build tooling
-- [x] **INFRA-03**: SQLite database for learning data (posts, stories, performance, balance matrix cache) with WAL mode and integrity checks
-- [x] **INFRA-04**: JSON file storage for settings with automatic timestamp versioning
-- [x] **INFRA-05**: Secure Claude API key storage via Electron safeStorage API
-- [x] **INFRA-06**: Brand-aware data model (brand_id in all database tables) with single-brand UI
-- [x] **INFRA-07**: Graceful shutdown handler to prevent SQLite corruption
+- [x] **INFRA-01** through **INFRA-07**: Electron app, React/Tailwind, SQLite, JSON storage, API key, brand-aware model
 
-## v2 Requirements
+## Future Requirements
 
-Deferred to future release. Tracked but not in current roadmap.
+### Performance Tracking (deferred from v1.0)
+
+- **PERF-01**: System auto-captures post metadata on creation
+- **PERF-02**: Manual performance input form 7 days after publication
+- **PERF-03**: Manual story performance input within 24h
+- **PERF-04**: Revenue attribution and qualitative notes per post
+- **PERF-05**: API override per metric field
+- **PERF-06**: Story performance linked to parent feed post
 
 ### API Integration
 
-- **API-01**: Instagram Graph API integration for automated feed post metrics (replaces manual input)
-- **API-02**: Instagram Stories API / webhook for automated story metrics within 24h window
-- **API-03**: Automated posting via Instagram Content Publishing API
+- **API-01**: Instagram Graph API integration for automated metrics
+- **API-02**: Stories API for automated story metrics
+- **API-03**: Automated posting via Content Publishing API
 
 ### Multi-Brand & Web
 
-- **MULTI-01**: Multi-brand UI (brand switcher, per-brand settings and data)
-- **WEB-01**: Web app deployment (React code reuse, PostgreSQL migration, cloud Puppeteer)
-- **WEB-02**: User authentication and multi-tenant architecture
-
-### Content Types
-
-- **CONTENT-01**: Video/Reel generation support
-- **CONTENT-02**: LinkedIn post format support
+- **MULTI-01**: Multi-brand UI
+- **WEB-01**: Web app deployment
+- **WEB-02**: User authentication
 
 ### Prompt Quality Feedback Loop
 
-- **PQFL-01**: App stores correction diffs when user edits generated content (original output, edited version, active dimensions, timestamp)
-- **PQFL-02**: Analysis command reads correction log, clusters patterns, and proposes updates to skill reference files (anti-patterns.md, method-structures.md, hook-formulas.md, or SKILL.md product rules)
-- **PQFL-03**: After skill file updates, re-run evals to verify fix sticks, then port changes to prompt-assembler.ts
-
-### UX Enhancements
-
-- **UX-01**: First-run onboarding wizard (guided brand setup, template creation, first post)
-- **UX-02**: Content calendar/scheduling view
-- **UX-03**: Draft auto-save and crash recovery
-- **UX-04**: Comprehensive logging with electron-log for production debugging
+- **PQFL-01**: Store correction diffs
+- **PQFL-02**: Analysis command for pattern clustering
+- **PQFL-03**: Eval-verified skill file updates
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Pre-built template library | Creates generic content, no brand differentiation - users create custom templates |
+| Story format (1080x1920) updates | Focus on feed/carousel first for v2.0, story update later |
+| Backward compatibility with v1.0 data | Clean break confirmed - no migration needed |
+| Canva-like free-form design editor | Assessed and rejected - domain-specific zone model is the right approach |
+| Pre-built template library | Users create custom templates via guided flow |
 | Provider-agnostic LLM layer | Abstraction dilutes prompt optimization - Claude API only |
-| Real-time Instagram preview | Perfect match impossible across devices/OS - high-fidelity preview sufficient |
-| Mobile app | Desktop-first, web migration path exists for later |
-| Real-time chat | Not core to content creation workflow |
-| Direct Instagram posting | Manual export validates core loop without API complexity |
-| Infinite customization | Decision fatigue - opinionated defaults with strategic flexibility |
+| Video/Reel content | Image-based posts only |
+| Mobile app | Desktop-first |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SET-01 | Phase 2 | Complete |
-| SET-02 | Phase 2 | Complete |
-| SET-03 | Phase 2 | Complete |
-| SET-04 | Phase 2 | Complete |
-| SET-05 | Phase 2 | Complete |
-| SET-06 | Phase 2 | Complete |
-| SET-07 | Phase 2 | Complete |
-| SET-08 | Phase 2 | Complete |
-| SET-09 | Phase 2 | Complete |
-| SET-10 | Phase 2 | Complete |
-| SET-11 | Phase 2 | Complete |
-| SET-12 | Phase 2 | Complete |
-| TPL-01 | Phase 2 | Complete |
-| TPL-02 | Phase 2 | Complete |
-| TPL-03 | Phase 2 | Complete |
-| TPL-04 | Phase 2 | Complete |
-| TPL-05 | Phase 2 | Complete |
-| TPL-06 | Phase 2 | Complete |
-| TPL-07 | Phase 1 | Complete |
-| TPL-08 | Phase 2 | Complete |
-| TPL-09 | Phase 2 | Complete |
-| POST-01 | Phase 3 | Complete |
-| POST-02 | Phase 3 | Complete |
-| POST-03 | Phase 3 | Complete |
-| POST-04 | Phase 3 | Pending |
-| POST-05 | Phase 3 | Pending |
-| POST-06 | Phase 3 | Complete |
-| POST-07 | Phase 3 | Complete |
-| POST-08 | Phase 3 | Complete |
-| POST-09 | Phase 3 | Complete |
-| POST-10 | Phase 3 | Complete |
-| POST-11 | Phase 3 | Complete |
-| POST-12 | Phase 3 | Complete |
-| POST-13 | Phase 3 | Complete |
-| POST-14 | Phase 3 | Complete |
-| POST-15 | Phase 3 | Complete |
-| POST-16 | Phase 3 | Complete |
-| POST-17 | Phase 3 | Complete |
-| VSED-01 | Phase 03.1 | Complete |
-| VSED-02 | Phase 03.1 | Complete |
-| VSED-03 | Phase 03.1 | Complete |
-| VSED-04 | Phase 03.1 | Complete |
-| VSED-05 | Phase 03.1 | Complete |
-| VSED-06 | Phase 03.1 | Complete |
-| VSED-07 | Phase 03.1 | Complete |
-| VSED-08 | Phase 03.1 | Complete |
-| STORY-01 | Phase 3 | Complete |
-| STORY-02 | Phase 3 | Complete |
-| STORY-03 | Phase 3 | Complete |
-| STORY-04 | Phase 3 | Complete |
-| STORY-05 | Phase 3 | Complete |
-| STORY-06 | Phase 3 | Complete |
-| STORY-07 | Phase 3 | Complete |
-| STORY-08 | Phase 3 | Complete |
-| STORY-09 | Phase 3 | Complete |
-| STORY-10 | Phase 3 | Complete |
-| PERF-01 | Phase 4 | Pending |
-| PERF-02 | Phase 4 | Pending |
-| PERF-03 | Phase 4 | Pending |
-| PERF-04 | Phase 4 | Pending |
-| PERF-05 | Phase 4 | Pending |
-| PERF-06 | Phase 4 | Pending |
-| LEARN-01 | Phase 3 | Complete |
-| LEARN-02 | Phase 3 | Complete |
-| LEARN-03 | Phase 3 | Complete |
-| LEARN-04 | Phase 3 | Complete |
-| LEARN-05 | Phase 3 | Complete |
-| LEARN-06 | Phase 3 | Complete |
-| INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 1 | Complete |
-| INFRA-04 | Phase 1 | Complete |
-| INFRA-05 | Phase 1 | Complete |
-| INFRA-06 | Phase 1 | Complete |
-| INFRA-07 | Phase 1 | Complete |
+| DATA-01 | - | Pending |
+| DATA-02 | - | Pending |
+| DATA-03 | - | Pending |
+| DATA-04 | - | Pending |
+| STYLE-01 | - | Pending |
+| STYLE-02 | - | Pending |
+| STYLE-03 | - | Pending |
+| STYLE-04 | - | Pending |
+| STYLE-05 | - | Pending |
+| EDIT-01 | - | Pending |
+| EDIT-02 | - | Pending |
+| EDIT-03 | - | Pending |
+| EDIT-04 | - | Pending |
+| EDIT-05 | - | Pending |
+| GEN-01 | - | Pending |
+| GEN-02 | - | Pending |
+| GEN-03 | - | Pending |
+| DRAFT-01 | - | Pending |
+| DRAFT-02 | - | Pending |
+| DRAFT-03 | - | Pending |
+| DRAFT-04 | - | Pending |
 
 **Coverage:**
-- v1 requirements: 63 total
-- Mapped to phases: 63
-- Unmapped: 0
+- v2.0 requirements: 21 total
+- Mapped to phases: 0
+- Unmapped: 21
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-17 after Phase 03.1 planning*
+*Last updated: 2026-03-20 after v2.0 milestone definition*
