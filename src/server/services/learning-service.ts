@@ -2,7 +2,7 @@ import type { BalanceEntry, BalanceRecommendation, BalanceWarning, BalanceDashbo
 
 // --- Recommendation engine ---
 
-const REQUIRED_DIMS = ['pillar', 'area', 'method', 'tonality'] as const
+const REQUIRED_DIMS = ['pillar', 'scenario', 'method'] as const
 
 export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecommendation {
   if (!balanceEntries || balanceEntries.length === 0) {
@@ -26,10 +26,8 @@ export function recommendContent(balanceEntries: BalanceEntry[]): BalanceRecomme
 
   return {
     pillar: selectFromDimension(byType['pillar'], hasPerformanceData),
-    area: selectFromDimension(byType['area'], hasPerformanceData),
-    angle: byType['angle'] ? selectFromDimension(byType['angle'], hasPerformanceData) : null,
+    scenario: selectFromDimension(byType['scenario'], hasPerformanceData),
     method: selectFromDimension(byType['method'], hasPerformanceData),
-    tonality: selectFromDimension(byType['tonality'], hasPerformanceData),
     reasoning
   }
 }
@@ -68,10 +66,8 @@ export function calculateBalance(
   targetPercentages: Record<string, number>
 ): BalanceDashboardData {
   const pillarEntries = entries.filter(e => e.variable_type === 'pillar')
-  const areaEntries = entries.filter(e => e.variable_type === 'area')
-  const angleEntries = entries.filter(e => e.variable_type === 'angle')
+  const scenarioEntries = entries.filter(e => e.variable_type === 'scenario')
   const methodEntries = entries.filter(e => e.variable_type === 'method')
-  const tonalityEntries = entries.filter(e => e.variable_type === 'tonality')
   const totalCount = pillarEntries.reduce((s, e) => s + e.usage_count, 0)
 
   return {
@@ -81,22 +77,12 @@ export function calculateBalance(
       target_pct: targetPercentages[e.variable_value] ?? 0,
       count: e.usage_count
     })),
-    areas: areaEntries.map(e => ({
-      name: e.variable_value,
-      count: e.usage_count,
-      avg_performance: e.avg_performance
-    })),
-    angles: angleEntries.map(e => ({
+    scenarios: scenarioEntries.map(e => ({
       name: e.variable_value,
       count: e.usage_count,
       avg_performance: e.avg_performance
     })),
     methods: methodEntries.map(e => ({
-      name: e.variable_value,
-      count: e.usage_count,
-      avg_performance: e.avg_performance
-    })),
-    tonalities: tonalityEntries.map(e => ({
       name: e.variable_value,
       count: e.usage_count,
       avg_performance: e.avg_performance
@@ -113,6 +99,8 @@ export function generateWarnings(entries: BalanceEntry[]): BalanceWarning[] {
 
   for (const entry of entries) {
     if (entry.last_used === null || entry.usage_count <= 3) continue
+    // Only warn for tracked dimensions
+    if (!['pillar', 'scenario', 'method'].includes(entry.variable_type)) continue
     const days = Math.floor((now - entry.last_used) / 86400)
     if (days > 14) continue
     warnings.push({

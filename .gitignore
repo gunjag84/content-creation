@@ -2,6 +2,7 @@ node_modules/
 dist/
 out/
 data/
+!src/shared/data/
 .env
 *.db
 *.db-shm

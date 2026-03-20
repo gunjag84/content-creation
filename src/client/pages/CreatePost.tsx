@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { api } from '../lib/apiClient'
-import { getAnglesForPillar, getFilteredAreas, getFilteredMethods, getFilteredTonalities, isAreaRequired } from '@shared/pillarConstraints'
+import { getScenariosForPillar, getMethodsForScenario } from '@shared/pillarConstraints'
 import type { BalanceRecommendation, BalanceWarning, GenerationResult } from '@shared/types'
 
 interface CreatePostProps {
@@ -34,79 +34,46 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   // Cascade reset when pillar changes
   useEffect(() => {
     if (!settings || !store.selectedPillar) return
-    const pillarAngles = getAnglesForPillar(settings, store.selectedPillar)
-    const pillarMethods = getFilteredMethods(settings, store.selectedPillar).filter(m => {
-      if (!m.formatConstraints || m.formatConstraints.length === 0) return true
-      return m.formatConstraints.includes(store.contentType)
-    })
-    const pillarTonalities = getFilteredTonalities(settings, store.selectedPillar)
-    const areaReq = isAreaRequired(settings, store.selectedPillar)
+    const pillarScenarios = getScenariosForPillar(settings, store.selectedPillar)
 
-    // Reset angle to first angle of new pillar
-    const currentAngleValid = pillarAngles.some(a => a.name === store.selectedAngle)
-    if (!currentAngleValid) {
-      store.setField('selectedAngle', pillarAngles.length > 0 ? pillarAngles[0].name : '')
-    }
-
-    // Reset method if no longer valid
-    const currentMethodValid = pillarMethods.some(m => m.name === store.selectedMethod)
-    if (!currentMethodValid && pillarMethods.length > 0) {
-      store.setField('selectedMethod', pillarMethods[0].name)
-    }
-
-    // Reset tonality if no longer valid
-    const currentTonalityValid = pillarTonalities.some(t => t.name === store.selectedTonality)
-    if (!currentTonalityValid && pillarTonalities.length > 0) {
-      store.setField('selectedTonality', pillarTonalities[0].name)
-    }
-
-    // Reset area if no longer valid for this pillar
-    const pillarAreas = getFilteredAreas(settings, store.selectedPillar)
-    const currentAreaValid = store.selectedArea === '' || pillarAreas.some(a => a.name === store.selectedArea)
-    if (!currentAreaValid) {
-      store.setField('selectedArea', '')
+    // Reset scenario to first of new pillar
+    const currentScenarioValid = pillarScenarios.some(s => s.name === store.selectedScenario)
+    if (!currentScenarioValid) {
+      store.setField('selectedScenario', pillarScenarios.length > 0 ? pillarScenarios[0].name : '')
     }
   }, [store.selectedPillar, settings])
 
+  // Reset method when scenario changes
+  useEffect(() => {
+    if (!settings || !store.selectedPillar || !store.selectedScenario) return
+    const scenarioMethods = getMethodsForScenario(settings, store.selectedPillar, store.selectedScenario).filter(m => {
+      if (!m.formatConstraints || m.formatConstraints.length === 0) return true
+      return m.formatConstraints.includes(store.contentType)
+    })
+    const currentMethodValid = scenarioMethods.some(m => m.name === store.selectedMethod)
+    if (!currentMethodValid && scenarioMethods.length > 0) {
+      store.setField('selectedMethod', scenarioMethods[0].name)
+    }
+  }, [store.selectedScenario, store.selectedPillar, store.contentType, settings])
+
   // Derived filtered lists
-  const angles = useMemo(() => {
+  const scenarios = useMemo(() => {
     if (!settings) return []
-    return getAnglesForPillar(settings, store.selectedPillar)
+    return getScenariosForPillar(settings, store.selectedPillar)
   }, [settings, store.selectedPillar])
 
   const filteredMethods = useMemo(() => {
     if (!settings) return []
-    const pillarFiltered = getFilteredMethods(settings, store.selectedPillar)
-    return pillarFiltered.filter(m => {
+    const scenarioFiltered = getMethodsForScenario(settings, store.selectedPillar, store.selectedScenario)
+    return scenarioFiltered.filter(m => {
       if (!m.formatConstraints || m.formatConstraints.length === 0) return true
       return m.formatConstraints.includes(store.contentType)
     })
-  }, [settings, store.selectedPillar, store.contentType])
-
-  const filteredTonalities = useMemo(() => {
-    if (!settings) return []
-    return getFilteredTonalities(settings, store.selectedPillar)
-  }, [settings, store.selectedPillar])
-
-  const areaRequired = useMemo(() => {
-    if (!settings) return true
-    return isAreaRequired(settings, store.selectedPillar)
-  }, [settings, store.selectedPillar])
-
-  // Reset method if current selection is invalid for format or pillar
-  useEffect(() => {
-    if (!settings || filteredMethods.length === 0) return
-    const valid = filteredMethods.some(m => m.name === store.selectedMethod)
-    if (!valid) {
-      store.setField('selectedMethod', filteredMethods[0].name)
-    }
-  }, [filteredMethods])
+  }, [settings, store.selectedPillar, store.selectedScenario, store.contentType])
 
   const canGenerate = store.selectedPillar
-    && store.selectedAngle
-    && (areaRequired ? store.selectedArea : true)
+    && store.selectedScenario
     && store.selectedMethod
-    && store.selectedTonality
 
   const handleGenerate = () => {
     store.setIsGenerating(true)
@@ -115,10 +82,8 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
     const cancel = api.streamGenerate(
       {
         pillar: store.selectedPillar,
-        area: store.selectedArea,
-        angle: store.selectedAngle || null,
+        scenario: store.selectedScenario,
         method: store.selectedMethod,
-        tonality: store.selectedTonality,
         contentType: store.contentType,
         slideCount: store.contentType === 'carousel' ? store.slideCount : undefined,
         impulse: store.impulse
@@ -140,14 +105,11 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
   }
 
   const pillars = settings?.pillars ?? []
-  const areas = settings ? getFilteredAreas(settings, store.selectedPillar) : []
 
   const badgeColors: Record<string, string> = {
-    area: 'bg-green-100 text-green-700',
     pillar: 'bg-blue-100 text-blue-700',
+    scenario: 'bg-purple-100 text-purple-700',
     method: 'bg-gray-200 text-gray-700',
-    tonality: 'bg-amber-100 text-amber-700',
-    angle: 'bg-purple-100 text-purple-700'
   }
 
   return (
@@ -159,12 +121,8 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
         <div className="flex flex-wrap gap-1.5 items-center">
           <span className="text-xs text-gray-500 mr-1">Recommended:</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.pillar}`}>{store.recommendation.pillar}</span>
-          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.area}`}>{store.recommendation.area}</span>
-          {store.recommendation.angle && (
-            <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.angle}`}>{store.recommendation.angle}</span>
-          )}
+          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.scenario}`}>{store.recommendation.scenario}</span>
           <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.method}`}>{store.recommendation.method}</span>
-          <span className={`text-xs px-2 py-0.5 rounded ${badgeColors.tonality}`}>{store.recommendation.tonality}</span>
         </div>
       )}
 
@@ -194,51 +152,35 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
           </select>
         </div>
 
-        {/* Angle - full width, pillar-specific */}
+        {/* Scenario - full width, pillar-specific */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Angle</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Scenario</label>
           <select
-            value={store.selectedAngle}
-            onChange={(e) => store.setField('selectedAngle', e.target.value)}
+            value={store.selectedScenario}
+            onChange={(e) => store.setField('selectedScenario', e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-sm"
-            disabled={!store.selectedPillar || angles.length === 0}
+            disabled={!store.selectedPillar || scenarios.length === 0}
           >
-            <option value="">Select angle...</option>
-            {angles.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
+            <option value="">Select scenario...</option>
+            {scenarios.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
           </select>
-          {store.selectedPillar && angles.length === 0 && (
-            <p className="text-xs text-amber-600 mt-1">No angles configured for this pillar. Add angles in Brand Configuration.</p>
+          {store.selectedPillar && scenarios.length === 0 && (
+            <p className="text-xs text-amber-600 mt-1">No scenarios configured for this pillar. Add scenarios in Brand Configuration.</p>
           )}
         </div>
 
-        {/* Area - full width, optional for Nurture Loyalty */}
+        {/* Prompt Guidance - optional, highest priority instruction for generation */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Area
-            {!areaRequired && <span className="ml-1 text-xs text-gray-400">(optional)</span>}
-          </label>
-          <select
-            value={store.selectedArea}
-            onChange={(e) => store.setField('selectedArea', e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">{areaRequired ? 'Select area...' : '-- optional --'}</option>
-            {areas.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
-          </select>
-        </div>
-
-        {/* Real Life Situation - optional, anchors content in authenticity */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Real Life Situation
-            <span className="ml-1 text-xs text-gray-400">(optional)</span>
+            Prompt Guidance
+            <span className="ml-1 text-xs text-gray-400">(optional - overrides other settings when set)</span>
           </label>
           <textarea
             value={store.impulse}
             onChange={(e) => store.setField('impulse', e.target.value)}
             rows={3}
             className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-            placeholder="Describe a real situation from Jule's life that anchors this post..."
+            placeholder="Free-form instruction for this post. Overrides scenario/method when conflicting..."
           />
         </div>
       </div>
@@ -258,18 +200,6 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tonality</label>
-            <select
-              value={store.selectedTonality}
-              onChange={(e) => store.setField('selectedTonality', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              {filteredTonalities.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
             <div className="flex gap-2">
               {(['single', 'carousel'] as const).map((type) => (
@@ -285,29 +215,29 @@ export function CreatePost({ onGenerated }: CreatePostProps) {
               ))}
             </div>
           </div>
-          {store.contentType === 'carousel' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slides</label>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
-                  className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
-                  disabled={store.slideCount <= 3}
-                >
-                  -
-                </button>
-                <span className="w-6 text-center text-sm font-semibold">{store.slideCount}</span>
-                <button
-                  onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
-                  className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
-                  disabled={store.slideCount >= 7}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          )}
         </div>
+        {store.contentType === 'carousel' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Slides</label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => store.setField('slideCount', Math.max(3, store.slideCount - 1))}
+                className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+                disabled={store.slideCount <= 3}
+              >
+                -
+              </button>
+              <span className="w-6 text-center text-sm font-semibold">{store.slideCount}</span>
+              <button
+                onClick={() => store.setField('slideCount', Math.min(7, store.slideCount + 1))}
+                className="w-8 h-8 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-sm font-medium"
+                disabled={store.slideCount >= 7}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mode switch + actions */}

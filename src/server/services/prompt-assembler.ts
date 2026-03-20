@@ -2,219 +2,286 @@ import type { Settings } from '../../shared/types'
 import {
   methodStructures,
   hookFormulas,
-  hookTonalityModifiers,
-  tonalityWritingRules,
   antiPatterns
 } from './prompt-references'
 
 /**
- * Assembles a structured prompt for Claude following the 12-section template
- * from the create-content skill. Each section serves a specific purpose in
- * guiding content generation quality.
- *
- * Source of truth: ~/.claude/skills/.on-demand/create-content/SKILL.md
- * Reference data: ./prompt-references.ts (ported from skill reference files)
+ * Assembles a structured prompt following the 5-block anatomy:
+ * 1. TASK - what to do + success criteria
+ * 2. CONTEXT - brand knowledge, product, persona (read before starting)
+ * 3. REFERENCE - method structure, hook formulas, examples
+ * 4. BRIEF - the specific creative brief for this post
+ * 5. RULES - hard constraints, anti-patterns, output format
  */
 export function assemblePrompt(
   pillar: string,
-  area: string,
-  angle: string | null,
+  scenario: string,
   method: string,
-  tonality: string,
-  impulse: string,
   settings: Settings,
   contentType: 'single' | 'carousel',
-  slideCount?: number
+  slideCount?: number,
+  libraryHook?: string | null,
+  libraryCta?: string | null,
+  librarySituation?: string | null,
+  libraryScience?: string | null,
+  impulse?: string
 ): string {
   const sections: string[] = []
   const defaults = settings.contentDefaults
   const carouselCount = slideCount ?? 5
+  const docs = settings.contextDocs
 
   // Look up dimension entries
-  const areaEntry = settings.areas.find(a => a.name === area)
   const pillarEntry = settings.pillars.find(p => p.name === pillar)
-  const angleEntry = angle && pillarEntry ? pillarEntry.angles.find(a => a.name === angle) : null
+  const scenarioEntry = pillarEntry?.scenarios.find(s => s.name === scenario)
   const methodEntry = settings.methods.find(m => m.name === method)
-  const tonalityEntry = settings.tonalities.find(t => t.name === tonality)
 
-  // Extract method ID (e.g., "M3" from "M3 Persoenliche Geschichte") for structure lookup
+  // Extract method ID for structure lookup
   const methodKey = Object.keys(methodStructures).find(k =>
     method.includes(k.split(' ')[0]) || k === method
   )
   const structure = methodKey ? methodStructures[methodKey] : null
 
-  // Extract tonality ID for lookup
-  const tonalityKey = Object.keys(tonalityWritingRules).find(k =>
-    tonality.includes(k.split(' ')[0]) || k === tonality
-  )
+  // =====================================================================
+  // BLOCK 1: TASK
+  // What to do + what success looks like
+  // =====================================================================
+  const taskLines: string[] = []
 
-  // --- Section 1: Role & Creative Brief ---
-  sections.push(`Du bist Jule - 39, Mutter von drei Kindern, Management-Job, Gruenderin von LEBEN.LIEBEN.
-Du schreibst einen ${method} Post ueber ${area}${angle ? ', Angle: ' + angle : ''}, in ${tonality} Tonalitaet, fuer den Zweck: ${pillar}.
+  taskLines.push(`Schreibe einen Instagram ${contentType === 'carousel' ? `Carousel (${carouselCount} Slides)` : 'Single Post'} auf Deutsch.
+Methode: ${method}. Szenario: ${scenario}. Pillar: ${pillar}.`)
 
-DEINE STIMME: Wie eine Freundin beim Kaffee. Warm, persoenlich, ehrlich, ermutigend. Aus eigener Erfahrung, nie aus der Theorie. Konkrete Alltagsszenen statt Abstraktion. "Du" (grossgeschrieben: Du, Dir, Dich, Dein).
+  if (pillarEntry?.promise) {
+    taskLines.push(`\nErfolg: ${pillarEntry.promise}`)
+  }
 
-SPRACHE: Immer konkret und umgangssprachlich, nie abstrakt. "Dauer-Stress" statt "Erschoepfung". "Nur noch funktionieren" statt "zu leer sein". "An die Decke gehen" statt "weinen". Woerter benutzen, die eine Mutter beim Kaffee sagen wuerde, nicht Woerter aus einem Psychologie-Ratgeber.
+  const cotGuidanceHint = (impulse && impulse.trim())
+    ? '\nWICHTIG: Wenn eine Prompt Guidance im Brief steht, ist sie Dein Szenen-Anker und Deine kreative Angle. Baue den Post darum herum.'
+    : ''
 
-ALLTAGSDETAILS: Kita, Schule, Brotdose, Waesche, Abendbrot - die Welt der Zielgruppe. Nicht: Meetings, Projekte, Praesentationen (zu karrierefokussiert). Die Spannung der Zielgruppe ist Kinder + Job, nicht Job allein.
-
-DEIN PRODUKT: LEBEN.LIEBEN Dankbarkeitstagebuch. 100 Eintraege, ein Jahr. WEIL3-Methode: bei einem Grund bleiben, dreimal tiefer fragen. Letzter Gedanke am Tag. Analog, 3 Minuten, radikal einfach.
-
-WICHTIGE PRODUKTREGELN:
-- Das Handy kommt NICHT mit ins Schlafzimmer. Es bleibt draussen. Auf dem Nachttisch liegen das Journal und ein Stift.
-- Die Nutzung ist NICHT taeglich. Alle 3-4 Tage reicht voellig. Formuliere NIE so, dass sich die Leserin verpflichtet fuehlt, jeden Abend zu schreiben. "Wenn Du magst" / "Ab und zu" statt "jeden Abend". Das Journal soll einladen, nie Druck machen.
-- Bei Fakten, Zahlen und Studien: NUR verifizierbare, recherchierte Daten verwenden. Nie Zahlen erfinden. Wenn keine belastbare Quelle existiert, formuliere als persoenliche Beobachtung statt als Fakt.
-
-DEINE ZIELGRUPPE: Beruftaetige Muetter (35-45), obere Mittelschicht, DACH. Kern-Spannung: liebt Job UND Kinder, fuehlt sich in keiner Rolle gut genug. Will keine Optimierung, will mehr spueren was wichtig ist. Misstraut Werbung, vertraut persoenlichen Empfehlungen.`)
-
-  // --- Section 2: Chain-of-Thought Planning ---
-  sections.push(`## Bevor Du schreibst - plane intern
-
-Bestimme fuer Dich (nicht im Output):
+  taskLines.push(`\nBevor Du schreibst, bestimme fuer Dich (nicht im Output):
 1. EINE zentrale Erkenntnis, die der Post vermittelt
-2. EINE konkrete Alltagsszene, die als Anker dient (Wer, wo, wann, was passiert)
-3. Das EINE Element, das diesen Post speichernswert macht (ueberraschender Fakt? emotionaler Moment? praktischer Tipp?)
-4. Den emotionalen Bogen: Wo startet die Leserin, wo soll sie ankommen?`)
+2. EINE konkrete Alltagsszene als Anker (Wer, wo, wann, was passiert)
+3. Das EINE Element, das diesen Post speichernswert macht
+4. Den emotionalen Bogen: Wo startet die Leserin, wo soll sie ankommen?${cotGuidanceHint}`)
 
-  // --- Section 3: Hook Rules ---
-  const hookFormulaText = Object.entries(hookFormulas).find(([k]) =>
-    method.includes(k.split(' ')[0]) || k === method
-  )?.[1] ?? ''
-  const tonalityModifier = tonalityKey ? hookTonalityModifiers[tonalityKey] ?? '' : ''
+  sections.push(`# 1. TASK\n\n${taskLines.join('\n')}`)
 
-  sections.push(`## Hook-Regeln (gelten NUR fuer hook_text auf Slide 1 / Single Post)
+  // =====================================================================
+  // BLOCK 2: CONTEXT
+  // Brand knowledge - read completely before writing
+  // =====================================================================
+  const contextLines: string[] = []
+  contextLines.push('Lies diese Kontext-Dokumente vollstaendig bevor Du schreibst.')
 
-Der Hook folgt NICHT der Brand Voice. Er ist schaerfer, direkter, provokanter.
-Ziel: In 3 Sekunden zum Stoppen bringen. Konkurrenz ist Netflix, Memes, Freunde.
+  if (docs.brandVoice) {
+    contextLines.push(`\n## Stimme\n${docs.brandVoice}`)
+  }
 
-Was in den ersten 3 Sekunden passieren muss:
-- Ein Versprechen (was bekomme ich wenn ich weiterlese?)
-- ODER eine Spannung (ungeloeste Frage, Widerspruch)
-- ODER Wiedererkennung ("Das bin ich!")
-- ODER Ueberraschung (etwas Unerwartetes)
-- ODER eine Curiosity Gap / Bait-and-Switch: Der Hook klingt nach etwas voellig anderem als der Post tatsaechlich behandelt. Beispiel: "Wir haben jetzt getrennte Schlafzimmer. Und es tut mir so gut!" - klingt nach Beziehungskrise, handelt aber davon, dass das Handy in der Kueche schlaeft. Dieser Typ erzeugt die staerkste Neugier.
+  if (docs.productUVP) {
+    contextLines.push(`\n## Produkt\n${docs.productUVP}`)
+  }
 
-Die beste Hook-Strategie: Der Leser MUSS wischen/weiterlesen, weil der Hook allein nicht aufloesbar ist.
+  contextLines.push(`\n## Produktregeln
+- Handy nicht mit ins Zimmer nehmen, Journal aufschlagen, Deep Gratitude Ritual machen.
+- Die Nutzung ist NICHT taeglich. Alle 3-4 Tage reicht voellig. Formuliere NIE so, dass sich die Leserin verpflichtet fuehlt, jeden Abend zu schreiben. "Wenn Du magst" / "Ab und zu" statt "jeden Abend". Das Journal soll einladen, nie Druck machen.
+- Bei Fakten, Zahlen und Studien: NUR verifizierbare, recherchierte Daten verwenden. Nie Zahlen erfinden. Wenn keine belastbare Quelle existiert, formuliere als persoenliche Beobachtung statt als Fakt.`)
 
-Hook-Formel fuer ${method}:
-${hookFormulaText}
+  if (docs.targetPersona) {
+    contextLines.push(`\n## Zielgruppe\n${docs.targetPersona}`)
+  }
 
-Tonalitaets-Modifikator: ${tonalityModifier}`)
+  if (docs.pov) {
+    contextLines.push(`\n## Kern-Ueberzeugungen (POV)\nNICHTS in Deiner Antwort darf diesen widersprechen. Wenn ein Widerspruch vorliegt, schreibe den betroffenen Teil um.\n\n${docs.pov}`)
+  }
 
-  // --- Section 4: Method Structure ---
+  sections.push(`# 2. CONTEXT\n\n${contextLines.join('\n')}`)
+
+  // =====================================================================
+  // BLOCK 3: REFERENCE
+  // Method structure, hook formula, examples - the patterns to follow
+  // =====================================================================
+  const refLines: string[] = []
+
+  // Method structure
   if (structure) {
     const structureText = contentType === 'carousel' && structure.carousel
       ? structure.carousel
       : structure.single
-    sections.push(`## Methoden-Struktur: ${method}
 
-${structure.core}
+    const guidanceNote = (impulse && impulse.trim())
+      ? `\n\nHINWEIS: Die Prompt Guidance im Brief bestimmt, WIE diese Methode angewendet wird. Die Slide-Struktur ist ein Geruest - die Guidance liefert die kreative Angle und den Szenen-Anker. Passe die Struktur an die Guidance an, nicht umgekehrt.`
+      : ''
 
-${contentType === 'carousel' ? `Carousel (${carouselCount} slides):` : 'Single:'}
-${structureText}
-
-Emotionaler Bogen: ${structure.arc}${structure.keyRule ? `\n\nWichtige Regel: ${structure.keyRule}` : ''}`)
+    refLines.push(`## Methoden-Struktur: ${method}\n\n${structure.core}\n\n${contentType === 'carousel' ? `Carousel (${carouselCount} slides):` : 'Single:'}\n${structureText}\n\nEmotionaler Bogen: ${structure.arc}${structure.keyRule ? `\n\nWichtige Regel: ${structure.keyRule}` : ''}${guidanceNote}`)
   } else if (methodEntry) {
-    sections.push(`## Method: ${method}\n${methodEntry.description ?? ''}`)
+    refLines.push(`## Methode: ${method}\n${methodEntry.description ?? ''}`)
   }
 
-  // --- Section 5: Tonality Guide ---
-  const writingRule = tonalityKey ? tonalityWritingRules[tonalityKey] ?? '' : ''
-  sections.push(`## Tonalitaet: ${tonality}
+  // Hook formula
+  const hookFormulaText = Object.entries(hookFormulas).find(([k]) =>
+    method.includes(k.split(' ')[0]) || k === method
+  )?.[1] ?? ''
 
-${tonalityEntry?.description ?? ''}
+  const hookRulesIntro = docs.hooks
+    ? docs.hooks
+    : `Der Hook folgt NICHT der Brand Voice. Er ist schaerfer, direkter, provokanter.
+Ziel: In 3 Sekunden zum Stoppen bringen. Konkurrenz ist Netflix, Memes, Freunde.`
 
-${writingRule}`)
+  refLines.push(`## Hook-Formel (gilt NUR fuer hook_text auf Slide 1)\n\n${hookRulesIntro}\n\nHook-Formel fuer ${method}:\n${hookFormulaText}`)
 
-  // --- Section 6: Pillar CTA Calibration ---
-  const ctaSection = buildCtaSection(pillar, carouselCount)
-  sections.push(ctaSection)
+  // CTA calibration per pillar
+  refLines.push(buildCtaSection(pillar, carouselCount))
 
-  // --- Section 7: Content Focus ---
-  const focusLines = [`Lebensbereich: ${area}\n${areaEntry?.description ?? ''}`]
-  if (angleEntry) {
-    focusLines.push(`\nAngle: ${angle}\n${angleEntry.description ?? ''}`)
+  // Library items (pre-selected content to work with)
+  if (libraryHook || libraryCta) {
+    const libLines: string[] = ['## Vorgegebene Hook/CTA (aus der Bibliothek)', '']
+    libLines.push('Diese Texte sind bereits festgelegt und werden nach der Generierung eingesetzt. Schreibe den Body-Text so, dass er inhaltlich dazu passt.')
+    if (libraryHook) {
+      libLines.push(`\nVorgegebener Hook (Cover-Slide): "${libraryHook}"`)
+      libLines.push('Dein body_text auf dem Cover-Slide muss diesen Hook fortfuehren und vertiefen.')
+    }
+    if (libraryCta) {
+      libLines.push(`\nVorgegebener CTA (letzter Slide): "${libraryCta}"`)
+      libLines.push('Dein body_text auf dem CTA-Slide muss zu diesem CTA hinfuehren.')
+    }
+    refLines.push(libLines.join('\n'))
   }
-  sections.push(`## Inhaltlicher Fokus\n\n${focusLines.join('\n')}`)
 
-  // --- Section 8: Anti-Patterns ---
-  sections.push(antiPatterns)
+  if (librarySituation) {
+    refLines.push(`## Vorgegebene Situation (aus der Bibliothek)\n\nVerwende als Ausgangspunkt oder Inspiration:\n\n${librarySituation}`)
+  }
 
-  // --- Section 9: Caption Rules ---
-  sections.push(`## Caption-Regeln
+  if (libraryScience) {
+    refLines.push(`## Wissenschaftlicher Fakt (aus der Bibliothek)\n\nBaue diesen Fakt in den Post ein, wenn es zum Szenario passt. Zitiere die Quelle beilaeufig:\n\n${libraryScience}`)
+  }
 
-Die Caption ist ein eigenstaendiges Stueck Content, NICHT eine Zusammenfassung der Slides.
+  sections.push(`# 3. REFERENCE\n\n${refLines.join('\n\n')}`)
 
-- Eigener Hook in den ersten 125 Zeichen (vor dem "mehr"-Umbruch im Feed)
-- Der Caption-Hook darf NICHT identisch mit dem Slide-Hook sein
+  // =====================================================================
+  // BLOCK 4: BRIEF
+  // The specific creative brief - pillar tone, scenario, desired feeling
+  // =====================================================================
+  const briefLines: string[] = []
+
+  // Prompt Guidance - the creative core of this post
+  if (impulse && impulse.trim()) {
+    briefLines.push(`## PROMPT GUIDANCE - Kreative Angle dieses Posts
+
+${impulse.trim()}
+
+Das ist der kreative Kern. Baue den GESAMTEN Post um diese Angle herum. Jeder Slide dient dieser Angle. Die Methoden-Struktur ist das Geruest, aber diese Guidance bestimmt die Geschichte, den Blickwinkel und den emotionalen Bogen. Erfinde KEINE andere Szene neben der Guidance.`)
+  }
+
+  if (pillarEntry?.brief) {
+    briefLines.push(pillarEntry.brief)
+  }
+
+  if (pillarEntry?.tone) {
+    briefLines.push(`Ton: ${pillarEntry.tone}`)
+  }
+
+  if (pillarEntry?.desiredFeeling) {
+    briefLines.push(`Gewuenschtes Gefuehl bei der Leserin: ${pillarEntry.desiredFeeling}`)
+  }
+
+  if (scenarioEntry) {
+    briefLines.push(`\nSzenario: ${scenario}`)
+    if (scenarioEntry.description) briefLines.push(scenarioEntry.description)
+  }
+
+  // Caption brief
+  const pillarCaptionRules = pillarEntry?.production?.captionRules
+    ? `\nPILLAR-SPEZIFISCH: ${pillarEntry.production.captionRules}`
+    : ''
+
+  briefLines.push(`\nCaption: Eigenstaendiges Stueck Content, NICHT eine Zusammenfassung der Slides.
+- Eigener Hook in den ersten 125 Zeichen (vor dem "mehr"-Umbruch)
+- Caption-Hook NICHT identisch mit Slide-Hook
 - Wert liefern auch ohne die Slides gesehen zu haben
-- CTA am Ende (passend zum Pillar, siehe oben)
+- CTA am Ende (passend zum Pillar)
 - ${defaults.captionMinChars}-${defaults.captionMaxChars} Zeichen
-- Kein Hashtag-Spam. Maximal 3-5 relevante Hashtags, oder gar keine.`)
+- Maximal 3-5 relevante Hashtags, oder gar keine.${pillarCaptionRules}`)
 
-  // --- Section 10: Content Constraints & Output Format ---
-  const gf = defaults.generationFields ?? { single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' }
+  sections.push(`# 4. BRIEF\n\n${briefLines.join('\n')}`)
+
+  // =====================================================================
+  // BLOCK 5: RULES
+  // Hard constraints, anti-patterns, output format
+  // Read fully before starting. If about to break a rule, stop.
+  // =====================================================================
+  const ruleLines: string[] = []
+  ruleLines.push('Lies diese Regeln vollstaendig. Wenn Du dabei bist, eine zu brechen, stopp und korrigiere.')
+
+  // Zone separation rule - must come first, most commonly violated
+  ruleLines.push(`## ZONEN-TRENNUNG (haerteste Regel - Verstoss = sofort korrigieren)
+
+Jeder Slide hat 3 Zonen: hook_text, body_text, cta_text. Diese Zonen werden GETRENNT gerendert. Text der in zwei Zonen steht, erscheint DOPPELT auf dem Slide.
+
+VERBOTEN:
+- hook_text und erster Satz von body_text sagen das Gleiche -> body_text muss NACH dem Hook-Gedanken einsetzen
+- Letzter Satz von body_text und cta_text sagen das Gleiche -> body_text fuehrt zum CTA hin, wiederholt ihn aber NICHT
+- Gleicher Satz in zwei Feldern -> Die Leserin sieht ihn zweimal auf dem Bildschirm
+
+PRUEFE VOR DER AUSGABE: Lies hook_text und den ersten Satz von body_text laut vor. Klingen sie gleich? Dann aendere body_text. Lies den letzten Satz von body_text und cta_text laut vor. Klingen sie gleich? Dann aendere body_text.`)
+
+  // Anti-patterns (global + scenario-specific)
+  let antiPatternSection = antiPatterns
+  if (scenarioEntry?.antiPatterns) {
+    antiPatternSection += `\n\n### Szenario-spezifisch: ${scenario}\n${scenarioEntry.antiPatterns}`
+  }
+  ruleLines.push(antiPatternSection)
+
+  // Character limits
+  ruleLines.push(`## HARTE ZEICHENLIMITS (Ueberschreitung = Fehler)
+
+Diese Limits sind technische Grenzen der App. Text der laenger ist wird abgeschnitten und zerstoert den Post. Zaehle die Zeichen BEVOR Du antwortest.
+
+- Caption: EXAKT ${defaults.captionMinChars}-${defaults.captionMaxChars} Zeichen. Kuerze rigoros. Lieber 250 als 400.
+- Body pro Slide: MAXIMAL ${defaults.bodyMaxChars} Zeichen. Das sind circa 3-4 kurze Saetze.
+- Hook: MAXIMAL 80 Zeichen. Kuerzer ist besser.
+- CTA-Text: MAXIMAL 120 Zeichen.
+
+Faustregel: Wenn Du unsicher bist, schreib kuerzer.`)
+
+  // Output format
+  const baseGf = defaults.generationFields ?? { single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' }
+  const gf = {
+    ...baseGf,
+    ...(libraryHook && libraryCta ? { single: 'body_only' as const } : libraryHook ? { single: 'body_cta' as const } : libraryCta ? { single: 'hook_body' as const } : {}),
+    ...(libraryHook ? { carouselCover: 'body_only' as const } : {}),
+    ...(libraryCta ? { carouselCta: 'body_only' as const } : {}),
+  }
 
   const formatSection = contentType === 'single'
-    ? `GENAU 1 Slide.
-- slide_type: "cover"
-${describeFields(gf.single)}`
-    : `GENAU ${carouselCount} Slides:
-- Slide 1 (cover): ${describeFieldsInline(gf.carouselCover)}
-- Slides 2-${carouselCount - 1} (content): ${describeFieldsInline(gf.carouselContent)}
-- Slide ${carouselCount} (cta): ${describeFieldsInline(gf.carouselCta)}`
+    ? `GENAU 1 Slide.\n- slide_type: "cover"\n${describeFields(gf.single)}`
+    : `GENAU ${carouselCount} Slides:\n- Slide 1 (cover): ${describeFieldsInline(gf.carouselCover)}\n- Slides 2-${carouselCount - 1} (content): ${describeFieldsInline(gf.carouselContent)}\n- Slide ${carouselCount} (cta): ${describeFieldsInline(gf.carouselCta)}`
 
   const fieldRule = contentType === 'single'
     ? buildFieldRule(gf.single)
     : buildCarouselFieldRules(gf)
 
-  sections.push(`## Format-Vorgaben
-
-${formatSection}
-
-## HARTE ZEICHENLIMITS (Ueberschreitung = Fehler)
-
-Diese Limits sind technische Grenzen der App. Text der laenger ist wird abgeschnitten und zerstoert den Post. Zaehle die Zeichen BEVOR Du antwortest.
-
-- Caption: EXAKT ${defaults.captionMinChars}-${defaults.captionMaxChars} Zeichen. Kuerze rigoros. Lieber 250 als 400.
-- Body pro Slide: MAXIMAL ${defaults.bodyMaxChars} Zeichen. Das sind circa 3-4 kurze Saetze. Wenn ein Slide-Text laenger wird, kuerze ihn oder verteile den Inhalt auf den naechsten Slide.
-- Hook: Kurz und knackig, MAXIMAL 80 Zeichen. Kuerzer ist besser.
-- CTA-Text: MAXIMAL 120 Zeichen.
-
-Faustregel: Wenn Du unsicher bist, schreib kuerzer. Ein praegnanter kurzer Text ist IMMER besser als ein langer der abgeschnitten wird.
+  ruleLines.push(`## Output-Format
 
 Sprache: Deutsch. Anrede "Du" (grossgeschrieben).
-
-## Output-Format
-
 Antworte NUR mit validem JSON. Kein Markdown, keine Code-Bloecke.
+
+${formatSection}
 
 ${contentType === 'single'
     ? `{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}`
     : `{"slides":[{"slide_type":"cover","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"content","hook_text":"...","body_text":"...","cta_text":"..."},{"slide_type":"cta","hook_text":"...","body_text":"...","cta_text":"..."}],"caption":"..."}`}
 
-Regeln:
 - JEDER Slide hat IMMER alle 3 JSON-Felder (hook_text, body_text, cta_text) als Keys.
 ${fieldRule}
+- ZONEN-TRENNUNG beachten (siehe oben). hook_text, body_text, cta_text werden getrennt gerendert. Kein Text darf in zwei Zonen stehen.
 - slide_type "cover" fuer Slide 1
 - ${contentType === 'carousel' ? 'slide_type "cta" fuer letzten Slide\n- slide_type "content" fuer alle mittleren Slides' : 'Alle Felder muessen als Keys vorhanden sein'}`)
 
-  // --- Section 11: Performance Learnings (empty for now) ---
-  // Will be populated by the learning system (PQFL) once performance data flows back.
-
-  // --- Section 12: Real Life Situation ---
-  if (impulse && impulse.trim()) {
-    sections.push(`## Reale Situation (Impulse)
-
-Dieser Post basiert auf einer echten Situation. Verwende diese Details als Ausgangspunkt - erfinde KEINE andere Szene:
-
-${impulse.trim()}
-
-Baue den Post um diese Situation herum. Du darfst Details leicht anpassen fuer den Lesefluss, aber die Kernsituation muss erkennbar bleiben.`)
-  }
+  sections.push(`# 5. RULES\n\n${ruleLines.join('\n\n')}`)
 
   // Token budget check
-  let prompt = sections.join('\n\n')
+  let prompt = sections.join('\n\n---\n\n')
   if (prompt.length > 32000) {
     prompt = prompt.slice(0, 32000) + '\n\n[Context truncated due to length]'
   }
@@ -229,7 +296,7 @@ function buildCtaSection(pillar: string, slideCount: number): string {
   if (pillarLower.includes('generate')) {
     return `## CTA-Kalibrierung: ${pillar}
 
-KEIN Produktbezug. Null. Nicht mal subtil.
+PRODUKTREGEL: KEIN Produktbezug. Null. Nicht mal subtil. Kein Journal, kein Buch, kein Shop, kein "Link in Bio". Das Produkt existiert in diesem Post NICHT.
 Soft CTA: "Speicher Dir das fuer spaeter" / "Folge fuer mehr" / "Tagge eine Freundin, die das braucht"
 Ziel: Reichweite, Saves, Shares. Wert liefern, nichts verkaufen.`
   }
@@ -237,6 +304,7 @@ Ziel: Reichweite, Saves, Shares. Wert liefern, nichts verkaufen.`
   if (pillarLower.includes('convert')) {
     return `## CTA-Kalibrierung: ${pillar}
 
+PRODUKTREGEL: Dieser Post fuehrt KLAR zum Produkt hin. Das Journal ist das Ziel dieses Posts.
 Produkt erwaehnen, aber als selbstverstaendlichen Teil von Jules Leben, nicht als Pitch.
 Das Produkt gehoert zu Jules Abend wie der Nachttisch zum Schlafzimmer. Nicht anbieten, sondern zeigen dass es da ist.
 Formulierung: "Mein LEBEN.LIEBEN Journal liegt auf meinem Nachttisch." / "Ich greife nach meinem Journal."
@@ -248,7 +316,8 @@ NICHT: hedging CTAs wie "falls", "wenn Du magst", "koennte". Die Leserin ist hie
   // Nurture Loyalty
   return `## CTA-Kalibrierung: ${pillar}
 
-Spreche zu Menschen, die das Produkt schon kennen oder haben.
+PRODUKTREGEL: Kein aktiver Verkauf. Produktentwicklung und Entstehungsgeschichte zeigen ist OK (Behind-the-Scenes). Kein Produktnutzen, keine Kaufaufforderung.
+Spreche zu Menschen, die sich mit der Marke verbunden fuehlen.
 Engagement-CTA: "Wie macht ihr das?" / "Schreib mir, ich bin neugierig"
 Community staerken, nicht verkaufen.`
 }
@@ -272,7 +341,6 @@ function emptyFields(mode: FieldMode): string[] {
   return ['hook_text', 'body_text', 'cta_text'].filter(f => !active.has(f))
 }
 
-/** Multi-line field description for single slide */
 function describeFields(mode: FieldMode): string {
   const lines: string[] = []
   const active = new Set(activeFields(mode))
@@ -284,7 +352,6 @@ function describeFields(mode: FieldMode): string {
   return lines.join('\n')
 }
 
-/** Inline field description for carousel slide types */
 function describeFieldsInline(mode: FieldMode): string {
   const active = activeFields(mode)
   const empty = emptyFields(mode)
@@ -293,7 +360,6 @@ function describeFieldsInline(mode: FieldMode): string {
   return desc
 }
 
-/** Build field population rule for single posts */
 function buildFieldRule(mode: FieldMode): string {
   if (mode === 'all') return '- Alle 3 Felder (hook_text, body_text, cta_text) mit Inhalt befuellen. KEIN Feld leer.'
   const active = activeFields(mode)
@@ -301,7 +367,6 @@ function buildFieldRule(mode: FieldMode): string {
   return `- Nur ${active.join(' und ')} mit Inhalt befuellen.\n- ${empty.join(' und ')} MUSS ein leerer String "" sein.`
 }
 
-/** Build field population rules for carousel (different per slide type) */
 function buildCarouselFieldRules(gf: { carouselCover: string; carouselContent: string; carouselCta: string }): string {
   const lines: string[] = []
   const modes = [

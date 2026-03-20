@@ -31,9 +31,11 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     `@font-face { font-family: '${entry.name}'; src: url('${fileUrl(entry.path, baseUrl)}'); }`
   ).join('\n')
 
-  const fontStyles = [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontStyles]
+  // Separate @import rules (must come first in CSS) from @font-face rules
+  const allFontCss = [headlineFont.css, bodyFont.css, ctaFont.css, customLibraryFontStyles]
     .filter(Boolean)
-    .join('\n')
+  const importRules = allFontCss.filter(s => s.includes('@import')).join('\n')
+  const otherFontRules = allFontCss.filter(s => !s.includes('@import')).join('\n')
 
   // Background
   const bgX = slide.background_position_x ?? 50
@@ -46,6 +48,7 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
   const overlayColor = slide.overlay_color === 'light' ? '255,255,255' : '0,0,0'
+  const overlayTextOnly = slide.overlay_text_only ?? false
 
   const ctaText = slide.cta_text || ''
 
@@ -88,8 +91,10 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
       ? `left:${ov.posLeft ?? 0}px;width:${ov.posWidth ?? CANVAS_W}px;`
       : `left:0;right:0;`
 
+    const zoneBg = overlayTextOnly ? `background-color:rgba(${overlayColor},${overlayOpacity});border-radius:12px;` : ''
+
     return `<div style="position:absolute;top:${top}px;${positionCss}height:${height}px;display:flex;align-items:center;justify-content:center;padding:30px 80px;">
-      <div style="font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};font-style:${fontStyle};color:${color};text-align:${textAlign};line-height:${lineHeight};letter-spacing:${letterSpacing}px;word-wrap:break-word;width:100%;">${text}</div>
+      <div style="${zoneBg}padding:${overlayTextOnly ? '20px 30px' : '0'};font-family:${fontFamily};font-size:${fontSize}px;font-weight:${fontWeight};font-style:${fontStyle};color:${color};text-align:${textAlign};line-height:${lineHeight};letter-spacing:${letterSpacing}px;word-wrap:break-word;width:100%;">${text}</div>
     </div>`
   }).filter(Boolean).join('\n')
 
@@ -103,5 +108,8 @@ export function buildSlideHTML(params: BuildSlideHTMLParams): string {
     ? `<div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-family:${bodyFont.family};font-size:30px;color:${secondaryColor};white-space:nowrap;">${v.handle}</div>`
     : ''
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${fontStyles} body { width: ${CANVAS_W}px; height: ${CANVAS_H}px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; background-color: rgba(${overlayColor},${overlayOpacity}); }</style></head><body>${bgWrapperHtml}<div class="overlay"></div>${zoneElements}${logoHtml}${handleHtml}</body></html>`
+  const fullOverlayCss = overlayTextOnly ? '' : `background-color: rgba(${overlayColor},${overlayOpacity});`
+  const fullOverlayHtml = overlayTextOnly ? '' : '<div class="overlay"></div>'
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${importRules}</style><style>* { margin: 0; padding: 0; box-sizing: border-box; } ${otherFontRules} body { width: ${CANVAS_W}px; height: ${CANVAS_H}px; position: relative; overflow: hidden; background-color: ${bgColor}; } .overlay { position: absolute; inset: 0; ${fullOverlayCss} }</style></head><body>${bgWrapperHtml}${fullOverlayHtml}${zoneElements}${logoHtml}${handleHtml}</body></html>`
 }

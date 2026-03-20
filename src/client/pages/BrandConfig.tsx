@@ -3,9 +3,10 @@ import * as Popover from '@radix-ui/react-popover'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ContextEditor, AutoTextarea } from '../components/ContextEditor'
 import { DimensionListEditor } from '../components/DimensionListEditor'
+import { LibraryListEditor } from '../components/LibraryListEditor'
 import { ColorPalette } from '../components/ColorPalette'
 import { api } from '../lib/apiClient'
-import type { Settings, FontLibraryEntry, IgConnectionStatus } from '@shared/types'
+import type { Settings, FontLibraryEntry, IgConnectionStatus, LibraryItem, SituationItem, ScienceItem, SituationImageItem } from '@shared/types'
 import { PRESET_FONTS } from '@shared/fonts'
 
 function InfoPopover({ text }: { text: string }) {
@@ -39,9 +40,9 @@ type Section = 'identity' | 'library' | 'design' | 'strategy' | 'tech'
 
 const SECTION_TITLES: Record<Section, { title: string; description: string }> = {
   identity: { title: 'Brand Identity', description: 'Define who your brand is - voice, audience, positioning, and competitive context.' },
-  library: { title: 'Creative Library', description: 'Reusable creative assets - situations, hooks, and CTAs that feed into content generation.' },
+  library: { title: 'Creative Library', description: 'Reusable creative assets - hooks, CTAs, situations, science facts, and images.' },
   design: { title: 'Design', description: 'Visual identity - colors, fonts, logo, and content formatting defaults.' },
-  strategy: { title: 'Content Strategy', description: 'Pillars, areas, methods, and tonalities that define your content mix and guide AI generation.' },
+  strategy: { title: 'Content Strategy', description: 'Pillars with scenarios and methods that define your content mix and guide AI generation.' },
   tech: { title: 'Tech', description: 'Instagram connection, API tokens, and technical configuration.' },
 }
 
@@ -71,12 +72,11 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
   localRef.current = local
 
   useEffect(() => { load() }, [])
-  // Only sync from server on initial load (when local is null), not after saves
   useEffect(() => {
     if (settings && local === null) setLocal(structuredClone(settings))
   }, [settings])
 
-  // Debounced auto-save: 1s after any local change
+  // Debounced auto-save
   useEffect(() => {
     if (!local) return
     setSaved(false)
@@ -120,9 +120,8 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
       setUploadingFont(role)
       try {
         const result = await api.upload(file)
-        const fontName = file.name.replace(/\.[^.]+$/, '') // strip extension
+        const fontName = file.name.replace(/\.[^.]+$/, '')
         const newEntry: FontLibraryEntry = { id: crypto.randomUUID(), name: fontName, path: result.path }
-        // Functional updater avoids stale closure over `local` during async file picker
         setLocal(prev => {
           if (!prev) return prev
           return {
@@ -159,11 +158,21 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
     setSaved(true)
   }
 
+  // --- Pillar helpers ---
   const addPillar = () => {
-    setLocal({ ...local, pillars: [...local.pillars, { id: crypto.randomUUID(), name: '', targetPct: 0, rules: '', angles: [], allowedTonalities: [], allowedMethods: [], allowedAreas: [], areaRequired: true }] })
+    setLocal({
+      ...local,
+      pillars: [...local.pillars, {
+        id: crypto.randomUUID(), name: '', targetPct: 0,
+        promise: '', brief: '', tone: '', desiredFeeling: '',
+        production: { formats: '', visualStyle: '', captionRules: '' },
+        scenarios: [],
+        goals: { business: '', communication: '' },
+      }]
+    })
   }
 
-  const updatePillar = (index: number, field: string, value: string | number) => {
+  const updatePillar = (index: number, field: string, value: unknown) => {
     const pillars = [...local.pillars]
     pillars[index] = { ...pillars[index], [field]: value }
     setLocal({ ...local, pillars })
@@ -174,6 +183,38 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
     setLocal({ ...local, pillars: local.pillars.filter((_, i) => i !== index) })
     setSaved(false)
   }
+
+  // --- Scenario helpers ---
+  const addScenario = (pillarIndex: number) => {
+    const pillars = [...local.pillars]
+    pillars[pillarIndex] = {
+      ...pillars[pillarIndex],
+      scenarios: [...pillars[pillarIndex].scenarios, {
+        id: crypto.randomUUID(), name: '', description: '', antiPatterns: '', allowedMethods: []
+      }]
+    }
+    setLocal({ ...local, pillars })
+  }
+
+  const updateScenario = (pillarIndex: number, scenarioIndex: number, field: string, value: unknown) => {
+    const pillars = [...local.pillars]
+    const scenarios = [...pillars[pillarIndex].scenarios]
+    scenarios[scenarioIndex] = { ...scenarios[scenarioIndex], [field]: value }
+    pillars[pillarIndex] = { ...pillars[pillarIndex], scenarios }
+    setLocal({ ...local, pillars })
+  }
+
+  const removeScenario = (pillarIndex: number, scenarioIndex: number) => {
+    const pillars = [...local.pillars]
+    pillars[pillarIndex] = {
+      ...pillars[pillarIndex],
+      scenarios: pillars[pillarIndex].scenarios.filter((_, i) => i !== scenarioIndex)
+    }
+    setLocal({ ...local, pillars })
+  }
+
+  // Collect all scenarios across all pillars for library tagging
+  const allScenarios = local.pillars.flatMap(p => p.scenarios.map(s => ({ id: s.id, name: s.name || '(unnamed)' })))
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -211,41 +252,58 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
       )}
 
       {section === 'library' && (
-        <div className="space-y-6">
-          {/* Hooks - live editor */}
-          <section className="space-y-4">
-            <ContextEditor
-              label="Hooks"
-              value={local.contextDocs.hooks}
-              onChange={(v) => updateContextDoc('hooks', v)}
-              placeholder="List your hook patterns and examples..."
-            />
-          </section>
+        <div className="space-y-8">
+          <LibraryListEditor
+            title="Hooks"
+            items={local.hookLibrary ?? []}
+            scenarios={allScenarios}
+            onAdd={(text) => {
+              const allIds = allScenarios.map(s => s.id)
+              setLocal({
+                ...local,
+                hookLibrary: [...(local.hookLibrary ?? []), { id: crypto.randomUUID(), text, scenarioIds: allIds }]
+              })
+            }}
+            onRemove={(id) => setLocal({ ...local, hookLibrary: (local.hookLibrary ?? []).filter(h => h.id !== id) })}
+            onUpdate={(id, updates) => setLocal({ ...local, hookLibrary: (local.hookLibrary ?? []).map(h => h.id === id ? { ...h, ...updates } : h) })}
+          />
 
-          <div className="grid grid-cols-1 gap-4">
-            {/* Real Life Situations */}
-            <div className="border border-gray-200 rounded-lg p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-800">Real Life Situations</h3>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">Coming soon</span>
-              </div>
-              <p className="text-sm text-gray-500">
-                A library of real-life moments and situations that anchor your content in authenticity.
-                These will feed directly into content generation as situation prompts.
-              </p>
-            </div>
+          <LibraryListEditor
+            title="CTAs"
+            items={local.ctaLibrary ?? []}
+            scenarios={allScenarios}
+            onAdd={(text) => {
+              const allIds = allScenarios.map(s => s.id)
+              setLocal({
+                ...local,
+                ctaLibrary: [...(local.ctaLibrary ?? []), { id: crypto.randomUUID(), text, scenarioIds: allIds }]
+              })
+            }}
+            onRemove={(id) => setLocal({ ...local, ctaLibrary: (local.ctaLibrary ?? []).filter(c => c.id !== id) })}
+            onUpdate={(id, updates) => setLocal({ ...local, ctaLibrary: (local.ctaLibrary ?? []).map(c => c.id === id ? { ...c, ...updates } : c) })}
+          />
 
-            {/* CTAs */}
-            <div className="border border-gray-200 rounded-lg p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-800">CTAs</h3>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">Coming soon</span>
-              </div>
-              <p className="text-sm text-gray-500">
-                Call-to-action variants for different post types and goals.
-              </p>
-            </div>
-          </div>
+          {/* Situations library */}
+          <SituationLibraryEditor
+            items={local.situationLibrary ?? []}
+            scenarios={allScenarios}
+            imageLibrary={local.situationImageLibrary ?? []}
+            onChange={(items) => setLocal({ ...local, situationLibrary: items })}
+          />
+
+          {/* Science library */}
+          <ScienceLibraryEditor
+            items={local.scienceLibrary ?? []}
+            scenarios={allScenarios}
+            onChange={(items) => setLocal({ ...local, scienceLibrary: items })}
+          />
+
+          {/* Image library */}
+          <ImageLibraryManager
+            items={local.situationImageLibrary ?? []}
+            onChange={(items) => setLocal({ ...local, situationImageLibrary: items })}
+          />
+
         </div>
       )}
 
@@ -293,13 +351,11 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
                         className="flex-1 border rounded px-2 py-2 text-sm bg-white disabled:opacity-50"
                       >
                         <option value="">Default (sans-serif)</option>
-
                         <optgroup label="Preset Fonts">
                           {PRESET_FONTS.map((f) => (
                             <option key={f} value={f}>{f}</option>
                           ))}
                         </optgroup>
-
                         {fontLibrary.length > 0 && (
                           <optgroup label="Custom Fonts">
                             {fontLibrary.map((f) => (
@@ -489,84 +545,142 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
 
       {section === 'strategy' && (
         <div className="space-y-8">
-          {/* Pillars */}
+          {/* Pillars with Scenarios */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <h3 className="text-sm font-semibold text-gray-700">Content Pillars</h3>
-                <InfoPopover text="Pillars define the strategic purpose of your posts. Each pillar represents a goal - awareness, conversion, retention, etc. Set a target percentage and the app tracks your actual posting mix, warning you when you drift off balance." />
+                <InfoPopover text="Each pillar is a self-contained content brief with its own tone, scenarios, and production rules. Scenarios define the specific angles within a pillar." />
               </div>
               <button onClick={addPillar} className="text-sm text-blue-600 hover:underline">+ Add Pillar</button>
             </div>
-            {local.pillars.map((p, i) => (
-              <div key={p.id} className="space-y-2">
+            {local.pillars.map((p, pi) => (
+              <div key={p.id} className="border rounded-lg p-4 space-y-3">
+                {/* Pillar header */}
                 <div className="flex gap-3 items-center">
                   <input
                     type="text"
                     value={p.name}
-                    onChange={(e) => updatePillar(i, 'name', e.target.value)}
-                    className="flex-1 border rounded px-3 py-2 text-sm"
+                    onChange={(e) => updatePillar(pi, 'name', e.target.value)}
+                    className="flex-1 border rounded px-3 py-2 text-sm font-medium"
                     placeholder="Pillar name"
                   />
                   <input
                     type="number"
                     value={p.targetPct}
-                    onChange={(e) => updatePillar(i, 'targetPct', parseInt(e.target.value) || 0)}
+                    onChange={(e) => updatePillar(pi, 'targetPct', parseInt(e.target.value) || 0)}
                     className="w-20 border rounded px-2 py-2 text-sm text-center"
-                    min={0}
-                    max={100}
+                    min={0} max={100}
                   />
                   <span className="text-xs text-gray-400">%</span>
-                  <button onClick={() => removePillar(i)} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
+                  <button onClick={() => removePillar(pi)} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
                 </div>
-                <AutoTextarea
-                  value={p.rules ?? ''}
-                  onChange={(v) => updatePillar(i, 'rules', v)}
-                  placeholder="Content rules for this pillar (what to include, what to avoid...)"
-                  className="w-full border rounded px-3 py-2 text-sm resize-none overflow-hidden text-gray-600"
-                />
+
+                {/* Pillar fields */}
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Promise</label>
+                  <input type="text" value={p.promise} onChange={(e) => updatePillar(pi, 'promise', e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Ein-Satz-Versprechen..." />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Tone</label>
+                  <input type="text" value={p.tone} onChange={(e) => updatePillar(pi, 'tone', e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Warm, motivational, never preachy..." />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Desired Feeling</label>
+                  <input type="text" value={p.desiredFeeling} onChange={(e) => updatePillar(pi, 'desiredFeeling', e.target.value)} className="w-full border rounded px-2 py-1.5 text-sm" placeholder="How should the reader feel..." />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Content Brief</label>
+                  <AutoTextarea
+                    value={p.brief}
+                    onChange={(v) => updatePillar(pi, 'brief', v)}
+                    placeholder="Content translation paragraph..."
+                    className="w-full border rounded px-3 py-2 text-sm resize-none overflow-hidden text-gray-600"
+                  />
+                </div>
+
+                {/* Goals */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Business Goal</label>
+                    <input type="text" value={p.goals.business} onChange={(e) => updatePillar(pi, 'goals', { ...p.goals, business: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Communication Goal</label>
+                    <input type="text" value={p.goals.communication} onChange={(e) => updatePillar(pi, 'goals', { ...p.goals, communication: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" />
+                  </div>
+                </div>
+
+                {/* Scenarios */}
+                <div className="border-t pt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-600">Scenarios</span>
+                    <button onClick={() => addScenario(pi)} className="text-xs text-blue-600 hover:underline">+ Add Scenario</button>
+                  </div>
+                  {p.scenarios.map((s, si) => (
+                    <div key={s.id} className="border rounded p-3 space-y-2 bg-gray-50">
+                      <div className="flex gap-2 items-center">
+                        <input type="text" value={s.name} onChange={(e) => updateScenario(pi, si, 'name', e.target.value)} className="flex-1 border rounded px-2 py-1.5 text-sm" placeholder="Scenario name..." />
+                        <button onClick={() => removeScenario(pi, si)} className="text-red-400 hover:text-red-600 text-xs">Remove</button>
+                      </div>
+                      <AutoTextarea
+                        value={s.description}
+                        onChange={(v) => updateScenario(pi, si, 'description', v)}
+                        placeholder="What to do (description)..."
+                        className="w-full border rounded px-2 py-1.5 text-sm resize-none overflow-hidden"
+                      />
+                      <AutoTextarea
+                        value={s.antiPatterns}
+                        onChange={(v) => updateScenario(pi, si, 'antiPatterns', v)}
+                        placeholder="What NOT to do (anti-patterns)..."
+                        className="w-full border rounded px-2 py-1.5 text-sm resize-none overflow-hidden text-red-600/70"
+                      />
+                      {/* Allowed methods multi-select */}
+                      <div>
+                        <span className="text-xs text-gray-500">Allowed Methods:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {local.methods.map(m => {
+                            const active = (s.allowedMethods ?? []).includes(m.name)
+                            return (
+                              <button
+                                key={m.id}
+                                type="button"
+                                onClick={() => {
+                                  const current = s.allowedMethods ?? []
+                                  const next = active ? current.filter(n => n !== m.name) : [...current, m.name]
+                                  updateScenario(pi, si, 'allowedMethods', next)
+                                }}
+                                className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
+                                  active
+                                    ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                    : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'
+                                }`}
+                              >
+                                {m.name}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        {(s.allowedMethods ?? []).length === 0 && (
+                          <p className="text-[10px] text-gray-400 mt-0.5">All methods allowed when none selected</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </section>
 
-          {/* Areas */}
-          <DimensionListEditor
-            title="Areas"
-            infoText="Life areas your content covers - the 'what' of each post. Each post is tagged with one area so the app can track coverage and suggest underrepresented topics."
-            emptyMessage="No areas configured yet."
-            items={local.areas}
-            onAdd={() => { setLocal({ ...local, areas: [...local.areas, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
-            onRemove={(id) => {
-              setLocal({
-                ...local,
-                areas: local.areas.filter(a => a.id !== id)
-              })
-              setSaved(false)
-            }}
-            onUpdate={(id, updates) => {
-              setLocal({ ...local, areas: local.areas.map(a => a.id === id ? { ...a, ...updates } : a) })
-              setSaved(false)
-            }}
-            renderFields={(item, onUpdate) => (
-              <div className="space-y-2">
-                <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Area name (e.g. L1 Familienleben)" />
-                <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
-              </div>
-            )}
-          />
-
           {/* Methods */}
           <DimensionListEditor
             title="Methods"
-            infoText="Storytelling methods - how the post is structured. Examples: provocative thesis, Q&A, personal story, listicle, myth-busting. Some methods have format constraints (single-only or carousel-only)."
+            infoText="Storytelling methods - how the post is structured. Scenarios reference these by name to constrain allowed methods."
             emptyMessage="No methods configured yet."
             items={local.methods}
             onAdd={() => { setLocal({ ...local, methods: [...local.methods, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
             onRemove={(id) => {
-              setLocal({
-                ...local,
-                methods: local.methods.filter(m => m.id !== id)
-              })
+              setLocal({ ...local, methods: local.methods.filter(m => m.id !== id) })
               setSaved(false)
             }}
             onUpdate={(id, updates) => {
@@ -619,32 +733,6 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
               </div>
             )}
           />
-
-          {/* Tonalities */}
-          <DimensionListEditor
-            title="Tonalities"
-            infoText="Tone of voice for each post - emotional, humorous, matter-of-fact, or provocative. Tracked for variety across your feed."
-            emptyMessage="No tonalities configured yet."
-            items={local.tonalities}
-            onAdd={() => { setLocal({ ...local, tonalities: [...local.tonalities, { id: crypto.randomUUID(), name: '', description: '' }] }); setSaved(false) }}
-            onRemove={(id) => {
-              setLocal({
-                ...local,
-                tonalities: local.tonalities.filter(t => t.id !== id)
-              })
-              setSaved(false)
-            }}
-            onUpdate={(id, updates) => {
-              setLocal({ ...local, tonalities: local.tonalities.map(t => t.id === id ? { ...t, ...updates } : t) })
-              setSaved(false)
-            }}
-            renderFields={(item, onUpdate) => (
-              <div className="space-y-2">
-                <input type="text" value={item.name} onChange={(e) => onUpdate({ name: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm" placeholder="Tonality name (e.g. T1 Emotional)" />
-                <input type="text" value={item.description} onChange={(e) => onUpdate({ description: e.target.value } as any)} className="w-full border rounded px-3 py-2 text-sm text-gray-600" placeholder="Description (optional)" />
-              </div>
-            )}
-          />
         </div>
       )}
 
@@ -652,6 +740,250 @@ export function BrandConfig({ section = 'identity', onBack }: BrandConfigProps) 
         <TechSection />
       )}
     </div>
+  )
+}
+
+// --- Situation Library Editor ---
+function SituationLibraryEditor({ items, scenarios, imageLibrary, onChange }: {
+  items: SituationItem[]
+  scenarios: { id: string; name: string }[]
+  imageLibrary: SituationImageItem[]
+  onChange: (items: SituationItem[]) => void
+}) {
+  const handleAdd = () => {
+    const text = window.prompt('New situation text:')
+    if (text?.trim()) {
+      onChange([...items, { id: crypto.randomUUID(), text: text.trim(), scenarioIds: scenarios.map(s => s.id), imageIds: [] }])
+    }
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-800">Situations</h3>
+        <div className="flex items-center gap-3 text-xs text-gray-400">
+          <span>{items.length} items</span>
+          <button onClick={handleAdd} className="text-sm text-blue-600 hover:underline">+ Add</button>
+        </div>
+      </div>
+
+      {items.length === 0 && <p className="text-sm text-gray-400">No situations yet.</p>}
+
+      {items.map(item => (
+        <div key={item.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
+          <div className="flex gap-2 items-start">
+            <input
+              type="text"
+              value={item.text}
+              onChange={(e) => onChange(items.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))}
+              className="flex-1 border rounded px-3 py-1.5 text-sm"
+            />
+            <button onClick={() => onChange(items.filter(i => i.id !== item.id))} className="text-red-400 hover:text-red-600 text-sm px-1 py-1">Remove</button>
+          </div>
+
+          {/* Scenario chips */}
+          {scenarios.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {scenarios.map(s => {
+                const active = (item.scenarioIds ?? []).includes(s.id)
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      const next = active ? item.scenarioIds.filter(id => id !== s.id) : [...item.scenarioIds, s.id]
+                      onChange(items.map(i => i.id === item.id ? { ...i, scenarioIds: next } : i))
+                    }}
+                    className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
+                      active ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Image pool picker */}
+          {imageLibrary.length > 0 && (
+            <div>
+              <span className="text-xs text-gray-500">Linked images:</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {imageLibrary.map(img => {
+                  const linked = (item.imageIds ?? []).includes(img.id)
+                  return (
+                    <button
+                      key={img.id}
+                      type="button"
+                      onClick={() => {
+                        const next = linked ? item.imageIds.filter(id => id !== img.id) : [...item.imageIds, img.id]
+                        onChange(items.map(i => i.id === item.id ? { ...i, imageIds: next } : i))
+                      }}
+                      className={`px-2 py-0.5 text-xs rounded border transition-colors ${
+                        linked ? 'bg-green-100 border-green-300 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'
+                      }`}
+                    >
+                      {img.label || img.filename}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+  )
+}
+
+// --- Science Library Editor ---
+function ScienceLibraryEditor({ items, scenarios, onChange }: {
+  items: ScienceItem[]
+  scenarios: { id: string; name: string }[]
+  onChange: (items: ScienceItem[]) => void
+}) {
+  const handleAdd = () => {
+    onChange([...items, { id: crypto.randomUUID(), claim: '', source: '', scenarioIds: scenarios.map(s => s.id) }])
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-800">Science Facts</h3>
+        <div className="flex items-center gap-3 text-xs text-gray-400">
+          <span>{items.length} items</span>
+          <button onClick={handleAdd} className="text-sm text-blue-600 hover:underline">+ Add</button>
+        </div>
+      </div>
+
+      {items.length === 0 && <p className="text-sm text-gray-400">No science facts yet.</p>}
+
+      {items.map(item => (
+        <div key={item.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
+          <div className="flex gap-2 items-start">
+            <div className="flex-1 space-y-1">
+              <input
+                type="text"
+                value={item.claim}
+                onChange={(e) => onChange(items.map(i => i.id === item.id ? { ...i, claim: e.target.value } : i))}
+                className="w-full border rounded px-3 py-1.5 text-sm"
+                placeholder="Claim (e.g. 40% of happiness is within your control)"
+              />
+              <input
+                type="text"
+                value={item.source}
+                onChange={(e) => onChange(items.map(i => i.id === item.id ? { ...i, source: e.target.value } : i))}
+                className="w-full border rounded px-3 py-1.5 text-sm text-gray-500"
+                placeholder="Source (e.g. Lyubomirsky, 2005)"
+              />
+            </div>
+            <button onClick={() => onChange(items.filter(i => i.id !== item.id))} className="text-red-400 hover:text-red-600 text-sm px-1 py-1">Remove</button>
+          </div>
+
+          {scenarios.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {scenarios.map(s => {
+                const active = (item.scenarioIds ?? []).includes(s.id)
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      const next = active ? item.scenarioIds.filter(id => id !== s.id) : [...item.scenarioIds, s.id]
+                      onChange(items.map(i => i.id === item.id ? { ...i, scenarioIds: next } : i))
+                    }}
+                    className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
+                      active ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+  )
+}
+
+// --- Image Library Manager ---
+function ImageLibraryManager({ items, onChange }: {
+  items: SituationImageItem[]
+  onChange: (items: SituationImageItem[]) => void
+}) {
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.multiple = true
+    input.onchange = async () => {
+      const files = input.files
+      if (!files || files.length === 0) return
+      setUploading(true)
+      try {
+        for (const file of Array.from(files)) {
+          const formData = new FormData()
+          formData.append('file', file)
+          const result = await fetch('/api/settings/upload-image', { method: 'POST', body: formData })
+          const data = await result.json()
+          if (data.id) {
+            onChange([...items, { id: data.id, filename: data.filename, label: data.label }])
+          }
+        }
+      } finally {
+        setUploading(false)
+      }
+    }
+    input.click()
+  }
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/settings/image/${id}`, { method: 'DELETE' })
+    onChange(items.filter(i => i.id !== id))
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-800">Situation Images</h3>
+        <div className="flex items-center gap-3 text-xs text-gray-400">
+          <span>{items.length} images</span>
+          <button onClick={handleUpload} disabled={uploading} className="text-sm text-blue-600 hover:underline disabled:opacity-50">
+            {uploading ? 'Uploading...' : '+ Upload'}
+          </button>
+        </div>
+      </div>
+
+      {items.length === 0 && <p className="text-sm text-gray-400">No situation images yet. Upload images to link them to situations.</p>}
+
+      {items.length > 0 && (
+        <div className="grid grid-cols-6 gap-2">
+          {items.map(img => (
+            <div key={img.id} className="relative group aspect-square">
+              <img
+                src={`/api/files/images/${img.filename}`}
+                alt={img.label}
+                className="w-full h-full object-cover rounded border border-gray-200"
+              />
+              <button
+                onClick={() => handleDelete(img.id)}
+                className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                x
+              </button>
+              <div className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[9px] px-1 py-0.5 truncate rounded-b">
+                {img.label || img.filename}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 

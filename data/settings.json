@@ -1,16 +1,16 @@
 {
   "contextDocs": {
-    "brandVoice": "Voice: Juliane (Jule) Gansczyk, 39. Strategy Executive, Mutter von 3 Kindern (*2019, *2021, *2024). Spricht aus eigener Erfahrung, nie aus der Theorie. Klingt wie eine Freundin beim Kaffee, nicht wie eine Expertin auf der Bühne.\n\nTonalität: Warm, persönlich, ermutigend. Nahbar. Ehrlich. Ermutigend.\n\nDOS:\n- Aus eigener Erfahrung schreiben: 'Mir ging es so...', 'Ich habe gemerkt...'\n- Konkrete Alltagsszenen statt abstrakter Beschreibungen\n- Ehrliche Widersprüche benennen - Spannung aufmachen, nicht auflösen\n- Mit 'Du' ansprechen (großgeschrieben: Du, Dir, Dich, Dein)\n- Produkt als Einladung formulieren, nie als Aufforderung ('Wenn Du magst...')\n- Satzrhythmus: fließende Sätze mit kurzen Momenten für emotionale Punkte - kein Staccato\n\nDON'TS:\n- Nie belehrend, nie 'du musst' / 'du solltest'\n- Keine Gedankenstriche/Emdashes. Komma, Doppelpunkt oder neuer Satz stattdessen.\n- Keine Satzfragmente ohne Subjekt und Verb\n- Verboten: 'Experte/Expertin', 'Hack', 'Manifestieren', 'Einfach', 'Universum'\n- Verboten (AI-Blacklist): 'In der heutigen Zeit...', 'Die unbequeme Wahrheit', 'Der Schlüssel liegt in...'\n- Nie uniform kurze Sätze (klingt abgehackt)\n\nGOLD STANDARD EXAMPLE:\n'Letzte Woche stand ich um 6:30 in der Küche, das Baby auf dem Arm, mein Sohn wollte sein Pausenbrot ohne Kruste und ich hatte noch nicht mal Kaffee getrunken. In dem Moment dachte ich: Ich bin so müde. Und dann, ganz leise: Aber ich bin auch so dankbar, dass diese drei verrückten Menschen zu mir gehören. Dieser Gedanke hat meinen ganzen Tag verändert.'",
-    "targetPersona": "Name: Luise (Stellvertretend), 40 Jahre, verheiratet, 2 Kinder (8+6), Obere Mittelschicht, DACH, Management oder vergleichbare Verantwortung. Vielleicht gerade in Elternzeit. Oder in Teilzeit. Aktiv in ihrem Leben vor der Familie. Viele Hobbies, viele Interessen. Ambition: Beruf und Familie soll vereinbar sein.\n\nKERN-SPANNUNG: Luise liebt ihren Job und sie liebt ihre Kinder. Aber jeder Tag fühlt sich an wie ein Wettlauf gegen die Uhr. Sie fühlt sich dauerhaft gestresst und erschöpft. Unter der Oberfläche nagen Zweifel, ob sie jemals in einer ihrer Rollen wirklich gut sein kann.\n\nPAIN POINTS:\n1. 'Ich renne den ganzen Tag und habe trotzdem das Gefühl, nichts richtig zu machen.'\n2. 'Ich vermisse die Dinge, die mir früher Freude gemacht haben.'\n3. 'Ich weiß, dass ich etwas ändern sollte, aber ich habe keine Energie dafür.'\n4. 'Alle um mich herum scheinen das gleiche Problem zu haben.'\n5. 'Ich will kein perfektes Leben. Ich will mehr von dem spüren, was wichtig ist.'\n6. 'Ich schiebe das Thema mich um mich kümmern immer auf morgen.'\n\nWAS SIE SICH WÜNSCHT: Momente der Stille und Verbundenheit. Kleine kraftvolle Pausen, die in ihren vollen Alltag passen. Wieder spüren, was ihr wirklich wichtig ist.\n\nSPRACHE: Wie eine Freundin, die das gleiche durchmacht. Keine Belehrung, kein Optimierungsdruck. Wiedererkennung, Ermutigung. Misstraut Werbung. Vertraut persönlichen Empfehlungen.\n\nMEDIEN: Instagram Hauptplattform. Morgens 6:00 und abends 20:30-21:00. Begrenzte Aufmerksamkeit.",
-    "productUVP": "PRODUKT: LEBEN.LIEBEN Dankbarkeitstagebuch. 100 Einträge für ein ganzes Jahr (alle 3-4 Tage einer). Preis: 34,90 EUR regulär, 29,90 EUR Launch-Angebot inkl. Versand.\n\nDAS DEEP GRATITUDE RITUAL = Buch + WEIL3-Methode + analoges Erlebnis:\n- Dankbarkeitsfrage: 'Wofür bin ich heute dankbar?' - IMMER als Ausgangsfrage\n- WEIL3-Methodik: Bei einer Antwort bleiben und dreimal nach dem Grund fragen: Warum bin ich dafür dankbar? Antwort beginnt mit 'Weil...' \n- Fokus auf Tiefe und nicht auf Breite\n- Das analoge Ritual: Letzte Handlung vor dem Schlafen - am Besten bereits im Bett. Handy weglegen, Journal aufschlagen, 3 Minuten der Schönheit des eignen Leben widmen. Der letzte Gedanke am Tag gehört Dir. \n\nWARUM ES ANDERS IST: Die meisten Journals fragen 'Wofür bist du dankbar?' und gehen zum nächsten Punkt. Die WEIL-Methode bleibt bei einem Grund und geht dreimal in die Tiefe. Das erzeugt nachhaltigere Erkenntnisse statt Routine-Antworten.\n\nWISSENSCHAFT: Emmons: 25% glücklicher in wenigen Wochen. Lyubomirsky: 40% des Wohlbefindens durch eigene Handlungen beeinflussbar. Harvard Grant Study: Beziehungen als stärkster Faktor für Glück. Wissenschaft beiläufig einbauen, nie dozierend.",
-    "competitive": "WETTBEWERBER:\n- Intelligent Change (313K Follower): Englisch, breite Zielgruppe, Lifestyle-Ästhetik\n- Lebenskompass (305K): Deutsch, spirituell-esoterisch, junge Frauen\n- Zeit statt Zeug (76K): Deutsch, Minimalismus, Anti-Konsum\n- 6-Minuten-Tagebuch (70K, 2M Nutzer): Deutsch, Marktführer, strukturiertes Tagesformat\n- Calm (3.5M): App-basiert, Meditation, englischsprachig global\n\nDIFFERENZIERUNG VS. WETTBEWERB:\n- Laserfokus auf berufstätige Mütter (nicht alle Frauen, nicht alle Menschen)\n- Analog als bewusste Entscheidung gegen App-basierte Konkurrenz (Calm, Headspace)\n- WEIL3-Methode geht tiefer als 6-Minuten-Tagebuch (Tiefe statt Routine)\n- 100 Einträge als Jahresbegleiter vs. konsumierbare Produkte\n- Gründerin IST die Zielgruppe (vs. Corporate-Marken wie Intelligent Change)\n\nBEWÄHRTE MUSTER AUS WETTBEWERBSANALYSE:\n- 'Du bist genug' Messaging performt am besten\n- 'Weniger tun' schlägt 'mehr erreichen'\n- Humor + Tiefgang schlägt reine Information\n- Founder-Geschichten schlagen Corporate-Content\n\nWAS WIR BEWUSST NICHT SAGEN: 'Mehr ist besser', 'Selbstoptimierung macht glücklich', 'Für alle passt dasselbe', 'Perfektion verkauft'.",
-    "hooks": "HOOK-REGELN (folgen NICHT der Brand Voice - dürfen schärfer sein):\n- Provokative These: Direkt, ohne Einleitung. 'Dein Handy ist der Grund, warum du deine Kinder nicht mehr richtig siehst.'\n- Zahl + Versprechen: '40% deines Glücks hängen von einer einzigen Sache ab.'\n- Storytelling: Szene beginnt sofort. Wer, wo, was - direkt in der ersten Zeile.\n- Kontrast: 'Dein Kalender ist voll. Dein Herz ist leer.'\n\nVIRALITÄTS-TREIBER:\n- Cleverness: Alltagsszene + überraschender Fakt\n- Perspektivwechsel: Bekanntes aus neuem Winkel zeigen\n- Verbindung: Du statt ihr, persönlich statt allgemein\n- Spannung aufbauen: Nicht sofort auflösen\n- Leichter Humor: Augenzwinkernd, nie albern\n\nTEILBARKEIT:\n- Menschen teilen was sie fühlen lässt: Humor, Emotion, Überraschung, Inspiration\n- CTA 'Tagge eine Freundin, die das braucht' funktioniert\n- Kontraste und überraschende Fakten haben den höchsten Share-Wert",
-    "pov": "5 KERN-ÜBERZEUGUNGEN:\n1. Die Welt braucht kein weiteres Selbstoptimierungs-Tool. Sie braucht Erlaubnis, langsamer zu machen. Wertschätzung und Selbstakzeptanz schlagen Optimierung.\n2. Analog ist keine Nostalgie. Es ist bewusste Rebellion. Der Griff zum Papier ist ein radikaler, liebevoller Akt der Selbstfürsorge.\n3. Tiefe schlägt Breite. Immer. Fünf Dinge auflisten, abhaken, weiter - das erzeugt keine echte Verbindung. Einmal tief gehen schon.\n4. Berufstätige Mütter machen das wunderbar. Sie brauchen kurze, kraftvolle Pausen - keine langen Programme, keine 70-seitigen Einleitungen.\n5. Die Gründerin IST die Zielgruppe. Jule ist selbst berufstätige Mutter von 3 Kindern, die die Krise erlebt hat, die sie beschreibt. Kommunikation ist Empfehlung unter Freundinnen, kein Pitch.\n\nMESSAGING-HIERARCHIE:\n1. 'Entdecke die Schönheit, die in Deinem Leben schon da ist.'\n2. '3 Minuten, ein Buch, eine Frage. Dreimal nach dem Grund dahinter fragen.'\n3. '25% glücklicher in wenigen Wochen.'\n4. '100 Gründe. Ein Jahr. Am Ende hast Du etwas, das es nirgendwo zu kaufen gibt.'"
+    "brandVoice": "Voice: Juliane (Jule) Gansczyk, 40. Jule war Strategy Executive in einem internationalen Konzern - Vollzeit-Management-Job mit 2 Kindern, während ihr Mann gleichzeitig Vollzeitkarriere gemacht hat. Heute ist sie Mutter von 3 Kindern (*2019, *2021, *2024) in Elternzeit und gründet parallel LEBEN.LIEBEN. Sie spricht aus eigener Erfahrung, nie aus der Theorie. Klingt wie eine Freundin beim Kaffee, nicht wie eine Expertin auf der Bühne. Kommunikation ist Empfehlung unter Freundinnen, kein Pitch.\n\nTonalität: Warm, persönlich, ermutigend. Nahbar. Ehrlich.\n\nDOS:\n- Aus eigener Erfahrung schreiben: 'Mir ging es so...', 'Ich habe gemerkt...'\n- Konkrete Alltagsszenen statt abstrakter Beschreibungen\n- Ehrliche Widersprüche benennen - Spannung aufmachen, Mitgefühl zeigen, aber nicht alles glatt auflösen\n- Mit 'Du' ansprechen (großgeschrieben: Du, Dir, Dich, Dein)\n- Satzrhythmus: fließende Sätze mit kurzen Momenten für emotionale Punkte - kein Staccato\n- Generate Demand + Nurture Loyalty: Produkt als Einladung formulieren, nie als Aufforderung ('Wenn Du magst...')\n- Convert Demand: Darf direkter sein. Produkt selbstbewusst zeigen, assumptive CTAs erlaubt.\n\nDON'TS:\n- Nie belehrend, nie 'du musst' / 'du solltest'\n- Keine Gedankenstriche/Emdashes. Komma, Doppelpunkt oder neuer Satz stattdessen.\n- Keine Satzfragmente ohne Subjekt und Verb\n- Verboten: 'Experte/Expertin', 'Hack', 'Manifestieren', 'Einfach', 'Universum'\n- Verboten (AI-Blacklist): 'In der heutigen Zeit...', 'Die unbequeme Wahrheit', 'Der Schlüssel liegt in...'\n- Nie uniform kurze Sätze (klingt abgehackt)\n\nGOLD STANDARD EXAMPLE:\n'Letzte Woche stand ich um 6:30 in der Küche, das Baby auf dem Arm, mein Sohn wollte sein Pausenbrot ohne Kruste und ich hatte noch nicht mal Kaffee getrunken. In dem Moment dachte ich: Ich bin so müde. Und dann, ganz leise: Aber ich bin auch so dankbar, dass diese drei verrückten Menschen zu mir gehören. Dieser Gedanke hat meinen ganzen Tag verändert.'",
+    "targetPersona": "Luise (stellvertretend), 40 Jahre, verheiratet, 2 Kinder (8+6), Obere Mittelschicht, DACH, Management oder vergleichbare Verantwortung. Vielleicht gerade in Teilzeit, im Spagat zwischen Familie und dem Job. Aktiv in ihrem Leben vor der Familie. Viele Hobbies, viele Interessen. Ambition: Beruf und Familie soll vereinbar sein.\n\nKERN-SPANNUNG: Luise liebt ihren Job und sie liebt ihre Kinder. Aber jeder Tag fühlt sich an wie ein Wettlauf gegen die Uhr. Sie fühlt sich dauerhaft gestresst und erschöpft. Unter der Oberfläche nagen Zweifel, ob sie jemals in einer ihrer Rollen wirklich gut sein kann.\n\nWAS SIE BELASTET:\n1. 'Ich renne den ganzen Tag und habe trotzdem das Gefühl, nichts richtig zu machen.'\n2. 'Ich vermisse die Dinge, die mir früher Freude gemacht haben.'\n3. 'Ich weiß, dass ich etwas ändern sollte, aber ich habe keine Energie dafür.'\n4. 'Alle um mich herum scheinen das gleiche Problem zu haben.'\n5. 'Ich will kein perfektes Leben. Ich will mehr von dem spüren, was wichtig ist.'\n6. 'Ich schiebe das Thema mich um mich kümmern immer auf morgen.'\n\nWAS SIE SICH WÜNSCHT: Momente der Stille und Verbundenheit. Kleine kraftvolle Pausen, die in ihren vollen Alltag passen. Wieder spüren, was ihr wirklich wichtig ist.\n\nSPRACHE: Kein Optimierungsdruck. Wiedererkennung, Ermutigung. Misstraut Werbung. Vertraut persönlichen Empfehlungen.\n\nMEDIEN: Instagram Hauptplattform. Morgens 6:00 und abends 20:30-21:00. Begrenzte Aufmerksamkeit.",
+    "productUVP": "PRODUKT: LEBEN.LIEBEN. - Gratitude Journal. 100 Einträge für ein ganzes Jahr (alle 3-4 Tage einer). Preis: 34,90 EUR regulär, 29,90 EUR Launch-Angebot inkl. Versand.\n\nDAS DEEP GRATITUDE RITUAL = Setting + Buch + WEIL3-Methode + analoges Erlebnis:\n- Dankbarkeitsfrage: 'Wofür bin ich heute dankbar?' - IMMER als Ausgangsfrage\n- WEIL3-Methode: Bei einer Antwort bleiben und dreimal nach dem Grund fragen: Warum bin ich dafür dankbar? Antwort beginnt mit 'Weil...'\n- Fokus auf Tiefe und nicht auf Breite.\n- Einfach fünf Dinge auflisten, abhaken, weiter - das erzeugt keine echte Verbindung. Bei einer Sache bleiben und hinter diese Sache schauen schon.\n- Das analoge Ritual: Letzte Handlung vor dem Schlafen - am Besten bereits im Bett. Handy nicht mit ins Zimmer nehmen, Journal aufschlagen, Deep Gratitude Ritual machen. Mit diesem letzten Gedanken in die Nacht gehen.\n\nWARUM ES ANDERS IST: Die meisten Journals fragen 'Wofür bist du dankbar?' und gehen zum nächsten Punkt. Die WEIL3-Methode bleibt bei einem Grund und geht dreimal in die Tiefe. Das erzeugt nachhaltigere Erkenntnisse statt Routine-Antworten.\n\nWISSENSCHAFT: Emmons: 25% glücklicher in wenigen Wochen. Lyubomirsky: 40% des Wohlbefindens durch eigene Handlungen beeinflussbar. Harvard Grant Study: Beziehungen als stärkster Faktor für Glück. Wissenschaft beiläufig einbauen, nie dozierend.",
+    "competitive": "WAS WIR ANDERS MACHEN:\n- Laserfokus auf berufstätige Mütter (nicht alle Frauen, nicht alle Menschen)\n- Analog als bewusste Entscheidung gegen App-basierte Konkurrenz (Calm, Headspace)\n- 100 Einträge als Jahresbegleiter\n- Das Gratitude-Journal hilft beim Tun, aber schafft Erinnerungen für immer.\n- Gründerin ist selbst die Zielgruppe (vs. Corporate-Marken wie Intelligent Change)\n\nBEWÄHRTE MUSTER:\n- 'Du bist genug' Messaging performt am besten\n- 'Weniger tun' schlägt 'mehr erreichen'\n- Humor + Tiefgang schlägt reine Information\n- Gründerinnen-Geschichten schlagen Corporate-Content\n\nWAS WIR BEWUSST NICHT SAGEN: 'Mehr ist besser', 'Selbstoptimierung macht glücklich', 'Für alle passt dasselbe', 'Perfektion verkauft'.",
+    "hooks": "",
+    "pov": "5 KERN-ÜBERZEUGUNGEN:\n1. Die Welt braucht kein weiteres Selbstoptimierungs-Tool. Sie braucht Erlaubnis, langsamer zu machen. Wertschätzung und Selbstakzeptanz schlagen Optimierung.\n2. Analog ist keine Nostalgie. Es ist bewusste Rebellion. Der Griff zum Papier ist ein radikaler, liebevoller Akt der Selbstfürsorge.\n3. Tiefe schlägt Breite. Immer.\n4. Berufstätige Mütter machen das wunderbar. Keine langen Programme, keine 70-seitigen Einleitungen.\n5. Kommunikation ist Empfehlung unter Freundinnen, kein Pitch.\n\nKERNBOTSCHAFTEN (nach Wichtigkeit):\n1. 'Entdecke die Schönheit, die in Deinem Leben schon da ist.'\n2. '3 Minuten, ein Buch, eine Frage. And dann nach dem Grund dahinter fragen.'\n3. '25% glücklicher in wenigen Wochen.'\n4. '100 Gründe. Ein Jahr. Am Ende hast Du etwas, das es nirgendwo zu kaufen gibt.'"
   },
   "visual": {
     "colors": [
-      "#FFFFFF",
       "#EAB308",
+      "#FFFFFF",
       "#375546"
     ],
     "fonts": {
@@ -20,7 +20,7 @@
     },
     "fontSizes": {
       "headline": 100,
-      "body": 60,
+      "body": 70,
       "cta": 100
     },
     "fontLibrary": [
@@ -64,184 +64,234 @@
       "id": "p1",
       "name": "Generate Demand",
       "targetPct": 65,
-      "rules": "Ziel: Aufmerksamkeit, Wiedererkennung, emotionale Resonanz. Kein Produkt, kein Pitch. Die Leserin soll denken: 'Das bin ich. Die versteht mich.'\n\n- Sprich das Gefühl an, nie die Lösung. Zeige das Problem in Alltagsszenen, die Luise sofort wiedererkennt.\n- Nutze Kontraste: voller Kalender vs. leeres Herz. Funktionieren vs. Fühlen.\n- Wissenschaft nur als überraschenden Fakt einstreuen (40%-Statistik, Negativity Bias), nie dozierend.\n- Humor darf schärfer sein als im Rest - augenzwinkernd über den Wahnsinn des Alltags.\n- Jeder Post muss teilbar sein: 'Tagge eine Freundin' oder Screenshot-würdig.\n- Kein Journal, kein Produkt, kein Link, kein Shop. Reine Resonanz.",
-      "angles": [
+      "promise": "Entdecke die Schönheit, die in Deinem Leben schon da ist.",
+      "brief": "Zeig berufstätigen Müttern: Die schönen Momente sind schon da - Du siehst sie nur zu selten. Der tägliche Rush macht die kleinen Funken der Freude unsichtbar, obwohl sie noch da sind. Wir erinnern daran, was bereits da ist, statt etwas Neues zu verkaufen.",
+      "tone": "Warm, motivierend.",
+      "desiredFeeling": "Sie denkt: 'Ja, genau so ist mein Alltag.' Sie fühlt sich gesehen und verstanden. Sie findet Hoffnung in einer achtsamen Alternative zum Alltagsstress - ohne Druck.",
+      "production": {
+        "formats": "",
+        "visualStyle": "",
+        "captionRules": "Kurz. Bei Wissens-Carousels darf die Caption länger sein. Immer mit Engagement- oder Teilen-Aufforderung wie 'Markiere eine Freundin, die einen friedlichen Moment verdient hat!' oder 'Teile das mit einer echten Heldin!'. Immer mit #Hashtags gemäß Hashtags Settings"
+      },
+      "scenarios": [
         {
           "id": "gd-a1",
-          "name": "Reality of Moms' Life",
-          "description": "Validating lived experience, messy reality"
+          "name": "Realität berufstätiger Mütter",
+          "description": "Die gelebte Erfahrung berufstätiger Mütter validieren: das Überwältigt-Sein vom gnadenlosen Tempo des Lebens, der emotionale Overload und die chaotische Realität. Authentische, emotional aufgeladene Inhalte in der Ich-Perspektive. Hochgradig teilbar.",
+          "antiPatterns": "Poliert, abgehoben oder inauthentisch wirkender Content. Glänzende Fassaden, die echte Verletzlichkeit verdecken.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M6 Zitat & Kommentar",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M13 Beobachtung"
+          ]
         },
         {
           "id": "gd-a2",
-          "name": "Appreciation",
-          "description": "Self-acceptance, you are enough, doing less"
+          "name": "Wertschätzung",
+          "description": "Berufstätigen Müttern sagen, dass sie das wunderbar machen und Selbstakzeptanz betonen ('Du bist genug'). Einladen, weniger zu tun, langsamer zu machen und sich mehr auf sich selbst zu konzentrieren statt sich zu überfordern. 'Du bist einfach zu gestresst, um all die Schönheit in Deinem Leben zu sehen. Aber es ist so leicht, sie wiederzuentdecken!'",
+          "antiPatterns": "Angstmachende oder schuldzuweisende Erzählungen im Body, die berufstätige Mütter für systemische Überforderung verantwortlich machen. (Hooks dürfen provozieren und zuspitzen - das Verbot gilt für den Body und die Story.)",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M6 Zitat & Kommentar",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M13 Beobachtung"
+          ]
         },
         {
           "id": "gd-a3",
-          "name": "Science of Happiness",
-          "description": "Science-backed gratitude truths, studies"
+          "name": "Wissenschaft des Glücks",
+          "description": "Wissenschaftlich fundierte Wahrheiten über Dankbarkeit. Wissenschaftlich belegte Informationen in Langform-Text, z.B. Carousels oder Blogposts. Auch als Re-Posts von Artikeln, Studien, Podcasts von anerkannten Experten und Wissenschaftlern. (Negativity Bias, 25% mehr Glück, stärkere soziale Bindungen und Stressmanagement, Langlebigkeit)",
+          "antiPatterns": "Berufstätige Mütter mit komplexem Fachjargon überwältigen. Keine Produktivitäts-Hacks, keine generischen Achtsamkeits-Klischees.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M6 Zitat & Kommentar",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M13 Beobachtung"
+          ]
         },
         {
           "id": "gd-a4",
-          "name": "Analog Ritual Aspiration",
-          "description": "Showcase journaling as loving, tactile ritual"
+          "name": "Sehnsucht nach analogen Ritualen",
+          "description": "Analoge Rituale als bewusste Alternative zum digitalen Overload zeigen - durch sensorisch-reiche Inhalte, die analoge Rituale als nährende, taktile Rückzugsorte im Alltags-Chaos lebendig darstellen.",
+          "antiPatterns": "Zu verkäuferisch oder werblich wirkender Content. Dieser Pillar handelt von emotionaler Verbindung, nicht von Kaufentscheidungen.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M6 Zitat & Kommentar",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M13 Beobachtung"
+          ]
         }
       ],
-      "allowedTonalities": [
-        "T1 Emotional",
-        "T2 Humorvoll",
-        "T3 Sachlich",
-        "T4 Provokant",
-        "T5 Ermutigend"
-      ],
-      "allowedMethods": [
-        "M1 Provokante These",
-        "M2 Frage & Antwort",
-        "M3 Persönliche Geschichte",
-        "M4 Vorher / Nachher",
-        "M6 Zitat & Kommentar",
-        "M7 Faktencheck",
-        "M8 Liste",
-        "M9 Mythos vs. Realität",
-        "M13 Beobachtung"
-      ],
-      "allowedAreas": [
-        "L1 Familie & Beziehungen",
-        "L2 Innere Welt",
-        "L3 Alltagslogistik",
-        "L4 Digitale Welt"
-      ],
-      "areaRequired": true
+      "goals": {
+        "business": "Reichweite aufbauen",
+        "communication": "Shares, Follows, Reach"
+      }
     },
     {
       "id": "p2",
       "name": "Convert Demand",
       "targetPct": 25,
-      "rules": "Ziel: Interesse in Kaufabsicht wandeln. Produkt zeigen, Nutzen erklären, Einladung formulieren.\n\n- Immer konkreten Nutzen vor Feature: Was verändert sich im Alltag, nicht was das Journal enthält.\n- WEIL3-Methode erklären und demonstrieren - sie ist der Differentiator zum 6-Minuten-Tagebuch.\n- Social Proof mit echten Geschichten, nie mit generischen Testimonials.\n- Wissenschaft als Vertrauensanker: Emmons-Studie, Lyubomirsky 40%, Harvard Grant Study.\n- CTA als Einladung: 'Wenn Du magst, findest Du das Journal im Shop.' Nie als Druck.\n- Preis darf genannt werden (34,90 EUR / 29,90 EUR Launch). Analog-Argument gegen App-Konkurrenz.",
-      "angles": [
+      "promise": "Die Kraft des Deep Gratitude Rituals.",
+      "brief": "Zeig, wie das LEBEN.LIEBEN. - Gratitude Journal als praktisches Werkzeug funktioniert, um ein kraftvolles Deep Gratitude Ritual aufzubauen. Zeig, warum Design und WEIL3-Methode genau die Bedürfnisse berufstätiger Mütter treffen - Zeiteffizienz, Klarheit, emotionale Unterstützung. Mach das analoge Erlebnis durch persönliche Geschichten und echte Erfahrungsberichte greifbar und einladend.",
+      "tone": "Klar, empathisch, bestärkend und selbstbewusst.",
+      "desiredFeeling": "Sie denkt: 'Das passt in mein Leben. Das will ich ausprobieren.' Die Kaufentscheidung fühlt sich wie eine natürliche Erweiterung ihres Wunsches an, die Schönheit in ihrem Leben wiederzuentdecken.",
+      "production": {
+        "formats": "",
+        "visualStyle": "",
+        "captionRules": "Kurz und knackig mit klarer Aufforderung: Webseite besuchen, testen oder eine DM für Fragen schicken. #Hashtags gemäß Settings"
+      },
+      "scenarios": [
         {
           "id": "cd-a1",
-          "name": "Product-Centric Storytelling",
-          "description": "Showcase journal, gratitude ritual, tactile experience, unboxing"
+          "name": "Produkt-zentriertes Storytelling",
+          "description": "Das LEBEN.LIEBEN. - Gratitude Journal zeigen: wie das Deep Gratitude Ritual die kleinen Funken der Freude aufdeckt, sich nahtlos in volle Terminpläne integriert und bedeutungsvolle Momente der Selbstfürsorge schafft. Durch sensorische Videos und Visuals, die den taktilen Wechsel von digital zu Papier betonen. Unboxing-Videos dienen als interaktiveres Format.",
+          "antiPatterns": "Hartes Verkaufen oder aufdringliche Taktiken. Generischer Werbe-Content, der die echten Bedürfnisse berufstätiger Mütter ignoriert.",
+          "allowedMethods": [
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M5 Testimonial",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M10 Anleitung",
+            "M11 Call to Action"
+          ]
         },
         {
           "id": "cd-a2",
-          "name": "Benefit-Driven Education",
-          "description": "WHY3 methodology, science-backed rationale, practical impact"
+          "name": "Nutzen-getriebene Aufklärung",
+          "description": "Die wissenschaftlich fundierte Begründung hinter dem LEBEN.LIEBEN. - Gratitude Journal und der WEIL3-Methode in einfacher Sprache erklären. Emotionales Wohlbefinden und praktischen Nutzen betonen (Qualität statt Quantität). Fragen beantworten, die Käuferinnen zum Einfluss auf Glück, Gesundheit und Beziehungen haben könnten, bevor sie überhaupt darüber nachdenken. Erklären, wie es zeitsparend designed wurde und was alles dabei ist.",
+          "antiPatterns": "Trockene, technische Produktspezifikationen oder Feature-Auflistungen, die von der emotionalen Relevanz abgekoppelt sind.",
+          "allowedMethods": [
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M5 Testimonial",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M10 Anleitung",
+            "M11 Call to Action"
+          ]
         },
         {
           "id": "cd-a3",
-          "name": "Social Proof & Testimonials",
-          "description": "User stories, reviews, personalized rituals, transformation"
+          "name": "Erfahrungsberichte und echte Geschichten",
+          "description": "Die einzigartigen Wege zeigen, wie berufstätige Mütter ihr Deep Gratitude Ritual personalisieren: z.B. eine besonders schöne Szenerie wählen, eine schöne Aussicht genießen, eine heiße Tasse Tee, gemütlich im Sessel sitzen. Echte Geschichten, Rezensionen und Inhalte von berufstätigen Müttern teilen, die eine Transformation mit dem Journal erlebt haben, um Vertrauen und Glaubwürdigkeit aufzubauen.",
+          "antiPatterns": "Bilder ohne Papier/Journal. Bilder von Bücherlesen, Malen, Basteln. Jeder digitale Service oder jedes Goodie.",
+          "allowedMethods": [
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M4 Vorher / Nachher",
+            "M5 Testimonial",
+            "M7 Faktencheck",
+            "M8 Liste",
+            "M9 Mythos vs. Realität",
+            "M10 Anleitung",
+            "M11 Call to Action"
+          ]
         }
       ],
-      "allowedTonalities": [
-        "T1 Emotional",
-        "T3 Sachlich",
-        "T5 Ermutigend"
-      ],
-      "allowedMethods": [
-        "M2 Frage & Antwort",
-        "M3 Persönliche Geschichte",
-        "M4 Vorher / Nachher",
-        "M5 Testimonial",
-        "M7 Faktencheck",
-        "M8 Liste",
-        "M9 Mythos vs. Realität",
-        "M10 Anleitung",
-        "M11 Call to Action"
-      ],
-      "allowedAreas": [
-        "L1 Familie & Beziehungen",
-        "L2 Innere Welt",
-        "L3 Alltagslogistik",
-        "L4 Digitale Welt",
-        "L5 Produkt & Angebot",
-        "L7 Community & Social Proof"
-      ],
-      "areaRequired": true
+      "goals": {
+        "business": "Verkauf",
+        "communication": "Sales, Clicks, Saves, Leads"
+      }
     },
     {
       "id": "p3",
       "name": "Nurture Loyalty",
       "targetPct": 10,
-      "rules": "Ziel: Beziehung vertiefen, Community stärken, Markenbindung. Kein Produkt, kein Pitch.\n\n- Jules echte Geschichte erzählen: die Krise, die Erkenntnis, der Weg. Verletzlich, nicht poliert.\n- Behind the Scenes zeigt Entscheidungen und Werte, nicht nur hübsche Bilder.\n- Community aktiv einbinden: Fragen stellen, Challenges starten, Nutzerinnen-Wins feiern.\n- Thought Leadership über die Mission: analog vs. digital, Tiefe vs. Breite, Erlaubnis vs. Optimierung.\n- Kein Produkt-Push. Kein CTA zum Shop. Die Community soll sich zugehörig fühlen, nicht verkauft.",
-      "angles": [
+      "promise": "Zuflucht für echte Heldinnen.",
+      "brief": "Zeig, woran wir glauben und warum wir anders sind. Gründerinnen-Geschichten, Behind-the-Scenes-Einblicke, Haltung zu Themen wie Smartphone-Nutzung in Familien, Nachhaltigkeit, Digital Detox. Schaffe einen sicheren Raum, in dem berufstätige Mütter sich verbinden, kleine Erfolge feiern und Rückschläge anerkennen können.",
+      "tone": "Warm, authentisch, transparent und inspirierend - geteilte Verletzlichkeit und Vertrauen einladend.",
+      "desiredFeeling": "Sie denkt: 'Da will ich dazugehören. Die verstehen mich.' Sie fühlt sich wertgeschätzt und bestärkt, stolz darauf, Teil dieser Community zu sein.",
+      "production": {
+        "formats": "",
+        "visualStyle": "",
+        "captionRules": "Community-Interaktion fördern mit Prompts wie 'Teile Deine Ritual-Geschichte', 'Wo ist Dein Lieblingsplatz zum Schreiben?' oder 'Mach mit bei unserer Digital-Detox-Challenge.'"
+      },
+      "scenarios": [
         {
-          "id": "nl-a1",
-          "name": "Founder Story & Vulnerability",
-          "description": "Authentic founder stories and challenges"
+          "id": "nl-a1a",
+          "name": "Gründerin und Verletzlichkeit",
+          "description": "Authentische Geschichten und Herausforderungen aus Jules Leben offenbaren, sowie Reflexionen aus der Entwicklung und dem Umarmen des eigenen Deep Gratitude Rituals. Die Marke wird so zur vertrauenswürdigen Begleiterin statt zur distanzierten Anbieterin.",
+          "antiPatterns": "Content der sich korporat oder geskriptet anfühlt, der Jules echte Stimme verliert.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M6 Zitat & Kommentar",
+            "M12 Behind the Scenes",
+            "M13 Beobachtung"
+          ]
+        },
+        {
+          "id": "nl-a1b",
+          "name": "Exklusive Einblicke und Behind-the-Scenes",
+          "description": "Video- oder visuelle Einblicke hinter die Kulissen der Produktentwicklung und Markenevolution anbieten, um treue Follower in unsere Geschichte einzuladen.",
+          "antiPatterns": "Polierte Inszenierung statt echter Momente. Alles was nach Werbeagentur aussieht statt nach echtem Arbeitsalltag.",
+          "allowedMethods": [
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M12 Behind the Scenes",
+            "M13 Beobachtung"
+          ]
         },
         {
           "id": "nl-a2",
-          "name": "Exclusive BTS",
-          "description": "Product development, brand evolution, behind-the-scenes"
+          "name": "Haltung zeigen",
+          "description": "Content teilen, der über Produktvorteile hinausgeht und die Kernwerte hinter LEBEN.LIEBEN. erforscht (z.B. Nachhaltigkeit, Smartphone- und Social-Media-Nutzung in Familien). LEBEN.LIEBEN. als vertrauenswürdige Stimme und Zufluchtsort für achtsames Leben inmitten digitaler Überforderung positionieren.",
+          "antiPatterns": "Zu viel in einem Post.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M6 Zitat & Kommentar",
+            "M12 Behind the Scenes",
+            "M13 Beobachtung"
+          ]
         },
         {
           "id": "nl-a3",
-          "name": "Mission Thought Leadership",
-          "description": "Core values, sustainability, digital detox, mindful living"
-        },
-        {
-          "id": "nl-a4",
           "name": "Community Building",
-          "description": "Polls, Q&As, challenges, gratitude journaling highlights"
+          "description": "Instagram Stories Polls, Q&As und Challenges nutzen, um berufstätige Mütter ins Gespräch einzuladen. Eine unterstützende Community schaffen, in der Frauen offen ihre Herausforderungen und Rituale teilen können. Z.B. 'Gratitude Challenge' beigetreten? Highlights aus der Community, die auf Pillar-1-Werte zurückverweisen: was sich verändert hat, seit sie mit dem Dankbarkeits-Journaling begonnen haben.",
+          "antiPatterns": "Einseitige Sendungen ohne Einladung zum Dialog oder geteilter Erfahrung.",
+          "allowedMethods": [
+            "M1 Provokante These",
+            "M2 Frage & Antwort",
+            "M3 Persönliche Geschichte",
+            "M6 Zitat & Kommentar",
+            "M12 Behind the Scenes",
+            "M13 Beobachtung"
+          ]
         }
       ],
-      "allowedTonalities": [
-        "T1 Emotional",
-        "T5 Ermutigend"
-      ],
-      "allowedMethods": [
-        "M1 Provokante These",
-        "M2 Frage & Antwort",
-        "M3 Persönliche Geschichte",
-        "M6 Zitat & Kommentar",
-        "M12 Behind the Scenes",
-        "M13 Beobachtung"
-      ],
-      "allowedAreas": [
-        "L6 Marke & Gründerin",
-        "L7 Community & Social Proof"
-      ],
-      "areaRequired": false
-    }
-  ],
-  "areas": [
-    {
-      "id": "L1",
-      "name": "L1 Familie & Beziehungen",
-      "description": "Partner, Kinder, Miteinander, Distanz, Verbindung. Das Zwischenmenschliche im Familienleben."
-    },
-    {
-      "id": "L2",
-      "name": "L2 Innere Welt",
-      "description": "Mental Load, Schuldgefühle, Selbstzweifel, Rollenkonflikte, verschüttete Leidenschaften. 'Sollte das mein Leben sein?'"
-    },
-    {
-      "id": "L3",
-      "name": "L3 Alltagslogistik",
-      "description": "Zeitknappheit, Multitasking, Pendelzeit, unsichtbare Arbeit. Der Wettlauf gegen die Uhr."
-    },
-    {
-      "id": "L4",
-      "name": "L4 Digitale Welt",
-      "description": "Smartphone-Sucht, Scrollen, Messenger-Chaos, always-on. Immer erreichbar, nie abgeschaltet."
-    },
-    {
-      "id": "L5",
-      "name": "L5 Produkt & Angebot",
-      "description": "Das Journal, Unboxing, Anwendung, Bundle, Geschenkidee. Conversion-Kern."
-    },
-    {
-      "id": "L6",
-      "name": "L6 Marke & Gründerin",
-      "description": "Jules Geschichte, Behind the Scenes, Produktentwicklung, Nachhaltigkeit."
-    },
-    {
-      "id": "L7",
-      "name": "L7 Community & Social Proof",
-      "description": "Testimonials, UGC, Challenges, Nutzerinnen-Geschichten. Vertrauen durch echte Stimmen."
+      "goals": {
+        "business": "Langfristige Bindung",
+        "communication": "Kommentare, Shares, Wiederkäufe"
+      }
     }
   ],
   "methods": [
@@ -268,7 +318,7 @@
     {
       "id": "M5",
       "name": "M5 Testimonial",
-      "description": "Echte Nutzerinnen-Geschichten, UGC, Rezensionen. Social Proof."
+      "description": "Echte Geschichten von Nutzerinnen, Rezensionen. Glaubwürdigkeit durch echte Erfahrung."
     },
     {
       "id": "M6",
@@ -304,7 +354,7 @@
     {
       "id": "M11",
       "name": "M11 Call to Action",
-      "description": "Direkter Conversion-Post. Produkt zeigen, Nutzen erklären, Einladung formulieren.",
+      "description": "Direkter Verkaufspost. Produkt zeigen, Nutzen erklären, Einladung formulieren.",
       "formatConstraints": [
         "single"
       ]
@@ -320,42 +370,192 @@
       "description": "Alltagsbeobachtung als Aufhänger. Etwas Kleines gesehen, größere Erkenntnis daraus."
     }
   ],
-  "tonalities": [
-    {
-      "id": "T1",
-      "name": "T1 Emotional",
-      "description": "Warm, berührend, verletzlich. Herz über Kopf. Resonanz durch Gefühl."
-    },
-    {
-      "id": "T2",
-      "name": "T2 Humorvoll",
-      "description": "Leicht, witzig, augenzwinkernd. Alltag mit Humor nehmen. Lachen befreit."
-    },
-    {
-      "id": "T3",
-      "name": "T3 Sachlich",
-      "description": "Faktenbasiert, ruhig, informativ. Wissenschaft und Daten sprechen lassen."
-    },
-    {
-      "id": "T4",
-      "name": "T4 Provokant",
-      "description": "Kantig, herausfordernd, unbequem. Scroll-Stopper durch Reibung."
-    },
-    {
-      "id": "T5",
-      "name": "T5 Ermutigend",
-      "description": "Aufbauend, stärkend, du schaffst das. Energie geben statt nehmen."
-    }
-  ],
   "contentDefaults": {
     "captionMinChars": 50,
     "captionMaxChars": 400,
-    "bodyMaxChars": 300,
+    "bodyMaxChars": 200,
     "generationFields": {
       "single": "all",
       "carouselCover": "hook_only",
       "carouselContent": "body_only",
       "carouselCta": "body_cta"
     }
-  }
+  },
+  "hookLibrary": [
+    {
+      "id": "hook-009",
+      "text": "Wenn ich nur eine Sache in meinem Leben ändern dürfte...",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "hook-018",
+      "text": "\"Wie war Dein Tag?\" – \"Gut.\" Stimmt aber gar nicht.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "hook-019",
+      "text": "Warum fühlt sich ein voller Tag leer an?",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "hook-023",
+      "text": "Was würden Deine Kinder lesen, wenn sie Dein Tagebuch finden?",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "hook-025",
+      "text": "Du hast 1.440 Minuten am Tag.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    }
+  ],
+  "ctaLibrary": [
+    {
+      "id": "cta-003",
+      "text": "Schick das einer Freundin, die es braucht.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "cta-004",
+      "text": "Wenn Du das jetzt speicherst, begegnet Dir dieser Gedanke nochmal.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "cta-005",
+      "text": "Markiere eine Mama, die das verdient hat.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "cta-009",
+      "text": "Teile das mit jemandem, der einen harten Tag hat.",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    },
+    {
+      "id": "cta-014",
+      "text": "Was war heute Dein schönster Moment?",
+      "scenarioIds": [
+        "gd-a1",
+        "gd-a2",
+        "gd-a3",
+        "gd-a4",
+        "cd-a1",
+        "cd-a2",
+        "cd-a3",
+        "nl-a1",
+        "nl-a2",
+        "nl-a3",
+        "nl-a4"
+      ]
+    }
+  ],
+  "situationLibrary": [],
+  "scienceLibrary": [],
+  "situationImageLibrary": []
 }

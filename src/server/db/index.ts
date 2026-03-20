@@ -50,6 +50,17 @@ export function initDatabase(dbPath?: string): Database.Database {
     if (!cols.includes('hook_strategy')) db.exec('ALTER TABLE posts ADD COLUMN hook_strategy TEXT')
     if (!cols.includes('cta_strategy')) db.exec('ALTER TABLE posts ADD COLUMN cta_strategy TEXT')
 
+    // Scenario model migration: add scenario column, copy angle values
+    if (!cols.includes('scenario')) {
+      db.exec('ALTER TABLE posts ADD COLUMN scenario TEXT')
+      if (cols.includes('angle')) {
+        db.exec('UPDATE posts SET scenario = angle WHERE angle IS NOT NULL')
+      }
+    }
+    if (!cols.includes('science_id')) db.exec('ALTER TABLE posts ADD COLUMN science_id TEXT')
+    // Rename balance_matrix entries from 'angle' to 'scenario'
+    db.exec("UPDATE balance_matrix SET variable_type = 'scenario' WHERE variable_type = 'angle'")
+
     // MECE dimension migration: theme+mechanic -> area+approach+method+tonality
     if (!cols.includes('area')) {
       db.exec('ALTER TABLE posts ADD COLUMN area TEXT')

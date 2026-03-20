@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useWizardStore } from '../stores/wizardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { SlideEditor } from '../components/SlideEditor'
 import { SlidePreview } from '../components/SlidePreview'
 import { BackgroundPanEditor } from '../components/BackgroundPanEditor'
 import { api } from '../lib/apiClient'
-import type { ZoneOverride, ImageLibraryEntry } from '@shared/types'
+import type { ZoneOverride, ImageLibraryEntry, LibraryItem } from '@shared/types'
 
 interface EditPreviewProps {
   onRender: () => void
@@ -16,14 +16,21 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
   const {
     slides, caption, setSlide, setCaption, setRenderedImages,
     applyBackgroundToAll, setZoneOverride, updateZoneOverrideLive,
-    resetZonePosition, clearZoneOverrides, applyZoneOverrideToAll, undo, redo
+    resetZonePosition, clearZoneOverrides, applyZoneOverrideToAll, undo, redo,
+    addSlide, deleteSlide, moveSlide,
+    selectedHookId, selectedCtaId
   } = useWizardStore()
+  const selectedScenario = useWizardStore(s => s.selectedScenario)
+  const selectedPillar = useWizardStore(s => s.selectedPillar)
+  const setField = useWizardStore(s => s.setField)
   const { settings, save: saveSettings } = useSettingsStore()
   const [activeSlide, setActiveSlide] = useState(0)
   const [activeZoneId, setActiveZoneId] = useState('hook')
   const [rendering, setRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imagePanMode, setImagePanMode] = useState(false)
+  const dragIndexRef = useRef<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [uploadingBg, setUploadingBg] = useState(false)
   const [draftMsg, setDraftMsg] = useState<string | null>(null)
   const [showDraftModal, setShowDraftModal] = useState(false)
@@ -260,6 +267,48 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
     setZoneOverride(activeSlide, zoneId, override)
   }
 
+  // Resolve scenario ID for library filtering
+  const pillar = settings?.pillars.find(p => p.name === selectedPillar)
+  const scenarioId = pillar?.scenarios.find(s => s.name === selectedScenario)?.id ?? ''
+  const scenarioOptions = (pillar?.scenarios ?? []).map(s => ({ id: s.id, name: s.name }))
+
+  const handleSelectHook = useCallback((item: LibraryItem) => {
+    // Find cover slide and update its hook_text
+    const coverIdx = slides.findIndex(s => s.slide_type === 'cover')
+    if (coverIdx >= 0) {
+      setSlide(coverIdx, 'hook_text', `<p>${item.text}</p>`)
+    }
+    setField('selectedHookId', item.id)
+  }, [slides, setSlide, setField])
+
+  const handleSelectCta = useCallback((item: LibraryItem) => {
+    // Find CTA slide (or last slide) and update its cta_text
+    const ctaIdx = slides.findIndex(s => s.slide_type === 'cta')
+    const targetIdx = ctaIdx >= 0 ? ctaIdx : slides.length - 1
+    if (targetIdx >= 0) {
+      setSlide(targetIdx, 'cta_text', `<p>${item.text}</p>`)
+    }
+    setField('selectedCtaId', item.id)
+  }, [slides, setSlide, setField])
+
+  const handleAddHookToLibrary = useCallback(async (text: string, scenarioIds: string[]) => {
+    if (!settings) return
+    const newItem: LibraryItem = { id: crypto.randomUUID(), text, scenarioIds }
+    await saveSettings({
+      ...settings,
+      hookLibrary: [...(settings.hookLibrary ?? []), newItem],
+    })
+  }, [settings, saveSettings])
+
+  const handleAddCtaToLibrary = useCallback(async (text: string, scenarioIds: string[]) => {
+    if (!settings) return
+    const newItem: LibraryItem = { id: crypto.randomUUID(), text, scenarioIds }
+    await saveSettings({
+      ...settings,
+      ctaLibrary: [...(settings.ctaLibrary ?? []), newItem],
+    })
+  }, [settings, saveSettings])
+
   if (slides.length === 0) {
     return (
       <div className="p-4 space-y-3">
@@ -344,22 +393,74 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
         <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-sm text-green-700 text-center">{draftMsg}</div>
       )}
 
-      {/* Slide tabs */}
-      {slides.length > 1 && (
-        <div className="flex gap-1">
-          {slides.map((s, i) => (
+      {/* Slide tabs with drag & drop, add, delete */}
+      <div className="flex items-center gap-1 flex-wrap">
+        {slides.map((s, i) => (
+          <div
+            key={s.uid}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = 'move'
+              dragIndexRef.current = i
+            }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+              setDragOverIndex(i)
+            }}
+            onDragLeave={() => setDragOverIndex(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              const from = dragIndexRef.current
+              setDragOverIndex(null)
+              if (from !== null && from !== i) {
+                moveSlide(from, i)
+                setActiveSlide(from < i ? i : i)
+              }
+              dragIndexRef.current = null
+            }}
+            onDragEnd={() => { dragIndexRef.current = null; setDragOverIndex(null) }}
+            className={`group flex items-center gap-0.5 rounded text-sm cursor-grab active:cursor-grabbing select-none ${
+              dragOverIndex === i ? 'ring-2 ring-blue-400' : ''
+            } ${i === activeSlide ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
             <button
-              key={s.uid}
               onClick={() => handleSlideChange(i)}
-              className={`px-3 py-1.5 rounded text-sm ${
-                i === activeSlide ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className="px-2 py-1.5"
             >
-              Slide {i + 1}.
+              {i + 1}. {s.slide_type}
             </button>
-          ))}
-        </div>
-      )}
+            {slides.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (confirm(`Delete slide ${i + 1}?`)) {
+                    deleteSlide(i)
+                    if (activeSlide >= slides.length - 1) setActiveSlide(Math.max(0, slides.length - 2))
+                    else if (activeSlide > i) setActiveSlide(activeSlide - 1)
+                  }
+                }}
+                className={`pr-1.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                  i === activeSlide ? 'text-blue-200 hover:text-white' : 'text-gray-400 hover:text-red-500'
+                }`}
+                title="Delete slide"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          onClick={() => {
+            addSlide(activeSlide)
+            setActiveSlide(activeSlide + 1)
+          }}
+          className="px-2 py-1.5 rounded text-sm bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700 border border-dashed border-gray-300"
+          title="Add slide after current"
+        >
+          +
+        </button>
+      </div>
 
       {/* Editor + Preview/Pan side by side */}
       <div className="grid grid-cols-2 gap-6 items-start">
@@ -380,6 +481,16 @@ export function EditPreview({ onRender, onBack }: EditPreviewProps) {
             onSaveToLibrary={handleSaveToLibrary}
             onSelectFromLibrary={handleSelectFromLibrary}
             onDeleteFromLibrary={handleDeleteFromLibrary}
+            hookLibrary={settings?.hookLibrary ?? []}
+            ctaLibrary={settings?.ctaLibrary ?? []}
+            selectedHookId={selectedHookId}
+            selectedCtaId={selectedCtaId}
+            scenarioId={scenarioId}
+            scenarios={scenarioOptions}
+            onSelectHook={handleSelectHook}
+            onSelectCta={handleSelectCta}
+            onAddHookToLibrary={handleAddHookToLibrary}
+            onAddCtaToLibrary={handleAddCtaToLibrary}
           />
 
           {/* Caption editor */}

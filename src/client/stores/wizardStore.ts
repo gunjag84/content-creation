@@ -14,10 +14,8 @@ interface WizardStore {
   step: WizardStep
   // Step 1 - Create
   selectedPillar: string
-  selectedArea: string
-  selectedAngle: string
+  selectedScenario: string
   selectedMethod: string
-  selectedTonality: string
   contentType: 'single' | 'carousel'
   slideCount: number
   impulse: string
@@ -29,6 +27,10 @@ interface WizardStore {
   isGenerating: boolean
   generationError: string | null
   streamText: string
+  selectedHookId: string | null
+  selectedCtaId: string | null
+  selectedSituationId: string | null
+  selectedScienceId: string | null
   // Step 3 - Review
   renderedImages: Array<{ slide_number: number; dataUrl: string }>
   postId: number | null
@@ -50,6 +52,9 @@ interface WizardStore {
   setRenderedImages: (images: Array<{ slide_number: number; dataUrl: string }>) => void
   setPostId: (id: number) => void
   initManualSlides: (contentType: 'single' | 'carousel', defaultCta?: string) => void
+  addSlide: (afterIndex: number) => void
+  deleteSlide: (index: number) => void
+  moveSlide: (fromIndex: number, toIndex: number) => void
   applyBackgroundToAll: (index: number) => void
   reset: () => void
   // Zone override actions
@@ -65,10 +70,8 @@ interface WizardStore {
 const initialState = {
   step: 'create' as const,
   selectedPillar: '',
-  selectedArea: '',
-  selectedAngle: '',
+  selectedScenario: '',
   selectedMethod: '',
-  selectedTonality: '',
   contentType: 'carousel' as const,
   slideCount: 5,
   impulse: '',
@@ -79,6 +82,10 @@ const initialState = {
   isGenerating: false,
   generationError: null,
   streamText: '',
+  selectedHookId: null,
+  selectedCtaId: null,
+  selectedSituationId: null,
+  selectedScienceId: null,
   renderedImages: [],
   postId: null,
   history: [] as Slide[][],
@@ -114,10 +121,8 @@ export const useWizardStore = create<WizardStore>((set) => ({
     recommendation: rec,
     warnings,
     selectedPillar: rec.pillar,
-    selectedArea: rec.area,
-    selectedAngle: rec.angle ?? '',
+    selectedScenario: rec.scenario,
     selectedMethod: rec.method,
-    selectedTonality: rec.tonality
   }),
 
   setSlide: (index, field, value) => set((state) => {
@@ -125,8 +130,6 @@ export const useWizardStore = create<WizardStore>((set) => ({
     if (index >= 0 && index < slides.length) {
       slides[index] = { ...slides[index], [field]: value }
     }
-    // Text fields fire on every keystroke — debounce history pushes.
-    // Push a snapshot only if >500ms elapsed since last setSlide call.
     const now = Date.now()
     const elapsed = now - lastSetSlideTime
     lastSetSlideTime = now
@@ -158,7 +161,11 @@ export const useWizardStore = create<WizardStore>((set) => ({
     caption: result.caption,
     isGenerating: false,
     generationError: null,
-    streamText: ''
+    streamText: '',
+    selectedHookId: (result as any).selectedHookId ?? null,
+    selectedCtaId: (result as any).selectedCtaId ?? null,
+    selectedSituationId: (result as any).selectedSituationId ?? null,
+    selectedScienceId: (result as any).selectedScienceId ?? null,
   }),
 
   setIsGenerating: (value) => set({ isGenerating: value }),
@@ -185,6 +192,56 @@ export const useWizardStore = create<WizardStore>((set) => ({
     })
   },
 
+  addSlide: (afterIndex) => set((state) => {
+    const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
+    const newSlide: Slide = {
+      uid: crypto.randomUUID(),
+      slide_number: afterIndex + 2,
+      slide_type: 'content',
+      hook_text: '',
+      body_text: '',
+      cta_text: '',
+      overlay_opacity: 0.5
+    }
+    const next = [...state.slides]
+    next.splice(afterIndex + 1, 0, newSlide)
+    // Renumber
+    next.forEach((s, i) => { s.slide_number = i + 1 })
+    return { slides: next, history: newHistory, future: [] }
+  }),
+
+  deleteSlide: (index) => set((state) => {
+    if (state.slides.length <= 1) return {}
+    const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
+    const next = state.slides.filter((_, i) => i !== index)
+    // Renumber and fix slide_type
+    next.forEach((s, i) => {
+      s.slide_number = i + 1
+      if (i === 0) s.slide_type = 'cover'
+      else if (i === next.length - 1 && next.length > 1) s.slide_type = 'cta'
+      else s.slide_type = 'content'
+    })
+    return { slides: next, history: newHistory, future: [] }
+  }),
+
+  moveSlide: (fromIndex, toIndex) => set((state) => {
+    if (fromIndex === toIndex) return {}
+    if (fromIndex < 0 || fromIndex >= state.slides.length) return {}
+    if (toIndex < 0 || toIndex >= state.slides.length) return {}
+    const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
+    const next = [...state.slides]
+    const [moved] = next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, moved)
+    // Renumber and fix slide_type
+    next.forEach((s, i) => {
+      s.slide_number = i + 1
+      if (i === 0) s.slide_type = 'cover'
+      else if (i === next.length - 1 && next.length > 1) s.slide_type = 'cta'
+      else s.slide_type = 'content'
+    })
+    return { slides: next, history: newHistory, future: [] }
+  }),
+
   applyBackgroundToAll: (index) => set((state) => {
     const src = state.slides[index]
     return {
@@ -198,20 +255,17 @@ export const useWizardStore = create<WizardStore>((set) => ({
     }
   }),
 
-  // Zone override: deep merge + push to history + clear redo
   setZoneOverride: (slideIndex, zoneId, override) => set((state) => {
     const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)
     const nextSlides = mergeZoneOverride(state.slides, slideIndex, zoneId, override)
     return { slides: nextSlides, history: newHistory, future: [] }
   }),
 
-  // Zone override: deep merge WITHOUT pushing to history (live drag updates)
   updateZoneOverrideLive: (slideIndex, zoneId, override) => set((state) => {
     const nextSlides = mergeZoneOverride(state.slides, slideIndex, zoneId, override)
     return { slides: nextSlides }
   }),
 
-  // Reset position fields only — replaces (not merges) so pos keys are fully cleared
   resetZonePosition: (slideIndex, zoneId) => set((state) => {
     const next = [...state.slides]
     if (slideIndex < 0 || slideIndex >= next.length) return {}
@@ -226,7 +280,6 @@ export const useWizardStore = create<WizardStore>((set) => ({
     return { slides: next, history: newHistory, future: [] }
   }),
 
-  // Clear all overrides for a zone — reverts to brand defaults
   clearZoneOverrides: (slideIndex, zoneId) => set((state) => {
     const next = [...state.slides]
     if (slideIndex < 0 || slideIndex >= next.length) return {}
@@ -237,7 +290,6 @@ export const useWizardStore = create<WizardStore>((set) => ({
     return { slides: next, history: newHistory, future: [] }
   }),
 
-  // Apply zone formatting to all content slides (skip first and last)
   applyZoneOverrideToAll: (zoneId, override) => set((state) => {
     if (state.slides.length <= 2) return {}
     const newHistory = [...state.history, state.slides].slice(-MAX_HISTORY)

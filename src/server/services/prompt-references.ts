@@ -191,24 +191,6 @@ export const hookFormulas: Record<string, string> = {
   'M13 Beobachtung': 'Concrete, visual, specific scene.\nBeispiele: "Meine Tochter hat heute eine Schnecke beobachtet. 11 Minuten lang." / "Im Wartezimmer: 8 Menschen, 8 Handys, 0 Blicke nach oben."'
 }
 
-/** Tonality modifier for hooks */
-export const hookTonalityModifiers: Record<string, string> = {
-  'T1 Emotional': 'Lean into vulnerability. Slower rhythm. Let the feeling land.',
-  'T2 Humorvoll': 'Everyday chaos with a wink. Self-deprecating. Never mean.',
-  'T3 Sachlich': 'Lead with the number or fact. Cool, not cold. Credible.',
-  'T4 Provokant': 'Challenge hard. Create friction. Make them disagree first.',
-  'T5 Ermutigend': 'Lift up. "Du schaffst das" energy. Warm but not cheesy.'
-}
-
-/** Tonality-specific writing rules for body text */
-export const tonalityWritingRules: Record<string, string> = {
-  'T1 Emotional': 'Gefuehl vor Fakt. Verletzliche Momente. Kurze Saetze fuer emotionale Punkte, fliessend fuer Erzaehlung.',
-  'T2 Humorvoll': 'Alltags-Chaos humorvoll ueberzeichnen. Self-aware Humor. Augenzwinkernd, nie zynisch.',
-  'T3 Sachlich': 'Fakt fuehrt, persoenliche Reaktion folgt. Zahlen + Quellen beilaeufig einbauen. Ruhig, nicht trocken.',
-  'T4 Provokant': 'Unbequeme Wahrheiten. Annahmen in Frage stellen. Kantig, aber nie gemein. Reibung erzeugen.',
-  'T5 Ermutigend': 'Aufbauend, staerkend. "Du schaffst das" als Grundhaltung. Energie geben, nicht nehmen.'
-}
-
 /** Anti-patterns - hardcoded because they're structural rules, not user data */
 export const antiPatterns = `## Verboten - NIEMALS verwenden
 
@@ -226,8 +208,9 @@ export const antiPatterns = `## Verboten - NIEMALS verwenden
 - Hook startet mit Punch, nicht mit Kontext. Falsch: "Als berufstaetige Mutter weiss ich..." Richtig: "6:30. Kueche. Baby schreit."
 - Slide-Laengen variieren. Nicht jeder Slide gleich lang.
 - CTA muss zum Pillar passen. Generate Demand Post mit "Link in Bio" = Fehler.
-- Kein Produktbezug in Generate Demand Posts. Null. Nicht mal subtil.
+- Kein Produktbezug in Generate Demand und Nurture Loyalty Posts. Null. Nicht mal subtil. Kein Journal, kein Buch, kein Shop. Nur Convert Demand fuehrt zum Produkt hin.
 - Body und Hook muessen unterschiedlich klingen. Hook ist scharf/viral. Body ist warm/Brand Voice.
+- Body darf den Hook-Text NICHT wiederholen. Der Body setzt dort an, wo der Hook aufhoert. Falsch: Hook "Du hast 1.440 Minuten am Tag." Body "Du hast 1.440 Minuten am Tag. Wie viele davon gehoeren wirklich Dir?" Richtig: Hook "Du hast 1.440 Minuten am Tag." Body "Wie viele davon gehoeren wirklich Dir?"
 - Caption darf Slide-Inhalt NICHT wiederholen. Caption ist eigenstaendig.
 
 ### Verbotene Woerter

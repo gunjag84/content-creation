@@ -134,6 +134,7 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
 
   const overlayOpacity = slide.overlay_opacity ?? 0.5
   const overlayColor = slide.overlay_color === 'light' ? '255,255,255' : '0,0,0'
+  const overlayTextOnly = slide.overlay_text_only ?? false
 
   const ctaText = slide.cta_text || ''
 
@@ -265,8 +266,10 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
             }} />
           </div>
         )}
-        {/* overlay */}
-        <div style={{ position: 'absolute', inset: 0, backgroundColor: `rgba(${overlayColor},${overlayOpacity})` }} />
+        {/* overlay - full page unless text-only mode */}
+        {!overlayTextOnly && (
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: `rgba(${overlayColor},${overlayOpacity})` }} />
+        )}
 
         {/* zones */}
         {(['hook', 'body', 'cta'] as const).map(zoneId => {
@@ -304,6 +307,11 @@ export function SlidePreview({ slide, settings, className, activeZoneId, onZoneD
             lineHeight: ov.lineHeight ?? 1.3,
             letterSpacing: ov.letterSpacing ? `${ov.letterSpacing}px` : undefined,
             wordWrap: 'break-word',
+            ...(overlayTextOnly ? {
+              backgroundColor: `rgba(${overlayColor},${overlayOpacity})`,
+              borderRadius: 12,
+              padding: '20px 30px',
+            } : {}),
             width: '100%',
           }
 

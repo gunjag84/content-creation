@@ -25,9 +25,8 @@ describe('recommendContent', () => {
   it('throws when a required dimension is missing', () => {
     const entries = [
       makeEntry(1, 'pillar', 'A', 1),
-      makeEntry(2, 'area', 'L1', 1),
-      makeEntry(3, 'method', 'M1', 1)
-      // tonality missing
+      makeEntry(2, 'scenario', 'S1', 1)
+      // method missing
     ]
     expect(() => recommendContent(entries)).toThrow('missing required dimension')
   })
@@ -36,9 +35,8 @@ describe('recommendContent', () => {
     const entries = [
       makeEntry(1, 'pillar', 'A', 5),
       makeEntry(2, 'pillar', 'B', 2),
-      makeEntry(3, 'area', 'L1', 3),
-      makeEntry(4, 'method', 'M1', 1),
-      makeEntry(5, 'tonality', 'T1', 1)
+      makeEntry(3, 'scenario', 'S1', 3),
+      makeEntry(4, 'method', 'M1', 1)
     ]
     const result = recommendContent(entries)
     expect(result.reasoning).toBe('cold_start_round_robin')
@@ -49,9 +47,8 @@ describe('recommendContent', () => {
     const entries = [
       makeEntry(1, 'pillar', 'Zebra', 2),
       makeEntry(2, 'pillar', 'Alpha', 2),
-      makeEntry(3, 'area', 'L1', 1),
-      makeEntry(4, 'method', 'M1', 1),
-      makeEntry(5, 'tonality', 'T1', 1)
+      makeEntry(3, 'scenario', 'S1', 1),
+      makeEntry(4, 'method', 'M1', 1)
     ]
     const result = recommendContent(entries)
     expect(result.pillar).toBe('Alpha')
@@ -61,35 +58,31 @@ describe('recommendContent', () => {
     const entries = [
       makeEntry(1, 'pillar', 'High', 2, null, 100),
       makeEntry(2, 'pillar', 'Low', 2, null, 1),
-      makeEntry(3, 'area', 'L1', 1, null, 50),
-      makeEntry(4, 'method', 'M1', 1, null, 50),
-      makeEntry(5, 'tonality', 'T1', 1, null, 50)
+      makeEntry(3, 'scenario', 'S1', 1, null, 50),
+      makeEntry(4, 'method', 'M1', 1, null, 50)
     ]
     const result = recommendContent(entries)
     expect(result.reasoning).toBe('performance_weighted')
   })
 
-  it('returns null approach when no approach entries exist', () => {
+  it('returns scenario from recommendation', () => {
     const entries = [
       makeEntry(1, 'pillar', 'A', 1),
-      makeEntry(2, 'area', 'L1', 1),
-      makeEntry(3, 'method', 'M1', 1),
-      makeEntry(4, 'tonality', 'T1', 1)
+      makeEntry(2, 'scenario', 'S1', 1),
+      makeEntry(3, 'method', 'M1', 1)
     ]
     const result = recommendContent(entries)
-    expect(result.approach).toBeNull()
+    expect(result.scenario).toBe('S1')
   })
 
-  it('returns approach when approach entries exist', () => {
+  it('returns method from recommendation', () => {
     const entries = [
       makeEntry(1, 'pillar', 'A', 1),
-      makeEntry(2, 'area', 'L1', 1),
-      makeEntry(3, 'approach', 'A1', 1),
-      makeEntry(4, 'method', 'M1', 1),
-      makeEntry(5, 'tonality', 'T1', 1)
+      makeEntry(2, 'scenario', 'S1', 1),
+      makeEntry(3, 'method', 'M1', 1)
     ]
     const result = recommendContent(entries)
-    expect(result.approach).toBe('A1')
+    expect(result.method).toBe('M1')
   })
 })
 
@@ -99,9 +92,8 @@ describe('calculateBalance', () => {
       makeEntry(1, 'pillar', 'A', 4),
       makeEntry(2, 'pillar', 'B', 4),
       makeEntry(3, 'pillar', 'C', 2),
-      makeEntry(4, 'area', 'L1', 3),
-      makeEntry(5, 'method', 'M1', 2),
-      makeEntry(6, 'tonality', 'T1', 5)
+      makeEntry(4, 'scenario', 'S1', 3),
+      makeEntry(5, 'method', 'M1', 2)
     ]
     const result = calculateBalance(entries, { A: 40, B: 40, C: 20 })
     const a = result.pillars.find(p => p.name === 'A')!
@@ -112,7 +104,7 @@ describe('calculateBalance', () => {
   it('sets actual_pct to 0 when total usage count is 0', () => {
     const entries = [
       makeEntry(1, 'pillar', 'A', 0),
-      makeEntry(2, 'area', 'L1', 0)
+      makeEntry(2, 'scenario', 'S1', 0)
     ]
     const result = calculateBalance(entries, { A: 100 })
     expect(result.pillars[0].actual_pct).toBe(0)
@@ -131,19 +123,27 @@ describe('calculateBalance', () => {
     expect(unknown.target_pct).toBe(0)
   })
 
-  it('includes all dimension types with avg_performance', () => {
+  it('includes scenarios and methods with avg_performance', () => {
     const entries = [
       makeEntry(1, 'pillar', 'P', 3),
-      makeEntry(2, 'area', 'L1', 3, null, 42.5),
-      makeEntry(3, 'method', 'M1', 2, null, null),
-      makeEntry(4, 'tonality', 'T1', 1, null, 10),
-      makeEntry(5, 'approach', 'A1', 1, null, 20)
+      makeEntry(2, 'scenario', 'S1', 3, null, 42.5),
+      makeEntry(3, 'method', 'M1', 2, null, null)
     ]
     const result = calculateBalance(entries, {})
-    expect(result.areas[0].avg_performance).toBe(42.5)
+    expect(result.scenarios[0].avg_performance).toBe(42.5)
     expect(result.methods[0].avg_performance).toBeNull()
-    expect(result.tonalities[0].avg_performance).toBe(10)
-    expect(result.approaches[0].avg_performance).toBe(20)
+  })
+
+  it('returns scenarios array in result', () => {
+    const entries = [
+      makeEntry(1, 'pillar', 'P', 2),
+      makeEntry(2, 'scenario', 'Burnout recovery', 4, null, 80),
+      makeEntry(3, 'method', 'M1', 1)
+    ]
+    const result = calculateBalance(entries, {})
+    expect(result.scenarios).toHaveLength(1)
+    expect(result.scenarios[0].name).toBe('Burnout recovery')
+    expect(result.scenarios[0].count).toBe(4)
   })
 })
 
@@ -157,7 +157,7 @@ describe('generateWarnings', () => {
 
   it('skips entries with null last_used', () => {
     const entries = [
-      makeEntry(1, 'area', 'L1', 10, null)
+      makeEntry(1, 'scenario', 'S1', 10, null)
     ]
     expect(generateWarnings(entries)).toHaveLength(0)
   })
@@ -176,8 +176,18 @@ describe('generateWarnings', () => {
   it('ignores entries last used more than 14 days ago', () => {
     const oldTimestamp = Math.floor(Date.now() / 1000) - 86400 * 20
     const entries = [
-      makeEntry(1, 'tonality', 'T1', 10, oldTimestamp)
+      makeEntry(1, 'scenario', 'S1', 10, oldTimestamp)
     ]
     expect(generateWarnings(entries)).toHaveLength(0)
+  })
+
+  it('flags scenario entries when recently overused', () => {
+    const recentTimestamp = Math.floor(Date.now() / 1000) - 86400 * 5
+    const entries = [
+      makeEntry(1, 'scenario', 'Burnout recovery', 8, recentTimestamp)
+    ]
+    const warnings = generateWarnings(entries)
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0].variable_type).toBe('scenario')
   })
 })

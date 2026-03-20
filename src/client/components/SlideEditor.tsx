@@ -1,8 +1,9 @@
 import { useRef, useState, useCallback } from 'react'
-import type { Slide, ZoneOverride, Settings, ImageLibraryEntry } from '@shared/types'
+import type { Slide, ZoneOverride, Settings, ImageLibraryEntry, LibraryItem } from '@shared/types'
 import { fileUrl } from '@shared/fontResolver'
 import { ZoneToolbar } from './ZoneToolbar'
 import { RichTextEditor } from './RichTextEditor'
+import { LibrarySelector } from './LibrarySelector'
 
 interface SlideEditorProps {
   slide: Slide
@@ -20,6 +21,17 @@ interface SlideEditorProps {
   onSaveToLibrary?: () => void
   onSelectFromLibrary?: (entry: ImageLibraryEntry) => void
   onDeleteFromLibrary?: (id: string) => void
+  // Hook/CTA library
+  hookLibrary?: LibraryItem[]
+  ctaLibrary?: LibraryItem[]
+  selectedHookId?: string | null
+  selectedCtaId?: string | null
+  scenarioId?: string
+  scenarios?: Array<{ id: string; name: string }>
+  onSelectHook?: (item: LibraryItem) => void
+  onSelectCta?: (item: LibraryItem) => void
+  onAddHookToLibrary?: (text: string, scenarioIds: string[]) => void
+  onAddCtaToLibrary?: (text: string, scenarioIds: string[]) => void
 }
 
 // Remove a specific CSS property from all style="..." attributes in an HTML string.
@@ -88,6 +100,16 @@ export function SlideEditor({
   onSaveToLibrary,
   onSelectFromLibrary,
   onDeleteFromLibrary,
+  hookLibrary,
+  ctaLibrary,
+  selectedHookId,
+  selectedCtaId,
+  scenarioId,
+  scenarios,
+  onSelectHook,
+  onSelectCta,
+  onAddHookToLibrary,
+  onAddCtaToLibrary,
 }: SlideEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -170,6 +192,15 @@ export function SlideEditor({
             className="w-20"
           />
           <span>{Math.round(slide.overlay_opacity * 100)}%</span>
+          <label className="flex items-center gap-1 ml-1 cursor-pointer" title="Overlay only behind text, not full image">
+            <input
+              type="checkbox"
+              checked={slide.overlay_text_only ?? false}
+              onChange={(e) => onChange(index, 'overlay_text_only', e.target.checked)}
+              className="rounded"
+            />
+            Text only
+          </label>
         </div>
       </div>
 
@@ -231,6 +262,34 @@ export function SlideEditor({
               zoneFontSize={zoneValues.fontSize}
               contentVersion={zoneContentVersions[zone.id] ?? 0}
             />
+
+            {/* Hook library selector - cover slide hook zone */}
+            {zone.id === 'hook' && slide.slide_type === 'cover' && hookLibrary && onSelectHook && onAddHookToLibrary && (
+              <LibrarySelector
+                items={hookLibrary}
+                currentText={text}
+                currentItemId={selectedHookId ?? null}
+                scenarioId={scenarioId ?? ''}
+                scenarios={scenarios ?? []}
+                onSelect={onSelectHook}
+                onAddToLibrary={onAddHookToLibrary}
+                label="Hook"
+              />
+            )}
+
+            {/* CTA library selector - CTA slide (or last slide) CTA zone */}
+            {zone.id === 'cta' && (slide.slide_type === 'cta' || slide.slide_type === 'cover') && ctaLibrary && onSelectCta && onAddCtaToLibrary && (
+              <LibrarySelector
+                items={ctaLibrary}
+                currentText={text}
+                currentItemId={selectedCtaId ?? null}
+                scenarioId={scenarioId ?? ''}
+                scenarios={scenarios ?? []}
+                onSelect={onSelectCta}
+                onAddToLibrary={onAddCtaToLibrary}
+                label="CTA"
+              />
+            )}
           </div>
         )
       })}

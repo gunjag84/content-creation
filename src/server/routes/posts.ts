@@ -56,10 +56,12 @@ router.post('/', (req, res) => {
 
     // Update balance matrix for all dimensions
     updateBalanceMatrix('pillar', post.pillar)
-    updateBalanceMatrix('area', post.area)
-    if (post.angle) updateBalanceMatrix('angle', post.angle)
+    if (post.scenario) updateBalanceMatrix('scenario', post.scenario)
     updateBalanceMatrix('method', post.method)
-    updateBalanceMatrix('tonality', post.tonality)
+    if (post.selectedHookId) updateBalanceMatrix('hook', post.selectedHookId)
+    if (post.selectedCtaId) updateBalanceMatrix('cta', post.selectedCtaId)
+    if (post.selectedSituationId) updateBalanceMatrix('situation', post.selectedSituationId)
+    if (post.selectedScienceId) updateBalanceMatrix('science', post.selectedScienceId)
 
     res.json({ id: postId })
   } catch (err) {
@@ -96,27 +98,22 @@ router.get('/meta/recommendation', (_req, res) => {
 
     // Filter to only values present in current settings
     const validPillars = new Set(settings.pillars.map(p => p.name))
-    const validAreas = new Set(settings.areas.map(a => a.name))
-    const validAngles = new Set(settings.pillars.flatMap(p => p.angles.map(a => a.name)))
+    const validScenarios = new Set(settings.pillars.flatMap(p => p.scenarios.map(s => s.name)))
     const validMethods = new Set(settings.methods.map(m => m.name))
-    const validTonalities = new Set(settings.tonalities.map(t => t.name))
 
     const filtered = entries.filter(e => {
       if (e.variable_type === 'pillar') return validPillars.has(e.variable_value)
-      if (e.variable_type === 'area') return validAreas.has(e.variable_value)
-      if (e.variable_type === 'angle') return validAngles.has(e.variable_value)
+      if (e.variable_type === 'scenario') return validScenarios.has(e.variable_value)
       if (e.variable_type === 'method') return validMethods.has(e.variable_value)
-      if (e.variable_type === 'tonality') return validTonalities.has(e.variable_value)
       return false
     })
 
     // Need at least one entry per required dimension
     const hasPillar = filtered.some(e => e.variable_type === 'pillar')
-    const hasArea = filtered.some(e => e.variable_type === 'area')
+    const hasScenario = filtered.some(e => e.variable_type === 'scenario')
     const hasMethod = filtered.some(e => e.variable_type === 'method')
-    const hasTonality = filtered.some(e => e.variable_type === 'tonality')
 
-    if (!hasPillar || !hasArea || !hasMethod || !hasTonality) {
+    if (!hasPillar || !hasScenario || !hasMethod) {
       res.json({ recommendation: null, warnings: [] })
       return
     }
@@ -149,10 +146,9 @@ router.get('/meta/balance', (_req, res) => {
 router.get('/meta/stats', (_req, res) => {
   try {
     const byPillar = getAvgPerformanceByDimension('pillar')
-    const byArea = getAvgPerformanceByDimension('area')
+    const byScenario = getAvgPerformanceByDimension('scenario')
     const byMethod = getAvgPerformanceByDimension('method')
-    const byTonality = getAvgPerformanceByDimension('tonality')
-    res.json({ byPillar, byArea, byMethod, byTonality })
+    res.json({ byPillar, byScenario, byMethod })
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }

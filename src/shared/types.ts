@@ -27,6 +27,7 @@ export interface Slide {
   cta_text: string
   overlay_opacity: number
   overlay_color?: 'dark' | 'light'  // default 'dark'
+  overlay_text_only?: boolean       // overlay only behind text zones, not full image
   custom_background_path?: string
   background_position_x?: number  // 0-100 (%), default 50
   background_position_y?: number  // 0-100 (%), default 50
@@ -102,22 +103,36 @@ const VisualSchema = z.object({
   handle: z.string().default('')
 })
 
-const AngleSchema = z.object({
+const ScenarioSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().default('')
+  description: z.string().default(''),
+  antiPatterns: z.string().default(''),
+  allowedMethods: z.array(z.string()).default([]),
+})
+
+const PillarProductionSchema = z.object({
+  formats: z.string().default(''),
+  visualStyle: z.string().default(''),
+  captionRules: z.string().default(''),
+})
+
+const PillarGoalsSchema = z.object({
+  business: z.string().default(''),
+  communication: z.string().default(''),
 })
 
 const PillarSchema = z.object({
   id: z.string(),
   name: z.string(),
   targetPct: z.number().min(0).max(100),
-  rules: z.string().default(''),
-  angles: z.array(AngleSchema).default([]),
-  allowedTonalities: z.array(z.string()).default([]),
-  allowedMethods: z.array(z.string()).default([]),
-  allowedAreas: z.array(z.string()).default([]),
-  areaRequired: z.boolean().default(true)
+  promise: z.string().default(''),
+  brief: z.string().default(''),
+  tone: z.string().default(''),
+  desiredFeeling: z.string().default(''),
+  production: PillarProductionSchema.default({ formats: '', visualStyle: '', captionRules: '' }),
+  scenarios: z.array(ScenarioSchema).default([]),
+  goals: PillarGoalsSchema.default({ business: '', communication: '' }),
 })
 
 const ThemeSchema = z.object({
@@ -132,12 +147,10 @@ const MechanicSchema = z.object({
   slideRange: z.object({ min: z.number(), max: z.number() }).optional()
 })
 
-const AreaSchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
 const MethodSchema = z.object({
   id: z.string(), name: z.string(), description: z.string().default(''),
   formatConstraints: z.array(z.enum(['single', 'carousel'])).optional()
 })
-const TonalitySchema = z.object({ id: z.string(), name: z.string(), description: z.string().default('') })
 
 const GenerationFieldsOption = z.enum(['all', 'hook_body', 'body_cta', 'body_only', 'hook_only'])
 
@@ -155,14 +168,51 @@ const ContentDefaultsSchema = z.object({
   generationFields: GenerationFieldsSchema.default({ single: 'all', carouselCover: 'all', carouselContent: 'all', carouselCta: 'all' })
 })
 
+const LibraryItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  scenarioIds: z.array(z.string()).default([])
+})
+
+export type LibraryItem = z.infer<typeof LibraryItemSchema>
+
+const ScienceItemSchema = z.object({
+  id: z.string(),
+  claim: z.string(),
+  source: z.string(),
+  scenarioIds: z.array(z.string()).default([])
+})
+
+export type ScienceItem = z.infer<typeof ScienceItemSchema>
+
+const SituationImageItemSchema = z.object({
+  id: z.string(),
+  filename: z.string(),
+  label: z.string().default(''),
+})
+
+export type SituationImageItem = z.infer<typeof SituationImageItemSchema>
+
+const SituationItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  scenarioIds: z.array(z.string()).default([]),
+  imageIds: z.array(z.string()).default([]),
+})
+
+export type SituationItem = z.infer<typeof SituationItemSchema>
+
 export const SettingsSchema = z.object({
   contextDocs: ContextDocsSchema.default({ brandVoice: '', targetPersona: '', productUVP: '', competitive: '', hooks: '', pov: '' }),
   visual: VisualSchema.default({ colors: ['#000000', '#666666', '#ffffff'], fonts: { headline: '', body: '', cta: '' }, fontSizes: { headline: 56, body: 38, cta: 48 }, fontLibrary: [], imageLibrary: [], logo: '', cta: '', handle: '' }),
   pillars: z.array(PillarSchema).default([]),
-  areas: z.array(AreaSchema).default([]),
   methods: z.array(MethodSchema).default([]),
-  tonalities: z.array(TonalitySchema).default([]),
-  contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 })
+  contentDefaults: ContentDefaultsSchema.default({ captionMinChars: 50, captionMaxChars: 400, bodyMaxChars: 400 }),
+  hookLibrary: z.array(LibraryItemSchema).default([]),
+  ctaLibrary: z.array(LibraryItemSchema).default([]),
+  situationLibrary: z.array(SituationItemSchema).default([]),
+  scienceLibrary: z.array(ScienceItemSchema).default([]),
+  situationImageLibrary: z.array(SituationImageItemSchema).default([]),
 })
 
 export type Settings = z.infer<typeof SettingsSchema>
@@ -181,15 +231,13 @@ export interface BalanceEntry {
 
 export interface BalanceRecommendation {
   pillar: string
-  area: string
-  angle: string | null
+  scenario: string
   method: string
-  tonality: string
   reasoning: 'cold_start_round_robin' | 'performance_weighted'
 }
 
 export interface BalanceWarning {
-  variable_type: 'pillar' | 'area' | 'angle' | 'method' | 'tonality'
+  variable_type: 'pillar' | 'scenario' | 'method'
   variable_value: string
   usage_count: number
   days_span: number
@@ -198,10 +246,8 @@ export interface BalanceWarning {
 
 export interface BalanceDashboardData {
   pillars: Array<{ name: string; actual_pct: number; target_pct: number; count: number }>
-  areas: Array<{ name: string; count: number; avg_performance: number | null }>
-  angles: Array<{ name: string; count: number; avg_performance: number | null }>
+  scenarios: Array<{ name: string; count: number; avg_performance: number | null }>
   methods: Array<{ name: string; count: number; avg_performance: number | null }>
-  tonalities: Array<{ name: string; count: number; avg_performance: number | null }>
   total_posts: number
 }
 
@@ -210,10 +256,8 @@ export interface BalanceDashboardData {
 export interface PostRow {
   id: number
   pillar: string
-  area: string
-  angle: string | null
+  scenario: string
   method: string
-  tonality: string
   content_type: 'single' | 'carousel'
   caption: string | null
   slide_count: number | null
@@ -224,8 +268,13 @@ export interface PostRow {
   status: 'draft' | 'approved' | 'exported'
   created_at: number
   situationId?: string | null
+  scienceId?: string | null
   hookStrategy?: string | null
   ctaStrategy?: string | null
+  // Legacy columns kept for historical reads
+  area?: string | null
+  angle?: string | null
+  tonality?: string | null
 }
 
 export interface SlideRow {

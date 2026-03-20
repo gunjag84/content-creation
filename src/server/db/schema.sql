@@ -3,10 +3,8 @@
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   pillar TEXT NOT NULL,
-  area TEXT,
-  angle TEXT,
+  scenario TEXT,
   method TEXT,
-  tonality TEXT,
   content_type TEXT NOT NULL DEFAULT 'carousel' CHECK(content_type IN ('single', 'carousel')),
   caption TEXT,
   slide_count INTEGER DEFAULT 1,
@@ -17,8 +15,13 @@ CREATE TABLE IF NOT EXISTS posts (
   status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'approved', 'exported')),
   created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
   situation_id TEXT,
+  science_id TEXT,
   hook_strategy TEXT,
-  cta_strategy TEXT
+  cta_strategy TEXT,
+  -- Legacy columns kept for historical reads
+  area TEXT,
+  angle TEXT,
+  tonality TEXT
 );
 
 -- slides table
